@@ -1,24 +1,16 @@
-# Den’s Deal Engine V7.1
+# Den’s Deal Engine V7.2 — Market Tracker
 
-GitHub Pages-ready build.
+This build keeps the V7.1 scanner/dashboard and adds:
 
-## Upload these items to the repository root
-- `index.html`
-- `scanner.html`
-- the entire `assets` folder
+- shooting-star treatment behind the Den’s Deal Engine wordmark
+- Today’s Top 10 Deals panel
+- All / Pre-owned / Brand New-Sealed filters
+- separate used vs sealed valuation logic in the UI
+- GREEN / AMBER / RED deal signals
+- eBay sold benchmark, retail reference, estimated profit, ROI and upside score columns
+- responsive mobile deal cards
 
-The `assets/dens-avatar-cartoon.png` file is the cartoon logo used by both pages.
+## Important data note
+The included Top 10 list is demo data and is clearly labelled in the interface. GitHub Pages is a static host and should not contain private marketplace API credentials. A true live feed should be supplied by an authorised backend/serverless function or a scheduled workflow that writes sanitized JSON into the site.
 
-## What V7.1 includes
-- Seafoam responsive dashboard based on the approved visual direction
-- Den cartoon head/logo in the live page header
-- Working navigation into Scanner, Shelf Scan and Market Radar
-- Interactive demo price controls and live profit/ROI recalculation
-- Strong Buy / Watch / Pass actions saved locally in the browser
-- Collection, watchlist and history status using localStorage
-- Search forwarding into the scanner
-- Responsive mobile bottom navigation
-- Existing barcode scanner, UPC lookup, Collector Intelligence, Market Radar and Shelf Scan from V7 retained in `scanner.html`
-
-## GitHub Pages
-Upload the files preserving the `assets/` folder. If Pages is already enabled on the repository, the existing GitHub Pages URL should update automatically after GitHub publishes the new commit.
+Amazon/current retailer pricing should be treated as current retail/offer reference data. It should not be described as Amazon “latest sold” data unless an authorised source actually provides transaction-level sold history.
