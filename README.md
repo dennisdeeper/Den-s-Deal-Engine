@@ -1,9 +1,24 @@
-# Media Flip Deal Engine V6
+# Den’s Deal Engine V7.1
 
-Phase 1: barcode/product identification + eBay SOLD search + flip calculator.
-Phase 2: local price observations + trend + experimental Collector Score.
-Phase 3: shelf-photo multi-barcode detection beta using the browser BarcodeDetector API where supported.
+GitHub Pages-ready build.
 
-Upload `index.html` and `scanner.html` to the root of the existing GitHub Pages repository, replacing the old files.
+## Upload these items to the repository root
+- `index.html`
+- `scanner.html`
+- the entire `assets` folder
 
-Important: UPCitemdb trial lookup is rate-limited and incomplete. Automatic eBay sold-price extraction is not included because private API credentials should not be embedded in a public static GitHub Pages site.
+The `assets/dens-avatar-cartoon.png` file is the cartoon logo used by both pages.
+
+## What V7.1 includes
+- Seafoam responsive dashboard based on the approved visual direction
+- Den cartoon head/logo in the live page header
+- Working navigation into Scanner, Shelf Scan and Market Radar
+- Interactive demo price controls and live profit/ROI recalculation
+- Strong Buy / Watch / Pass actions saved locally in the browser
+- Collection, watchlist and history status using localStorage
+- Search forwarding into the scanner
+- Responsive mobile bottom navigation
+- Existing barcode scanner, UPC lookup, Collector Intelligence, Market Radar and Shelf Scan from V7 retained in `scanner.html`
+
+## GitHub Pages
+Upload the files preserving the `assets/` folder. If Pages is already enabled on the repository, the existing GitHub Pages URL should update automatically after GitHub publishes the new commit.
