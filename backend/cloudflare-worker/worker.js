@@ -11,6 +11,9 @@ export default {
   async fetch(request, env) {
     if (request.method === 'OPTIONS') return new Response(null, { headers: corsHeaders });
     const url = new URL(request.url);
+    if (url.pathname === '/image') {
+      return proxyImage(url, request);
+    }
     if (url.pathname === '/health') {
       return json({ ok: true, service: "Den's Deal Engine lookup", ebayConfigured: !!(env.EBAY_CLIENT_ID && env.EBAY_CLIENT_SECRET) });
     }
@@ -53,6 +56,12 @@ export default {
     const merged = mergeItems(upcItem, ebayItem, cexItem);
     if (!merged) return json({ barcode, item: null, source: null, evidence }, 404);
 
+    // Route artwork through this Worker. Some catalogue/CDN image hosts are
+    // unreliable when embedded directly from GitHub Pages; the proxy gives
+    // the browser a same-service HTTPS URL while preserving the exact source image.
+    merged.images = (merged.images || []).map(src => proxyUrlFor(request.url, src));
+    if (merged.cexReferenceImage) merged.cexReferenceImage = proxyUrlFor(request.url, merged.cexReferenceImage);
+
     return json({
       barcode,
       item: merged,
@@ -61,6 +70,46 @@ export default {
     });
   }
 };
+
+
+function proxyUrlFor(requestUrl, src) {
+  if (!src) return '';
+  const base = new URL(requestUrl);
+  return base.origin + '/image?url=' + encodeURIComponent(src);
+}
+
+async function proxyImage(url, request) {
+  const raw = url.searchParams.get('url') || '';
+  let target;
+  try { target = new URL(raw); } catch { return new Response('Bad image URL', { status: 400, headers: corsHeaders }); }
+  if (target.protocol !== 'https:') return new Response('HTTPS images only', { status: 400, headers: corsHeaders });
+
+  // Restrict the proxy to the catalogue/CDN hosts we intentionally use.
+  const allowed = [
+    'i.ebayimg.com', 'thumbs.ebaystatic.com', 'uk.static.webuy.com',
+    'images-na.ssl-images-amazon.com', 'books.google.com', 'books.googleusercontent.com',
+    'covers.openlibrary.org', 'coverartarchive.org', 'archive.org'
+  ];
+  const host = target.hostname.toLowerCase();
+  if (!allowed.some(h => host === h || host.endsWith('.' + h))) {
+    return new Response('Image host not allowed', { status: 403, headers: corsHeaders });
+  }
+
+  const r = await fetch(target.toString(), {
+    headers: {
+      'Accept': 'image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8',
+      'User-Agent': 'DensDealEngine/7.7'
+    },
+    redirect: 'follow'
+  });
+  if (!r.ok) return new Response('Image fetch failed', { status: r.status, headers: corsHeaders });
+  const ct = r.headers.get('content-type') || 'image/jpeg';
+  if (!ct.toLowerCase().startsWith('image/')) return new Response('Not an image', { status: 415, headers: corsHeaders });
+  const headers = new Headers(corsHeaders);
+  headers.set('Content-Type', ct);
+  headers.set('Cache-Control', 'public, max-age=86400, s-maxage=86400');
+  return new Response(r.body, { status: 200, headers });
+}
 
 function json(body, status = 200) {
   return new Response(JSON.stringify(body), { status, headers: corsHeaders });
