@@ -1,33 +1,31 @@
-# Den's Deal Engine V7.3 — Resilient Identification
+# Den’s Deal Engine V7.4 — Exact Image Matching
 
-V7.3 fixes the "barcode detected, product identification unavailable / Load failed" weakness in V7.2.
+V7.4 is the professional artwork reliability release. The scanner still keeps the resilient barcode-identification chain from V7.3, but it now treats artwork as verified product data rather than decoration.
 
-## Front-end changes
+## What changed
 
-The scanner now keeps barcode capture separate from catalogue identification. After a valid barcode is captured it tries, in order:
+- Exact artwork only: the app shows an image only when it was supplied by a catalogue or marketplace result matched to the scanned barcode/GTIN.
+- No generic substitutes: if the exact product cannot be identified, V7.4 deliberately displays no product artwork rather than risk showing the wrong game, film, album or book.
+- Professional artwork frame: covers are contained at their natural proportions inside a clean presentation card instead of being stretched or cropped.
+- Image recovery: when an exact-match image URL is broken, V7.4 automatically tries the next image candidate from the same barcode-matched result set.
+- Clear trust state: identified products can display an “Exact barcode artwork” badge and source label. Unresolved barcodes show “Awaiting exact match”.
+- Stronger eBay backend artwork: the included Cloudflare Worker keeps multiple image candidates from GTIN-constrained eBay Browse results and prioritises those before UPC catalogue images.
 
-1. Optional secure Den's Deal Engine backend
-2. UPCitemdb public catalogue
-3. Google Books for ISBN-13 barcodes
-4. Open Library for ISBN-13 barcodes
-5. MusicBrainz for music-release barcodes
+## Identification order
 
-If one provider fails, V7.3 continues to the next provider rather than presenting the whole scan as failed. The status line reports the provider being tried and the successful source is shown as a badge on the product card.
+1. Optional secure Deal Engine backend (recommended; eBay GTIN + UPC lookup)
+2. UPC catalogue fallback
+3. Google Books / Open Library for ISBNs
+4. MusicBrainz for music releases
 
-If no catalogue identifies the item, the barcode remains usable and the eBay sold-results button searches by that barcode so the exact edition can still be verified manually.
+If no provider returns an exact product, the barcode remains available for exact eBay sold-result searching, but the app will not invent an image.
 
-## Product images
+## GitHub Pages update
 
-Images are loaded from whichever successful catalogue supplies one. A broken image URL is hidden automatically rather than leaving a broken-image icon.
+Replace your existing `index.html` and `scanner.html` with the V7.4 versions. This gives you the new professional artwork behaviour immediately for the public fallbacks.
 
-## Secure eBay lookup backend
+For the strongest game/Blu-ray/product identification, deploy the optional Worker in `backend/cloudflare-worker/`, add your eBay credentials as Cloudflare secrets, then save the Worker HTTPS URL in the app’s Identification Connection panel. Do not place eBay credentials in GitHub Pages.
 
-`backend/cloudflare-worker/` contains an optional Cloudflare Worker. It can use eBay's Browse API to search by GTIN and enrich the identification with title, category, model clues, image, and current listing information while keeping the eBay Client Secret off GitHub Pages.
+## Important market-data note
 
-Do **not** paste an eBay Client Secret into `index.html` or `scanner.html`.
-
-The eBay Browse information in this backend is active-listing/product-identification data. It is not presented as completed/sold-price history. V7.3 continues to use the eBay completed/sold search link and manual Market Radar samples for sold evidence until a lawful sold-data source is connected.
-
-## Upload to GitHub Pages
-
-Replace the current site's `index.html` and `scanner.html` with the V7.3 versions. The `backend/` folder is source code for the optional secure service and does not run on GitHub Pages by itself.
+The eBay Browse API data used for product identification is active-listing/catalogue evidence; it is not represented as completed/sold history. The app still treats sold-market evidence separately.

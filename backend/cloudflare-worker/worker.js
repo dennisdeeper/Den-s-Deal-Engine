@@ -102,7 +102,7 @@ async function lookupEbay(barcode, env) {
   const market = env.EBAY_MARKETPLACE_ID || 'EBAY_GB';
   const u = new URL('https://api.ebay.com/buy/browse/v1/item_summary/search');
   u.searchParams.set('gtin', barcode);
-  u.searchParams.set('limit', '10');
+  u.searchParams.set('limit', '20');
   const r = await fetch(u.toString(), {
     headers: { 'Authorization': 'Bearer ' + token, 'X-EBAY-C-MARKETPLACE-ID': market, 'Accept': 'application/json' }
   });
@@ -110,7 +110,15 @@ async function lookupEbay(barcode, env) {
   const d = await r.json();
   const items = d.itemSummaries || [];
   if (!items.length) return null;
+  // The Browse search itself is constrained by gtin=barcode. Keep artwork only
+  // from these exact GTIN-matched results and preserve several candidates so
+  // the front end can recover cleanly if one marketplace image URL expires.
   const x = items[0];
+  const exactImages = [];
+  for (const item of items.slice(0, 8)) {
+    if (item.image && item.image.imageUrl) exactImages.push(item.image.imageUrl);
+    for (const img of (item.additionalImages || [])) if (img && img.imageUrl) exactImages.push(img.imageUrl);
+  }
   const aspects = x.localizedAspects || [];
   const getAspect = name => {
     const a = aspects.find(v => (v.name || '').toLowerCase() === name.toLowerCase());
@@ -122,7 +130,7 @@ async function lookupEbay(barcode, env) {
     category: (x.categories && x.categories[0] && x.categories[0].categoryName) || '',
     model: getAspect('Model') || getAspect('Edition') || '',
     description: [x.condition, getAspect('Platform'), getAspect('Format')].filter(Boolean).join(' · '),
-    images: [x.image && x.image.imageUrl, ...(x.additionalImages || []).map(i => i.imageUrl)].filter(Boolean),
+    images: [...new Set(exactImages.filter(Boolean))],
     sourceUrl: x.itemWebUrl || '',
     activePrice: x.price ? { value: Number(x.price.value), currency: x.price.currency } : null
   };
@@ -138,7 +146,7 @@ function mergeItems(primary, ebay) {
     category: a.category || b.category || '',
     model: a.model || b.model || '',
     description: a.description || b.description || '',
-    images: [...new Set([...(a.images || []), ...(b.images || [])].filter(Boolean))],
+    images: [...new Set([...(b.images || []), ...(a.images || [])].filter(Boolean))],
     sourceUrl: b.sourceUrl || a.sourceUrl || '',
     activePrice: b.activePrice || null
   };
