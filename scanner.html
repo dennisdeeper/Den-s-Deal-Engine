@@ -1,0 +1,169 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
+<meta name="theme-color" content="#000000">
+<title>Media Flip Scanner</title>
+<script src="https://unpkg.com/@zxing/browser@0.1.5/umd/zxing-browser.min.js"></script>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#000;color:#fff;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+.wrap{max-width:680px;margin:auto;padding:16px}
+.top{display:flex;gap:10px;align-items:center;justify-content:space-between}
+h1{font-size:24px;margin:6px 0}
+.card{background:#1c1c1e;border-radius:18px;padding:14px;margin:12px 0}
+video{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:14px;background:#111}
+button,.btn{border:0;border-radius:14px;padding:15px 16px;font-size:17px;font-weight:800;margin:5px 2px;cursor:pointer}
+.primary{width:100%;background:#0a84ff;color:white}
+.secondary{background:#333;color:white}
+.green{background:#30d158;color:#061b0d}
+.status{color:#aaa;min-height:22px;margin-top:8px}
+.barcode{font-size:27px;font-weight:900;word-break:break-all}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+label{font-size:12px;color:#aaa}
+input{width:100%;margin-top:5px;padding:13px;font-size:21px;border-radius:10px;border:1px solid #444;background:#111;color:#fff}
+.quick{display:grid;grid-template-columns:repeat(5,1fr);gap:7px;margin-top:10px}
+.quick button{padding:13px 2px;background:#2c2c2e;color:#fff}
+.verdict{font-size:27px;font-weight:900;margin-top:15px}
+.buy{color:#30d158}.watch{color:#ffd60a}.pass{color:#ff453a}
+.small{font-size:12px;color:#888;line-height:1.45}
+a{color:#7db7ff}
+</style>
+</head>
+<body>
+<div class="wrap">
+<div class="top">
+<h1>📷 Media Flip Scanner</h1>
+<a class="btn secondary" href="index.html">⌂ HOME</a>
+</div>
+
+<div class="card">
+<video id="video" muted playsinline></video>
+<div id="status" class="status">Camera is off.</div>
+<button id="cameraToggle" class="primary">📷 SWITCH CAMERA MODE ON</button>
+<button id="stopBtn" class="secondary">STOP CAMERA</button>
+</div>
+
+<div class="card">
+<div class="small">BARCODE DETECTED</div>
+<div id="barcode" class="barcode">—</div>
+<button id="nextBtn" class="green">SCAN NEXT ITEM</button>
+</div>
+
+<div class="card">
+<div class="small">QUICK BUY PRICE</div>
+<div class="quick">
+<button onclick="setBuy(1)">£1</button>
+<button onclick="setBuy(2)">£2</button>
+<button onclick="setBuy(3)">£3</button>
+<button onclick="setBuy(4)">£4</button>
+<button onclick="setBuy(5)">£5</button>
+</div>
+
+<div class="grid">
+<div><label>YOUR BUY PRICE (£)</label><input id="buy" type="number" step="0.01" value="2.00"></div>
+<div><label>eBay SOLD PRICE (£)</label><input id="sold" type="number" step="0.01" value="0"></div>
+<div><label>eBay FEE (%)</label><input id="fee" type="number" step="0.5" value="13"></div>
+<div><label>POSTAGE (£)</label><input id="post" type="number" step="0.10" value="2.00"></div>
+<div><label>PACKAGING (£)</label><input id="pack" type="number" step="0.05" value="0.30"></div>
+<div><label>PROFIT TARGET (£)</label><input id="target" type="number" step="1" value="7"></div>
+</div>
+
+<button class="primary" onclick="calculate()">💷 CALCULATE FLIP</button>
+<div id="calc"></div>
+</div>
+
+<div class="card">
+<div class="small">
+This camera page is designed to be hosted over HTTPS so iPhone camera permission works reliably. The scanner uses ZXing in-browser, so it does not rely only on the browser's limited BarcodeDetector support.
+</div>
+</div>
+</div>
+
+<script>
+let controls=null;
+let reader=null;
+let cameraOn=false;
+const video=document.getElementById('video');
+const statusEl=document.getElementById('status');
+const barcodeEl=document.getElementById('barcode');
+const toggleBtn=document.getElementById('cameraToggle');
+
+async function startCamera(){
+  try{
+    statusEl.textContent="Starting rear camera…";
+    if(!window.ZXingBrowser) throw new Error("Scanner library could not load.");
+    reader=new ZXingBrowser.BrowserMultiFormatReader();
+    const devices=await ZXingBrowser.BrowserCodeReader.listVideoInputDevices();
+    let device=devices.find(d=>/back|rear|environment/i.test(d.label)) || devices[devices.length-1];
+    if(!device) throw new Error("No camera found.");
+
+    controls=await reader.decodeFromVideoDevice(device.deviceId, video, (result, error)=>{
+      if(result){
+        const code=result.getText();
+        barcodeEl.textContent=code;
+        statusEl.textContent="✅ Barcode captured";
+        if(navigator.vibrate) navigator.vibrate(120);
+        stopCamera();
+      }
+    });
+    cameraOn=true;
+    toggleBtn.textContent="✅ CAMERA MODE ON";
+    statusEl.textContent="Point the camera at the barcode…";
+  }catch(e){
+    statusEl.textContent="Camera error: "+e.message;
+    cameraOn=false;
+    toggleBtn.textContent="📷 SWITCH CAMERA MODE ON";
+  }
+}
+
+function stopCamera(){
+  if(controls){controls.stop();controls=null;}
+  if(video.srcObject){
+    video.srcObject.getTracks().forEach(t=>t.stop());
+    video.srcObject=null;
+  }
+  cameraOn=false;
+  toggleBtn.textContent="📷 SWITCH CAMERA MODE ON";
+}
+
+toggleBtn.addEventListener('click',()=>{ cameraOn ? stopCamera() : startCamera(); });
+document.getElementById('stopBtn').addEventListener('click',stopCamera);
+document.getElementById('nextBtn').addEventListener('click',()=>{
+  barcodeEl.textContent="—";
+  startCamera();
+});
+
+function setBuy(v){
+  document.getElementById('buy').value=v.toFixed(2);
+}
+
+function calculate(){
+  const buy=+document.getElementById('buy').value||0;
+  const sold=+document.getElementById('sold').value||0;
+  const fee=+document.getElementById('fee').value||0;
+  const post=+document.getElementById('post').value||0;
+  const pack=+document.getElementById('pack').value||0;
+  const target=+document.getElementById('target').value||0;
+
+  const net=sold-(sold*fee/100)-post-pack-buy;
+  const roi=buy ? (net/buy)*100 : 0;
+  const maxBuy=sold-(sold*fee/100)-post-pack-target;
+
+  let cls='pass', verdict='❌ PASS';
+  if(net>=target && roi>=25){cls='buy';verdict='🔥 STRONG BUY';}
+  else if(net>0){cls='watch';verdict='👀 WATCH';}
+
+  document.getElementById('calc').innerHTML=
+    `<div class="verdict ${cls}">${verdict}</div>
+     <p>
+     Estimated net profit: <b>£${net.toFixed(2)}</b><br>
+     ROI: <b>${roi.toFixed(0)}%</b><br>
+     Maximum buy price for a £${target.toFixed(2)} target: <b>£${Math.max(0,maxBuy).toFixed(2)}</b>
+     </p>`;
+}
+window.addEventListener('pagehide',stopCamera);
+</script>
+</body>
+</html>
