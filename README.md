@@ -1,16 +1,33 @@
-# Den’s Deal Engine V7.2 — Market Tracker
+# Den's Deal Engine V7.3 — Resilient Identification
 
-This build keeps the V7.1 scanner/dashboard and adds:
+V7.3 fixes the "barcode detected, product identification unavailable / Load failed" weakness in V7.2.
 
-- shooting-star treatment behind the Den’s Deal Engine wordmark
-- Today’s Top 10 Deals panel
-- All / Pre-owned / Brand New-Sealed filters
-- separate used vs sealed valuation logic in the UI
-- GREEN / AMBER / RED deal signals
-- eBay sold benchmark, retail reference, estimated profit, ROI and upside score columns
-- responsive mobile deal cards
+## Front-end changes
 
-## Important data note
-The included Top 10 list is demo data and is clearly labelled in the interface. GitHub Pages is a static host and should not contain private marketplace API credentials. A true live feed should be supplied by an authorised backend/serverless function or a scheduled workflow that writes sanitized JSON into the site.
+The scanner now keeps barcode capture separate from catalogue identification. After a valid barcode is captured it tries, in order:
 
-Amazon/current retailer pricing should be treated as current retail/offer reference data. It should not be described as Amazon “latest sold” data unless an authorised source actually provides transaction-level sold history.
+1. Optional secure Den's Deal Engine backend
+2. UPCitemdb public catalogue
+3. Google Books for ISBN-13 barcodes
+4. Open Library for ISBN-13 barcodes
+5. MusicBrainz for music-release barcodes
+
+If one provider fails, V7.3 continues to the next provider rather than presenting the whole scan as failed. The status line reports the provider being tried and the successful source is shown as a badge on the product card.
+
+If no catalogue identifies the item, the barcode remains usable and the eBay sold-results button searches by that barcode so the exact edition can still be verified manually.
+
+## Product images
+
+Images are loaded from whichever successful catalogue supplies one. A broken image URL is hidden automatically rather than leaving a broken-image icon.
+
+## Secure eBay lookup backend
+
+`backend/cloudflare-worker/` contains an optional Cloudflare Worker. It can use eBay's Browse API to search by GTIN and enrich the identification with title, category, model clues, image, and current listing information while keeping the eBay Client Secret off GitHub Pages.
+
+Do **not** paste an eBay Client Secret into `index.html` or `scanner.html`.
+
+The eBay Browse information in this backend is active-listing/product-identification data. It is not presented as completed/sold-price history. V7.3 continues to use the eBay completed/sold search link and manual Market Radar samples for sold evidence until a lawful sold-data source is connected.
+
+## Upload to GitHub Pages
+
+Replace the current site's `index.html` and `scanner.html` with the V7.3 versions. The `backend/` folder is source code for the optional secure service and does not run on GitHub Pages by itself.

@@ -1,0 +1,6 @@
+name = "dens-deal-engine-api"
+main = "worker.js"
+compatibility_date = "2026-09-03"
+
+[vars]
+EBAY_MARKETPLACE_ID = "EBAY_GB"
