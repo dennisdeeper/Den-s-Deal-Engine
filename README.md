@@ -1,17 +1,9 @@
-# Media Flip Scanner V5 — Product Identification
+# Media Flip Deal Engine V6
 
-Replace your existing GitHub Pages files with:
-- index.html
-- scanner.html
+Phase 1: barcode/product identification + eBay SOLD search + flip calculator.
+Phase 2: local price observations + trend + experimental Collector Score.
+Phase 3: shelf-photo multi-barcode detection beta using the browser BarcodeDetector API where supported.
 
-README.md is optional.
+Upload `index.html` and `scanner.html` to the root of the existing GitHub Pages repository, replacing the old files.
 
-After scanning, V5 attempts product identification using the UPCitemdb free trial lookup endpoint.
-
-It can display title, barcode, brand/publisher, category, model, description, image, inferred PS5/PS4/4K UHD/Blu-ray format, edition clues and region clues.
-
-The **OPEN eBAY SOLD RESULTS** button opens eBay UK with Sold + Completed filters using the title and barcode.
-
-Important: the free UPCitemdb service is rate-limited and will not contain every media barcode. When product information is incomplete the app says so instead of inventing an edition.
-
-Static GitHub Pages cannot safely store private eBay API client secrets, so a fully automatic eBay API valuation step should later use a small backend/serverless function.
+Important: UPCitemdb trial lookup is rate-limited and incomplete. Automatic eBay sold-price extraction is not included because private API credentials should not be embedded in a public static GitHub Pages site.

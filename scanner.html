@@ -1,194 +1,42 @@
 <!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
-<meta name="theme-color" content="#000000">
-<title>Media Flip Scanner V5</title>
+<html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no"><meta name="theme-color" content="#000000">
+<title>Media Flip Deal Engine V6</title>
 <script src="https://unpkg.com/@zxing/browser@0.1.5/umd/zxing-browser.min.js"></script>
 <style>
-*{box-sizing:border-box}
-body{margin:0;background:#000;color:#fff;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
-.wrap{max-width:700px;margin:auto;padding:16px}
-.top{display:flex;gap:10px;align-items:center;justify-content:space-between}
-h1{font-size:24px;margin:6px 0}
-.card{background:#1c1c1e;border-radius:18px;padding:15px;margin:12px 0}
-video{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:14px;background:#111}
-button,.btn{border:0;border-radius:14px;padding:15px 16px;font-size:17px;font-weight:800;margin:5px 2px;cursor:pointer}
-.primary{width:100%;background:#0a84ff;color:white}.secondary{background:#333;color:white}
-.green{background:#30d158;color:#061b0d;width:100%}.orange{background:#ff9f0a;color:#111;width:100%}
-.status{color:#aaa;min-height:22px;margin-top:8px}.barcode{font-size:27px;font-weight:900;word-break:break-all}
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}label{font-size:12px;color:#aaa}
-input{width:100%;margin-top:5px;padding:13px;font-size:21px;border-radius:10px;border:1px solid #444;background:#111;color:#fff}
-.quick{display:grid;grid-template-columns:repeat(5,1fr);gap:7px;margin-top:10px}.quick button{padding:13px 2px;background:#2c2c2e;color:#fff}
-.verdict{font-size:27px;font-weight:900;margin-top:15px}.buy{color:#30d158}.watch{color:#ffd60a}.pass{color:#ff453a}
-.small{font-size:12px;color:#888;line-height:1.45}a{color:#7db7ff}.product-title{font-size:24px;font-weight:900;margin:5px 0}
-.badges{display:flex;gap:7px;flex-wrap:wrap;margin:8px 0}.badge{background:#2c2c2e;padding:7px 10px;border-radius:999px;font-size:13px;font-weight:700}
-.kv{display:grid;grid-template-columns:120px 1fr;gap:7px 10px;margin-top:10px;font-size:14px}.k{color:#999}.v{font-weight:650;word-break:break-word}
-img.product{max-width:180px;max-height:240px;border-radius:12px;margin-top:10px}.hidden{display:none}
-.notice{background:#2a2415;border:1px solid #67541c;padding:10px;border-radius:12px;color:#ffd87a;font-size:13px}
-</style>
-</head>
-<body>
-<div class="wrap">
-<div class="top"><h1>📷 Media Flip Scanner V5</h1><a class="btn secondary" href="index.html">⌂ HOME</a></div>
+*{box-sizing:border-box}body{margin:0;background:#000;color:#fff;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}.wrap{max-width:720px;margin:auto;padding:14px}.top{display:flex;gap:8px;align-items:center;justify-content:space-between}h1{font-size:22px;margin:6px 0}.card{background:#1c1c1e;border-radius:18px;padding:15px;margin:12px 0}video,.shelfPreview{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:14px;background:#111}button,.btn{border:0;border-radius:14px;padding:14px 15px;font-size:16px;font-weight:800;margin:5px 2px;cursor:pointer}.primary{width:100%;background:#0a84ff;color:#fff}.secondary{background:#333;color:#fff}.green{background:#30d158;color:#061b0d;width:100%}.orange{background:#ff9f0a;color:#111;width:100%}.purple{background:#bf5af2;color:#100317;width:100%}.status{color:#aaa;min-height:22px;margin-top:8px}.barcode{font-size:27px;font-weight:900;word-break:break-all}.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}label{font-size:12px;color:#aaa}input,select{width:100%;margin-top:5px;padding:12px;font-size:18px;border-radius:10px;border:1px solid #444;background:#111;color:#fff}.quick{display:grid;grid-template-columns:repeat(5,1fr);gap:7px;margin-top:10px}.quick button{padding:12px 2px;background:#2c2c2e;color:#fff}.verdict{font-size:27px;font-weight:900;margin-top:15px}.buy{color:#30d158}.watch{color:#ffd60a}.pass{color:#ff453a}.small{font-size:12px;color:#888;line-height:1.45}.product-title{font-size:23px;font-weight:900;margin:5px 0}.badges{display:flex;gap:7px;flex-wrap:wrap;margin:8px 0}.badge{background:#2c2c2e;padding:7px 10px;border-radius:999px;font-size:13px;font-weight:700}.kv{display:grid;grid-template-columns:125px 1fr;gap:7px 10px;margin-top:10px;font-size:14px}.k{color:#999}.v{font-weight:650;word-break:break-word}img.product{max-width:180px;max-height:240px;border-radius:12px;margin-top:10px}.hidden{display:none}.notice{background:#2a2415;border:1px solid #67541c;padding:10px;border-radius:12px;color:#ffd87a;font-size:13px}.score{font-size:42px;font-weight:900}.queueItem{display:flex;justify-content:space-between;gap:8px;align-items:center;background:#111;border-radius:12px;padding:10px;margin-top:8px}.queueItem button{font-size:13px;padding:9px}.tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}.tabs button{background:#242426;color:#fff;font-size:13px;padding:11px 5px}.sectionTitle{font-weight:900;font-size:17px;margin-bottom:6px}@media(max-width:470px){.grid{grid-template-columns:1fr}.kv{grid-template-columns:105px 1fr}}
+</style></head><body><div class="wrap">
+<div class="top"><h1>📷 Deal Engine V6</h1><a class="btn secondary" href="index.html">⌂ HOME</a></div>
+<div class="tabs"><button onclick="jump('deal')">PHASE 1</button><button onclick="jump('collector')">PHASE 2</button><button onclick="jump('shelf')">PHASE 3</button></div>
 
-<div class="card">
-<video id="video" muted playsinline></video>
-<div id="status" class="status">Camera is off.</div>
-<button id="cameraToggle" class="primary">📷 SWITCH CAMERA MODE ON</button>
-<button id="stopBtn" class="secondary">STOP CAMERA</button>
-</div>
+<div id="deal" class="card"><div class="sectionTitle">Phase 1 — Scan & Identify</div><video id="video" muted playsinline></video><div id="status" class="status">Camera is off.</div><button id="cameraToggle" class="primary">📷 SWITCH CAMERA MODE ON</button><button id="stopBtn" class="secondary">STOP CAMERA</button></div>
+<div class="card"><div class="small">BARCODE DETECTED</div><div id="barcode" class="barcode">—</div><button id="identifyBtn" class="orange">🔎 IDENTIFY PRODUCT</button><button id="nextBtn" class="green">SCAN NEXT ITEM</button></div>
+<div id="productCard" class="card hidden"><div class="small">PRODUCT IDENTIFICATION</div><div id="productTitle" class="product-title">—</div><div id="badges" class="badges"></div><img id="productImage" class="product hidden" alt="Product image"><div class="kv"><div class="k">Barcode</div><div id="pBarcode" class="v">—</div><div class="k">Brand / publisher</div><div id="pBrand" class="v">—</div><div class="k">Category</div><div id="pCategory" class="v">—</div><div class="k">Model / edition</div><div id="pModel" class="v">—</div><div class="k">Description</div><div id="pDescription" class="v">—</div></div><div id="confidence" class="notice" style="margin-top:12px"></div><button id="ebaySoldBtn" class="primary">🛒 OPEN eBAY SOLD RESULTS</button></div>
+<div class="card"><div class="small">QUICK BUY PRICE</div><div class="quick"><button onclick="setBuy(1)">£1</button><button onclick="setBuy(2)">£2</button><button onclick="setBuy(3)">£3</button><button onclick="setBuy(4)">£4</button><button onclick="setBuy(5)">£5</button></div><div class="grid"><div><label>YOUR BUY PRICE (£)</label><input id="buy" type="number" step="0.01" value="2.00"></div><div><label>eBay SOLD PRICE (£)</label><input id="sold" type="number" step="0.01" value="0"></div><div><label>eBay FEE (%)</label><input id="fee" type="number" step="0.5" value="13"></div><div><label>POSTAGE (£)</label><input id="post" type="number" step="0.10" value="2.00"></div><div><label>PACKAGING (£)</label><input id="pack" type="number" step="0.05" value="0.30"></div><div><label>PROFIT TARGET (£)</label><input id="target" type="number" step="1" value="7"></div></div><button class="primary" onclick="calculate()">💷 CALCULATE FLIP</button><div id="calc"></div></div>
 
-<div class="card">
-<div class="small">BARCODE DETECTED</div>
-<div id="barcode" class="barcode">—</div>
-<button id="identifyBtn" class="orange">🔎 IDENTIFY PRODUCT</button>
-<button id="nextBtn" class="green">SCAN NEXT ITEM</button>
-</div>
+<div id="collector" class="card"><div class="sectionTitle">Phase 2 — Collector Intelligence</div><p class="small">After checking eBay SOLD results, enter a realistic sold value above and save it. Repeat observations for the same barcode build your own price history on this device.</p><div class="grid"><div><label>SCARCITY / AVAILABILITY</label><select id="scarcity"><option value="0">Common / unknown</option><option value="1">Less common</option><option value="2">Hard to find</option><option value="3">Very scarce</option></select></div><div><label>CONDITION</label><select id="condition"><option value="0">Used / average</option><option value="1">Very good</option><option value="2">Mint / sealed</option></select></div></div><button class="purple" onclick="saveObservation()">📈 SAVE PRICE OBSERVATION</button><div id="intel" class="small" style="margin-top:12px">Scan an item to begin.</div></div>
 
-<div id="productCard" class="card hidden">
-<div class="small">PRODUCT IDENTIFICATION</div>
-<div id="productTitle" class="product-title">—</div>
-<div id="badges" class="badges"></div>
-<img id="productImage" class="product hidden" alt="Product image">
-<div class="kv">
-<div class="k">Barcode</div><div id="pBarcode" class="v">—</div>
-<div class="k">Brand / publisher</div><div id="pBrand" class="v">—</div>
-<div class="k">Category</div><div id="pCategory" class="v">—</div>
-<div class="k">Model / edition</div><div id="pModel" class="v">—</div>
-<div class="k">Description</div><div id="pDescription" class="v">—</div>
+<div id="shelf" class="card"><div class="sectionTitle">Phase 3 — Shelf Scan BETA</div><p class="small">Take a clear shelf photo with several visible barcodes. This beta uses your browser's multi-barcode detector where available.</p><input id="shelfInput" type="file" accept="image/*" capture="environment"><img id="shelfPreview" class="shelfPreview hidden" alt="Shelf photo"><button class="primary" onclick="scanShelfPhoto()">🧠 FIND BARCODES IN PHOTO</button><div id="shelfStatus" class="status"></div><div id="shelfQueue"></div></div>
+<div class="card"><div class="small">V6 still uses UPCitemdb's public trial lookup for identification. Automatic eBay sold-price extraction needs a backend/API later; this build deliberately does not invent sold prices. Collector history is stored locally in your browser.</div></div>
 </div>
-<div id="confidence" class="notice" style="margin-top:12px"></div>
-<button id="ebaySoldBtn" class="primary">🛒 OPEN eBAY SOLD RESULTS</button>
-</div>
-
-<div class="card">
-<div class="small">QUICK BUY PRICE</div>
-<div class="quick">
-<button onclick="setBuy(1)">£1</button><button onclick="setBuy(2)">£2</button><button onclick="setBuy(3)">£3</button><button onclick="setBuy(4)">£4</button><button onclick="setBuy(5)">£5</button>
-</div>
-<div class="grid">
-<div><label>YOUR BUY PRICE (£)</label><input id="buy" type="number" step="0.01" value="2.00"></div>
-<div><label>eBay SOLD PRICE (£)</label><input id="sold" type="number" step="0.01" value="0"></div>
-<div><label>eBay FEE (%)</label><input id="fee" type="number" step="0.5" value="13"></div>
-<div><label>POSTAGE (£)</label><input id="post" type="number" step="0.10" value="2.00"></div>
-<div><label>PACKAGING (£)</label><input id="pack" type="number" step="0.05" value="0.30"></div>
-<div><label>PROFIT TARGET (£)</label><input id="target" type="number" step="1" value="7"></div>
-</div>
-<button class="primary" onclick="calculate()">💷 CALCULATE FLIP</button>
-<div id="calc"></div>
-</div>
-
-<div class="card"><div class="small">
-Product lookup uses UPCitemdb's free trial lookup service. If the public catalogue does not contain the barcode or is temporarily rate-limited, the app will say so rather than inventing the edition.
-</div></div>
-</div>
-
 <script>
-let controls=null, reader=null, cameraOn=false, currentProduct=null;
-const video=document.getElementById('video'), statusEl=document.getElementById('status'),
-barcodeEl=document.getElementById('barcode'), toggleBtn=document.getElementById('cameraToggle');
-function clean(s){return (s||'').toString().trim();}
-function inferMedia(item){
- const blob=(clean(item.title)+' '+clean(item.category)+' '+clean(item.description)+' '+clean(item.brand)+' '+clean(item.model)).toLowerCase();
- let media='Media';
- if(/\bps5\b|playstation 5/.test(blob)) media='PS5';
- else if(/\bps4\b|playstation 4/.test(blob)) media='PS4';
- else if(/4k.*uhd|uhd.*4k|ultra hd/.test(blob)) media='4K UHD';
- else if(/blu[\s-]?ray/.test(blob)) media='Blu-ray';
- const editions=[];
- [['SteelBook',/steel[\s-]?book/],['Collector’s Edition',/collector'?s edition|collectors edition/],['Limited Edition',/limited edition/],['Deluxe Edition',/deluxe edition/],['Day One Edition',/day one edition/],['Special Edition',/special edition/],['Game of the Year',/game of the year|\bgoty\b/],['Director’s Cut',/director'?s cut/],['Extended Edition',/extended edition/],['Box Set',/box set|boxset/]]
- .forEach(([name,re])=>{if(re.test(blob)) editions.push(name)});
- let region='Not stated';
- if(/\bpal\b|region 2|region b|\buk\b/.test(blob)) region='UK / PAL clue';
- if(/region free/.test(blob)) region='Region Free';
- return {media,editions,region};
-}
-async function startCamera(){
- try{
-  statusEl.textContent='Starting rear camera…';
-  if(!window.ZXingBrowser) throw new Error('Scanner library could not load.');
-  reader=new ZXingBrowser.BrowserMultiFormatReader();
-  const devices=await ZXingBrowser.BrowserCodeReader.listVideoInputDevices();
-  let device=devices.find(d=>/back|rear|environment/i.test(d.label))||devices[devices.length-1];
-  if(!device) throw new Error('No camera found.');
-  controls=await reader.decodeFromVideoDevice(device.deviceId,video,(result,error)=>{
-   if(result){
-    barcodeEl.textContent=result.getText();
-    statusEl.textContent='✅ Barcode captured — identifying product…';
-    if(navigator.vibrate) navigator.vibrate(120);
-    stopCamera(); identifyProduct();
-   }
-  });
-  cameraOn=true; toggleBtn.textContent='✅ CAMERA MODE ON'; statusEl.textContent='Point the camera at the barcode…';
- }catch(e){statusEl.textContent='Camera error: '+e.message;cameraOn=false;toggleBtn.textContent='📷 SWITCH CAMERA MODE ON';}
-}
-function stopCamera(){
- if(controls){controls.stop();controls=null}
- if(video.srcObject){video.srcObject.getTracks().forEach(t=>t.stop());video.srcObject=null}
- cameraOn=false;toggleBtn.textContent='📷 SWITCH CAMERA MODE ON';
-}
-toggleBtn.onclick=()=>cameraOn?stopCamera():startCamera();
-document.getElementById('stopBtn').onclick=stopCamera;
-document.getElementById('nextBtn').onclick=()=>{barcodeEl.textContent='—';currentProduct=null;document.getElementById('productCard').classList.add('hidden');startCamera();};
-document.getElementById('identifyBtn').onclick=identifyProduct;
-
-async function identifyProduct(){
- const code=clean(barcodeEl.textContent);
- if(!/^\d{8,14}$/.test(code)){statusEl.textContent='Scan a valid EAN/UPC barcode first.';return;}
- statusEl.textContent='Looking up exact barcode…';
- try{
-  const response=await fetch('https://api.upcitemdb.com/prod/trial/lookup?upc='+encodeURIComponent(code),{headers:{'Accept':'application/json'}});
-  if(!response.ok) throw new Error('Lookup service returned '+response.status);
-  const data=await response.json(), item=(data.items||[])[0];
-  if(!item){showUnknown(code);statusEl.textContent='No catalogue match found for this barcode.';return;}
-  currentProduct=item;showProduct(code,item);statusEl.textContent='✅ Product identified';
- }catch(e){showUnknown(code);statusEl.textContent='Identification unavailable: '+e.message;}
-}
-function showUnknown(code){
- document.getElementById('productCard').classList.remove('hidden');
- document.getElementById('productTitle').textContent='Unknown product';
- document.getElementById('pBarcode').textContent=code;
- document.getElementById('pBrand').textContent='—';document.getElementById('pCategory').textContent='—';document.getElementById('pModel').textContent='—';
- document.getElementById('pDescription').textContent='No catalogue description returned.';
- document.getElementById('badges').innerHTML='<span class="badge">Unidentified</span>';
- document.getElementById('confidence').textContent='The barcode was read correctly, but the public catalogue did not return a match. Do not guess the edition from the barcode alone.';
- document.getElementById('productImage').classList.add('hidden');
-}
-function showProduct(code,item){
- const inf=inferMedia(item);
- document.getElementById('productCard').classList.remove('hidden');
- document.getElementById('productTitle').textContent=clean(item.title)||'Product found';
- document.getElementById('pBarcode').textContent=code;
- document.getElementById('pBrand').textContent=clean(item.brand)||'Not stated';
- document.getElementById('pCategory').textContent=clean(item.category)||'Not stated';
- document.getElementById('pModel').textContent=clean(item.model)||(inf.editions.length?inf.editions.join(', '):'Not stated');
- document.getElementById('pDescription').textContent=clean(item.description)||'Not stated';
- let badges=[inf.media].concat(inf.editions);if(inf.region!=='Not stated')badges.push(inf.region);
- document.getElementById('badges').innerHTML=badges.map(x=>'<span class="badge">'+x+'</span>').join('');
- const image=(item.images||[])[0],img=document.getElementById('productImage');
- if(image){img.src=image;img.classList.remove('hidden')}else img.classList.add('hidden');
- let note='Barcode match found. ';
- if(inf.media==='Media') note+='The catalogue did not clearly state PS4/PS5/Blu-ray/4K, so check the cover before valuing it. ';
- else note+='Detected format: '+inf.media+'. ';
- if(inf.editions.length)note+='Edition clues: '+inf.editions.join(', ')+'. ';
- note+='Always verify SteelBook/collector packaging, region and disc completeness against the item in your hand.';
- document.getElementById('confidence').textContent=note;
-}
-document.getElementById('ebaySoldBtn').onclick=()=>{
- const code=clean(barcodeEl.textContent);let q=code;
- if(currentProduct&&clean(currentProduct.title))q=clean(currentProduct.title)+' '+code;
- window.open('https://www.ebay.co.uk/sch/i.html?_nkw='+encodeURIComponent(q)+'&LH_Sold=1&LH_Complete=1','_blank');
-};
-function setBuy(v){document.getElementById('buy').value=v.toFixed(2)}
-function calculate(){
- const buy=+document.getElementById('buy').value||0,sold=+document.getElementById('sold').value||0,fee=+document.getElementById('fee').value||0,post=+document.getElementById('post').value||0,pack=+document.getElementById('pack').value||0,target=+document.getElementById('target').value||0;
- const net=sold-(sold*fee/100)-post-pack-buy,roi=buy?(net/buy)*100:0,maxBuy=sold-(sold*fee/100)-post-pack-target;
- let cls='pass',verdict='❌ PASS';if(net>=target&&roi>=25){cls='buy';verdict='🔥 STRONG BUY'}else if(net>0){cls='watch';verdict='👀 WATCH'}
- document.getElementById('calc').innerHTML='<div class="verdict '+cls+'">'+verdict+'</div><p>Estimated net profit: <b>£'+net.toFixed(2)+'</b><br>ROI: <b>'+roi.toFixed(0)+'%</b><br>Maximum buy price for a £'+target.toFixed(2)+' target: <b>£'+Math.max(0,maxBuy).toFixed(2)+'</b></p>';
-}
+let controls=null,reader=null,cameraOn=false,currentProduct=null,shelfFile=null;
+const video=document.getElementById('video'),statusEl=document.getElementById('status'),barcodeEl=document.getElementById('barcode'),toggleBtn=document.getElementById('cameraToggle');
+function clean(s){return(s||'').toString().trim()} function esc(s){return clean(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))} function jump(id){document.getElementById(id).scrollIntoView({behavior:'smooth'})}
+function inferMedia(item){const blob=(clean(item.title)+' '+clean(item.category)+' '+clean(item.description)+' '+clean(item.brand)+' '+clean(item.model)).toLowerCase();let media='Media';if(/\bps5\b|playstation 5/.test(blob))media='PS5';else if(/\bps4\b|playstation 4/.test(blob))media='PS4';else if(/\bps3\b|playstation 3/.test(blob))media='PS3';else if(/xbox series/.test(blob))media='Xbox Series';else if(/xbox one/.test(blob))media='Xbox One';else if(/nintendo switch/.test(blob))media='Nintendo Switch';else if(/4k.*uhd|uhd.*4k|ultra hd/.test(blob))media='4K UHD';else if(/blu[\s-]?ray/.test(blob))media='Blu-ray';else if(/\bdvd\b/.test(blob))media='DVD';else if(/compact disc|audio cd|\bcd\b/.test(blob))media='CD';else if(/vinyl|lp record/.test(blob))media='Vinyl';else if(/book|paperback|hardcover/.test(blob))media='Book';const editions=[];[['SteelBook',/steel[\s-]?book/],['Collector’s Edition',/collector'?s edition|collectors edition/],['Limited Edition',/limited edition/],['Deluxe Edition',/deluxe edition/],['Day One Edition',/day one edition/],['Special Edition',/special edition/],['Game of the Year',/game of the year|\bgoty\b/],['Director’s Cut',/director'?s cut/],['Extended Edition',/extended edition/],['Box Set',/box set|boxset/],['Anniversary',/anniversary/],['Criterion',/criterion/]].forEach(([name,re])=>{if(re.test(blob))editions.push(name)});let region='Not stated';if(/\bpal\b|region 2|region b|\buk\b/.test(blob))region='UK / PAL clue';if(/region free/.test(blob))region='Region Free';return{media,editions,region}}
+async function startCamera(){try{statusEl.textContent='Starting rear camera…';if(!window.ZXingBrowser)throw new Error('Scanner library could not load.');reader=new ZXingBrowser.BrowserMultiFormatReader();const devices=await ZXingBrowser.BrowserCodeReader.listVideoInputDevices();let device=devices.find(d=>/back|rear|environment/i.test(d.label))||devices[devices.length-1];if(!device)throw new Error('No camera found.');controls=await reader.decodeFromVideoDevice(device.deviceId,video,(result)=>{if(result){barcodeEl.textContent=result.getText();statusEl.textContent='✅ Barcode captured — identifying product…';if(navigator.vibrate)navigator.vibrate(120);stopCamera();identifyProduct()}});cameraOn=true;toggleBtn.textContent='✅ CAMERA MODE ON';statusEl.textContent='Point the camera at the barcode…'}catch(e){statusEl.textContent='Camera error: '+e.message;cameraOn=false;toggleBtn.textContent='📷 SWITCH CAMERA MODE ON'}}
+function stopCamera(){if(controls){controls.stop();controls=null}if(video.srcObject){video.srcObject.getTracks().forEach(t=>t.stop());video.srcObject=null}cameraOn=false;toggleBtn.textContent='📷 SWITCH CAMERA MODE ON'}
+toggleBtn.onclick=()=>cameraOn?stopCamera():startCamera();document.getElementById('stopBtn').onclick=stopCamera;document.getElementById('nextBtn').onclick=()=>{barcodeEl.textContent='—';currentProduct=null;document.getElementById('productCard').classList.add('hidden');document.getElementById('intel').textContent='Scan an item to begin.';startCamera()};document.getElementById('identifyBtn').onclick=identifyProduct;
+async function identifyProduct(){const code=clean(barcodeEl.textContent);if(!/^\d{8,14}$/.test(code)){statusEl.textContent='Scan a valid EAN/UPC barcode first.';return}statusEl.textContent='Looking up exact barcode…';try{const response=await fetch('https://api.upcitemdb.com/prod/trial/lookup?upc='+encodeURIComponent(code),{headers:{Accept:'application/json'}});if(!response.ok)throw new Error('Lookup service returned '+response.status);const data=await response.json(),item=(data.items||[])[0];if(!item){currentProduct=null;showUnknown(code);statusEl.textContent='No catalogue match found for this barcode.';renderIntel();return}currentProduct=item;showProduct(code,item);statusEl.textContent='✅ Product identified';renderIntel()}catch(e){currentProduct=null;showUnknown(code);statusEl.textContent='Identification unavailable: '+e.message;renderIntel()}}
+function showUnknown(code){document.getElementById('productCard').classList.remove('hidden');document.getElementById('productTitle').textContent='Unknown product';document.getElementById('pBarcode').textContent=code;['pBrand','pCategory','pModel'].forEach(id=>document.getElementById(id).textContent='—');document.getElementById('pDescription').textContent='No catalogue description returned.';document.getElementById('badges').innerHTML='<span class="badge">Unidentified</span>';document.getElementById('confidence').textContent='The barcode was read correctly, but the public catalogue did not return a match. Do not guess the edition from the barcode alone.';document.getElementById('productImage').classList.add('hidden')}
+function showProduct(code,item){const inf=inferMedia(item);document.getElementById('productCard').classList.remove('hidden');document.getElementById('productTitle').textContent=clean(item.title)||'Product found';document.getElementById('pBarcode').textContent=code;document.getElementById('pBrand').textContent=clean(item.brand)||'Not stated';document.getElementById('pCategory').textContent=clean(item.category)||'Not stated';document.getElementById('pModel').textContent=clean(item.model)||(inf.editions.length?inf.editions.join(', '):'Not stated');document.getElementById('pDescription').textContent=clean(item.description)||'Not stated';let badges=[inf.media].concat(inf.editions);if(inf.region!=='Not stated')badges.push(inf.region);document.getElementById('badges').innerHTML=badges.map(x=>'<span class="badge">'+esc(x)+'</span>').join('');const image=(item.images||[])[0],img=document.getElementById('productImage');if(image){img.src=image;img.classList.remove('hidden')}else img.classList.add('hidden');let note='Barcode match found. ';if(inf.media==='Media')note+='The catalogue did not clearly state the format, so check the cover before valuing it. ';else note+='Detected format: '+inf.media+'. ';if(inf.editions.length)note+='Edition clues: '+inf.editions.join(', ')+'. ';note+='Always verify special packaging, region and completeness against the item in your hand.';document.getElementById('confidence').textContent=note}
+document.getElementById('ebaySoldBtn').onclick=()=>{const code=clean(barcodeEl.textContent);let q=code;if(currentProduct&&clean(currentProduct.title))q=clean(currentProduct.title)+' '+code;window.open('https://www.ebay.co.uk/sch/i.html?_nkw='+encodeURIComponent(q)+'&LH_Sold=1&LH_Complete=1','_blank')};
+function setBuy(v){document.getElementById('buy').value=v.toFixed(2)} function economics(){const buy=+document.getElementById('buy').value||0,sold=+document.getElementById('sold').value||0,fee=+document.getElementById('fee').value||0,post=+document.getElementById('post').value||0,pack=+document.getElementById('pack').value||0,target=+document.getElementById('target').value||0;const net=sold-(sold*fee/100)-post-pack-buy,roi=buy?(net/buy)*100:0,maxBuy=sold-(sold*fee/100)-post-pack-target;return{buy,sold,fee,post,pack,target,net,roi,maxBuy}}
+function calculate(){const e=economics();let cls='pass',verdict='❌ PASS';if(e.net>=e.target&&e.roi>=25){cls='buy';verdict='🔥 STRONG BUY'}else if(e.net>0){cls='watch';verdict='👀 WATCH'}document.getElementById('calc').innerHTML='<div class="verdict '+cls+'">'+verdict+'</div><p>Estimated net profit: <b>£'+e.net.toFixed(2)+'</b><br>ROI: <b>'+e.roi.toFixed(0)+'%</b><br>Maximum buy price for a £'+e.target.toFixed(2)+' target: <b>£'+Math.max(0,e.maxBuy).toFixed(2)+'</b></p>';renderIntel()}
+function historyAll(){try{return JSON.parse(localStorage.getItem('mf_history_v6')||'{}')}catch{return{}}}function getHistory(code){return historyAll()[code]||[]}function saveObservation(){const code=clean(barcodeEl.textContent),e=economics();if(!/^\d{8,14}$/.test(code)){alert('Scan an item first.');return}if(e.sold<=0){alert('Enter a realistic eBay SOLD price first.');return}const all=historyAll();all[code]=all[code]||[];all[code].push({date:new Date().toISOString(),sold:e.sold,buy:e.buy,title:currentProduct?clean(currentProduct.title):'',scarcity:+document.getElementById('scarcity').value,condition:+document.getElementById('condition').value});all[code]=all[code].slice(-24);localStorage.setItem('mf_history_v6',JSON.stringify(all));renderIntel()}
+function collectorScore(){const code=clean(barcodeEl.textContent),h=getHistory(code),e=economics();let score=25,parts=[];const scarcity=+document.getElementById('scarcity').value,condition=+document.getElementById('condition').value;score+=scarcity*10+condition*5;if(scarcity)parts.push('scarcity +'+scarcity*10);if(condition)parts.push('condition +'+condition*5);if(currentProduct){const inf=inferMedia(currentProduct);if(inf.editions.length){score+=Math.min(20,inf.editions.length*10);parts.push('edition clues +'+Math.min(20,inf.editions.length*10))}}if(e.roi>=100){score+=15;parts.push('ROI +15')}else if(e.roi>=50){score+=10;parts.push('ROI +10')}else if(e.roi>=25){score+=5;parts.push('ROI +5')}let trend=null;if(h.length>=2){const first=h[0].sold,last=h[h.length-1].sold;if(first>0){trend=((last-first)/first)*100;if(trend>=20)score+=20;else if(trend>=10)score+=12;else if(trend>0)score+=5;else if(trend<=-20)score-=15;else if(trend<0)score-=7;parts.push('trend '+(trend>=0?'+':'')+trend.toFixed(0)+'%')}}return{score:Math.max(0,Math.min(100,Math.round(score))),trend,h,parts}}
+function renderIntel(){const code=clean(barcodeEl.textContent);if(!/^\d{8,14}$/.test(code)){document.getElementById('intel').textContent='Scan an item to begin.';return}const c=collectorScore(),h=c.h;let label=c.score>=75?'🔥 COLLECT / HOLD':c.score>=55?'👀 WATCH':'⚡ FLIP FIRST';let hist=h.length?h.slice().reverse().slice(0,5).map(x=>new Date(x.date).toLocaleDateString('en-GB')+' — £'+(+x.sold).toFixed(2)).join('<br>'):'No saved observations yet.';let trend=c.trend===null?'Not enough history':(c.trend>=0?'+':'')+c.trend.toFixed(1)+'%';document.getElementById('intel').innerHTML='<div class="score">'+c.score+'/100</div><b>'+label+'</b><p>Saved observations: <b>'+h.length+'</b><br>Observed price trend: <b>'+trend+'</b></p><div class="notice">This is an experimental signal, not a guaranteed future-value prediction. It rewards scarcity, special-edition clues, economics and your own recorded price movement.</div><p><b>Recent values</b><br>'+hist+'</p>'}
+const shelfInput=document.getElementById('shelfInput');shelfInput.onchange=e=>{shelfFile=e.target.files&&e.target.files[0];if(!shelfFile)return;const img=document.getElementById('shelfPreview');img.src=URL.createObjectURL(shelfFile);img.classList.remove('hidden');document.getElementById('shelfStatus').textContent='Photo ready.'};
+async function scanShelfPhoto(){const out=document.getElementById('shelfStatus'),q=document.getElementById('shelfQueue');q.innerHTML='';if(!shelfFile){out.textContent='Take or choose a shelf photo first.';return}if(!('BarcodeDetector'in window)){out.textContent='This browser does not expose multi-barcode photo detection. Live barcode scanning still works above.';return}try{out.textContent='Scanning photo for EAN/UPC barcodes…';const formats=await BarcodeDetector.getSupportedFormats();const wanted=['ean_13','ean_8','upc_a','upc_e'].filter(x=>formats.includes(x));const detector=new BarcodeDetector(wanted.length?{formats:wanted}:undefined);const bitmap=await createImageBitmap(shelfFile);const hits=await detector.detect(bitmap);const codes=[...new Set(hits.map(h=>clean(h.rawValue)).filter(x=>/^\d{8,14}$/.test(x)))];if(!codes.length){out.textContent='No clear retail barcodes found. Try a closer, sharper photo with labels facing the camera.';return}out.textContent='✅ Found '+codes.length+' barcode'+(codes.length===1?'':'s')+'. Tap one to identify it.';codes.forEach(code=>{const row=document.createElement('div');row.className='queueItem';row.innerHTML='<b>'+esc(code)+'</b><button class="orange">IDENTIFY</button>';row.querySelector('button').onclick=()=>{barcodeEl.textContent=code;jump('deal');identifyProduct()};q.appendChild(row)})}catch(e){out.textContent='Shelf scan error: '+e.message}}
 window.addEventListener('pagehide',stopCamera);
-</script>
-</body>
-</html>
+</script></body></html>
