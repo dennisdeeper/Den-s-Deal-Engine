@@ -1,37 +1,17 @@
-# Media Flip Scanner V4
+# Media Flip Scanner V5 — Product Identification
 
-This version adds the requested one-tap camera mode.
+Replace your existing GitHub Pages files with:
+- index.html
+- scanner.html
 
-## Main button
+README.md is optional.
 
-Open `index.html` and tap:
+After scanning, V5 attempts product identification using the UPCitemdb free trial lookup endpoint.
 
-**📷 OPEN CAMERA SCANNER**
+It can display title, barcode, brand/publisher, category, model, description, image, inferred PS5/PS4/4K UHD/Blu-ray format, edition clues and region clues.
 
-Inside camera mode, tap:
+The **OPEN eBAY SOLD RESULTS** button opens eBay UK with Sold + Completed filters using the title and barcode.
 
-**📷 SWITCH CAMERA MODE ON**
+Important: the free UPCitemdb service is rate-limited and will not contain every media barcode. When product information is incomplete the app says so instead of inventing an edition.
 
-The scanner then:
-- opens the rear camera
-- continuously scans common retail barcodes
-- stops automatically when it detects one
-- vibrates on supported phones
-- shows the barcode
-- provides a **SCAN NEXT ITEM** button
-- provides £1/£2/£3/£4/£5 quick-buy buttons
-- calculates net profit, ROI and maximum purchase price
-
-## Important hosting note
-
-For iPhone camera access to work reliably, serve the files from an HTTPS website. Opening local HTML files directly on a phone may not grant camera access consistently.
-
-## Current valuation step
-
-The scanner itself is working independently from the resale data source. Enter the eBay SOLD benchmark manually for now.
-
-The next integration is:
-
-BARCODE → exact product identity → SOLD evidence → automated resale benchmark → BUY / WATCH / PASS
-
-That automated SOLD-price step still requires a reliable sold-history source. The scanner deliberately does not substitute active eBay asking prices.
+Static GitHub Pages cannot safely store private eBay API client secrets, so a fully automatic eBay API valuation step should later use a small backend/serverless function.

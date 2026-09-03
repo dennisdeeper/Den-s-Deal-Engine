@@ -4,39 +4,34 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no">
 <meta name="theme-color" content="#000000">
-<title>Media Flip Scanner</title>
+<title>Media Flip Scanner V5</title>
 <script src="https://unpkg.com/@zxing/browser@0.1.5/umd/zxing-browser.min.js"></script>
 <style>
 *{box-sizing:border-box}
 body{margin:0;background:#000;color:#fff;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
-.wrap{max-width:680px;margin:auto;padding:16px}
+.wrap{max-width:700px;margin:auto;padding:16px}
 .top{display:flex;gap:10px;align-items:center;justify-content:space-between}
 h1{font-size:24px;margin:6px 0}
-.card{background:#1c1c1e;border-radius:18px;padding:14px;margin:12px 0}
+.card{background:#1c1c1e;border-radius:18px;padding:15px;margin:12px 0}
 video{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:14px;background:#111}
 button,.btn{border:0;border-radius:14px;padding:15px 16px;font-size:17px;font-weight:800;margin:5px 2px;cursor:pointer}
-.primary{width:100%;background:#0a84ff;color:white}
-.secondary{background:#333;color:white}
-.green{background:#30d158;color:#061b0d}
-.status{color:#aaa;min-height:22px;margin-top:8px}
-.barcode{font-size:27px;font-weight:900;word-break:break-all}
-.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-label{font-size:12px;color:#aaa}
+.primary{width:100%;background:#0a84ff;color:white}.secondary{background:#333;color:white}
+.green{background:#30d158;color:#061b0d;width:100%}.orange{background:#ff9f0a;color:#111;width:100%}
+.status{color:#aaa;min-height:22px;margin-top:8px}.barcode{font-size:27px;font-weight:900;word-break:break-all}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}label{font-size:12px;color:#aaa}
 input{width:100%;margin-top:5px;padding:13px;font-size:21px;border-radius:10px;border:1px solid #444;background:#111;color:#fff}
-.quick{display:grid;grid-template-columns:repeat(5,1fr);gap:7px;margin-top:10px}
-.quick button{padding:13px 2px;background:#2c2c2e;color:#fff}
-.verdict{font-size:27px;font-weight:900;margin-top:15px}
-.buy{color:#30d158}.watch{color:#ffd60a}.pass{color:#ff453a}
-.small{font-size:12px;color:#888;line-height:1.45}
-a{color:#7db7ff}
+.quick{display:grid;grid-template-columns:repeat(5,1fr);gap:7px;margin-top:10px}.quick button{padding:13px 2px;background:#2c2c2e;color:#fff}
+.verdict{font-size:27px;font-weight:900;margin-top:15px}.buy{color:#30d158}.watch{color:#ffd60a}.pass{color:#ff453a}
+.small{font-size:12px;color:#888;line-height:1.45}a{color:#7db7ff}.product-title{font-size:24px;font-weight:900;margin:5px 0}
+.badges{display:flex;gap:7px;flex-wrap:wrap;margin:8px 0}.badge{background:#2c2c2e;padding:7px 10px;border-radius:999px;font-size:13px;font-weight:700}
+.kv{display:grid;grid-template-columns:120px 1fr;gap:7px 10px;margin-top:10px;font-size:14px}.k{color:#999}.v{font-weight:650;word-break:break-word}
+img.product{max-width:180px;max-height:240px;border-radius:12px;margin-top:10px}.hidden{display:none}
+.notice{background:#2a2415;border:1px solid #67541c;padding:10px;border-radius:12px;color:#ffd87a;font-size:13px}
 </style>
 </head>
 <body>
 <div class="wrap">
-<div class="top">
-<h1>📷 Media Flip Scanner</h1>
-<a class="btn secondary" href="index.html">⌂ HOME</a>
-</div>
+<div class="top"><h1>📷 Media Flip Scanner V5</h1><a class="btn secondary" href="index.html">⌂ HOME</a></div>
 
 <div class="card">
 <video id="video" muted playsinline></video>
@@ -48,19 +43,31 @@ a{color:#7db7ff}
 <div class="card">
 <div class="small">BARCODE DETECTED</div>
 <div id="barcode" class="barcode">—</div>
+<button id="identifyBtn" class="orange">🔎 IDENTIFY PRODUCT</button>
 <button id="nextBtn" class="green">SCAN NEXT ITEM</button>
+</div>
+
+<div id="productCard" class="card hidden">
+<div class="small">PRODUCT IDENTIFICATION</div>
+<div id="productTitle" class="product-title">—</div>
+<div id="badges" class="badges"></div>
+<img id="productImage" class="product hidden" alt="Product image">
+<div class="kv">
+<div class="k">Barcode</div><div id="pBarcode" class="v">—</div>
+<div class="k">Brand / publisher</div><div id="pBrand" class="v">—</div>
+<div class="k">Category</div><div id="pCategory" class="v">—</div>
+<div class="k">Model / edition</div><div id="pModel" class="v">—</div>
+<div class="k">Description</div><div id="pDescription" class="v">—</div>
+</div>
+<div id="confidence" class="notice" style="margin-top:12px"></div>
+<button id="ebaySoldBtn" class="primary">🛒 OPEN eBAY SOLD RESULTS</button>
 </div>
 
 <div class="card">
 <div class="small">QUICK BUY PRICE</div>
 <div class="quick">
-<button onclick="setBuy(1)">£1</button>
-<button onclick="setBuy(2)">£2</button>
-<button onclick="setBuy(3)">£3</button>
-<button onclick="setBuy(4)">£4</button>
-<button onclick="setBuy(5)">£5</button>
+<button onclick="setBuy(1)">£1</button><button onclick="setBuy(2)">£2</button><button onclick="setBuy(3)">£3</button><button onclick="setBuy(4)">£4</button><button onclick="setBuy(5)">£5</button>
 </div>
-
 <div class="grid">
 <div><label>YOUR BUY PRICE (£)</label><input id="buy" type="number" step="0.01" value="2.00"></div>
 <div><label>eBay SOLD PRICE (£)</label><input id="sold" type="number" step="0.01" value="0"></div>
@@ -69,99 +76,117 @@ a{color:#7db7ff}
 <div><label>PACKAGING (£)</label><input id="pack" type="number" step="0.05" value="0.30"></div>
 <div><label>PROFIT TARGET (£)</label><input id="target" type="number" step="1" value="7"></div>
 </div>
-
 <button class="primary" onclick="calculate()">💷 CALCULATE FLIP</button>
 <div id="calc"></div>
 </div>
 
-<div class="card">
-<div class="small">
-This camera page is designed to be hosted over HTTPS so iPhone camera permission works reliably. The scanner uses ZXing in-browser, so it does not rely only on the browser's limited BarcodeDetector support.
-</div>
-</div>
+<div class="card"><div class="small">
+Product lookup uses UPCitemdb's free trial lookup service. If the public catalogue does not contain the barcode or is temporarily rate-limited, the app will say so rather than inventing the edition.
+</div></div>
 </div>
 
 <script>
-let controls=null;
-let reader=null;
-let cameraOn=false;
-const video=document.getElementById('video');
-const statusEl=document.getElementById('status');
-const barcodeEl=document.getElementById('barcode');
-const toggleBtn=document.getElementById('cameraToggle');
-
+let controls=null, reader=null, cameraOn=false, currentProduct=null;
+const video=document.getElementById('video'), statusEl=document.getElementById('status'),
+barcodeEl=document.getElementById('barcode'), toggleBtn=document.getElementById('cameraToggle');
+function clean(s){return (s||'').toString().trim();}
+function inferMedia(item){
+ const blob=(clean(item.title)+' '+clean(item.category)+' '+clean(item.description)+' '+clean(item.brand)+' '+clean(item.model)).toLowerCase();
+ let media='Media';
+ if(/\bps5\b|playstation 5/.test(blob)) media='PS5';
+ else if(/\bps4\b|playstation 4/.test(blob)) media='PS4';
+ else if(/4k.*uhd|uhd.*4k|ultra hd/.test(blob)) media='4K UHD';
+ else if(/blu[\s-]?ray/.test(blob)) media='Blu-ray';
+ const editions=[];
+ [['SteelBook',/steel[\s-]?book/],['Collector’s Edition',/collector'?s edition|collectors edition/],['Limited Edition',/limited edition/],['Deluxe Edition',/deluxe edition/],['Day One Edition',/day one edition/],['Special Edition',/special edition/],['Game of the Year',/game of the year|\bgoty\b/],['Director’s Cut',/director'?s cut/],['Extended Edition',/extended edition/],['Box Set',/box set|boxset/]]
+ .forEach(([name,re])=>{if(re.test(blob)) editions.push(name)});
+ let region='Not stated';
+ if(/\bpal\b|region 2|region b|\buk\b/.test(blob)) region='UK / PAL clue';
+ if(/region free/.test(blob)) region='Region Free';
+ return {media,editions,region};
+}
 async function startCamera(){
-  try{
-    statusEl.textContent="Starting rear camera…";
-    if(!window.ZXingBrowser) throw new Error("Scanner library could not load.");
-    reader=new ZXingBrowser.BrowserMultiFormatReader();
-    const devices=await ZXingBrowser.BrowserCodeReader.listVideoInputDevices();
-    let device=devices.find(d=>/back|rear|environment/i.test(d.label)) || devices[devices.length-1];
-    if(!device) throw new Error("No camera found.");
-
-    controls=await reader.decodeFromVideoDevice(device.deviceId, video, (result, error)=>{
-      if(result){
-        const code=result.getText();
-        barcodeEl.textContent=code;
-        statusEl.textContent="✅ Barcode captured";
-        if(navigator.vibrate) navigator.vibrate(120);
-        stopCamera();
-      }
-    });
-    cameraOn=true;
-    toggleBtn.textContent="✅ CAMERA MODE ON";
-    statusEl.textContent="Point the camera at the barcode…";
-  }catch(e){
-    statusEl.textContent="Camera error: "+e.message;
-    cameraOn=false;
-    toggleBtn.textContent="📷 SWITCH CAMERA MODE ON";
-  }
+ try{
+  statusEl.textContent='Starting rear camera…';
+  if(!window.ZXingBrowser) throw new Error('Scanner library could not load.');
+  reader=new ZXingBrowser.BrowserMultiFormatReader();
+  const devices=await ZXingBrowser.BrowserCodeReader.listVideoInputDevices();
+  let device=devices.find(d=>/back|rear|environment/i.test(d.label))||devices[devices.length-1];
+  if(!device) throw new Error('No camera found.');
+  controls=await reader.decodeFromVideoDevice(device.deviceId,video,(result,error)=>{
+   if(result){
+    barcodeEl.textContent=result.getText();
+    statusEl.textContent='✅ Barcode captured — identifying product…';
+    if(navigator.vibrate) navigator.vibrate(120);
+    stopCamera(); identifyProduct();
+   }
+  });
+  cameraOn=true; toggleBtn.textContent='✅ CAMERA MODE ON'; statusEl.textContent='Point the camera at the barcode…';
+ }catch(e){statusEl.textContent='Camera error: '+e.message;cameraOn=false;toggleBtn.textContent='📷 SWITCH CAMERA MODE ON';}
 }
-
 function stopCamera(){
-  if(controls){controls.stop();controls=null;}
-  if(video.srcObject){
-    video.srcObject.getTracks().forEach(t=>t.stop());
-    video.srcObject=null;
-  }
-  cameraOn=false;
-  toggleBtn.textContent="📷 SWITCH CAMERA MODE ON";
+ if(controls){controls.stop();controls=null}
+ if(video.srcObject){video.srcObject.getTracks().forEach(t=>t.stop());video.srcObject=null}
+ cameraOn=false;toggleBtn.textContent='📷 SWITCH CAMERA MODE ON';
 }
+toggleBtn.onclick=()=>cameraOn?stopCamera():startCamera();
+document.getElementById('stopBtn').onclick=stopCamera;
+document.getElementById('nextBtn').onclick=()=>{barcodeEl.textContent='—';currentProduct=null;document.getElementById('productCard').classList.add('hidden');startCamera();};
+document.getElementById('identifyBtn').onclick=identifyProduct;
 
-toggleBtn.addEventListener('click',()=>{ cameraOn ? stopCamera() : startCamera(); });
-document.getElementById('stopBtn').addEventListener('click',stopCamera);
-document.getElementById('nextBtn').addEventListener('click',()=>{
-  barcodeEl.textContent="—";
-  startCamera();
-});
-
-function setBuy(v){
-  document.getElementById('buy').value=v.toFixed(2);
+async function identifyProduct(){
+ const code=clean(barcodeEl.textContent);
+ if(!/^\d{8,14}$/.test(code)){statusEl.textContent='Scan a valid EAN/UPC barcode first.';return;}
+ statusEl.textContent='Looking up exact barcode…';
+ try{
+  const response=await fetch('https://api.upcitemdb.com/prod/trial/lookup?upc='+encodeURIComponent(code),{headers:{'Accept':'application/json'}});
+  if(!response.ok) throw new Error('Lookup service returned '+response.status);
+  const data=await response.json(), item=(data.items||[])[0];
+  if(!item){showUnknown(code);statusEl.textContent='No catalogue match found for this barcode.';return;}
+  currentProduct=item;showProduct(code,item);statusEl.textContent='✅ Product identified';
+ }catch(e){showUnknown(code);statusEl.textContent='Identification unavailable: '+e.message;}
 }
-
+function showUnknown(code){
+ document.getElementById('productCard').classList.remove('hidden');
+ document.getElementById('productTitle').textContent='Unknown product';
+ document.getElementById('pBarcode').textContent=code;
+ document.getElementById('pBrand').textContent='—';document.getElementById('pCategory').textContent='—';document.getElementById('pModel').textContent='—';
+ document.getElementById('pDescription').textContent='No catalogue description returned.';
+ document.getElementById('badges').innerHTML='<span class="badge">Unidentified</span>';
+ document.getElementById('confidence').textContent='The barcode was read correctly, but the public catalogue did not return a match. Do not guess the edition from the barcode alone.';
+ document.getElementById('productImage').classList.add('hidden');
+}
+function showProduct(code,item){
+ const inf=inferMedia(item);
+ document.getElementById('productCard').classList.remove('hidden');
+ document.getElementById('productTitle').textContent=clean(item.title)||'Product found';
+ document.getElementById('pBarcode').textContent=code;
+ document.getElementById('pBrand').textContent=clean(item.brand)||'Not stated';
+ document.getElementById('pCategory').textContent=clean(item.category)||'Not stated';
+ document.getElementById('pModel').textContent=clean(item.model)||(inf.editions.length?inf.editions.join(', '):'Not stated');
+ document.getElementById('pDescription').textContent=clean(item.description)||'Not stated';
+ let badges=[inf.media].concat(inf.editions);if(inf.region!=='Not stated')badges.push(inf.region);
+ document.getElementById('badges').innerHTML=badges.map(x=>'<span class="badge">'+x+'</span>').join('');
+ const image=(item.images||[])[0],img=document.getElementById('productImage');
+ if(image){img.src=image;img.classList.remove('hidden')}else img.classList.add('hidden');
+ let note='Barcode match found. ';
+ if(inf.media==='Media') note+='The catalogue did not clearly state PS4/PS5/Blu-ray/4K, so check the cover before valuing it. ';
+ else note+='Detected format: '+inf.media+'. ';
+ if(inf.editions.length)note+='Edition clues: '+inf.editions.join(', ')+'. ';
+ note+='Always verify SteelBook/collector packaging, region and disc completeness against the item in your hand.';
+ document.getElementById('confidence').textContent=note;
+}
+document.getElementById('ebaySoldBtn').onclick=()=>{
+ const code=clean(barcodeEl.textContent);let q=code;
+ if(currentProduct&&clean(currentProduct.title))q=clean(currentProduct.title)+' '+code;
+ window.open('https://www.ebay.co.uk/sch/i.html?_nkw='+encodeURIComponent(q)+'&LH_Sold=1&LH_Complete=1','_blank');
+};
+function setBuy(v){document.getElementById('buy').value=v.toFixed(2)}
 function calculate(){
-  const buy=+document.getElementById('buy').value||0;
-  const sold=+document.getElementById('sold').value||0;
-  const fee=+document.getElementById('fee').value||0;
-  const post=+document.getElementById('post').value||0;
-  const pack=+document.getElementById('pack').value||0;
-  const target=+document.getElementById('target').value||0;
-
-  const net=sold-(sold*fee/100)-post-pack-buy;
-  const roi=buy ? (net/buy)*100 : 0;
-  const maxBuy=sold-(sold*fee/100)-post-pack-target;
-
-  let cls='pass', verdict='❌ PASS';
-  if(net>=target && roi>=25){cls='buy';verdict='🔥 STRONG BUY';}
-  else if(net>0){cls='watch';verdict='👀 WATCH';}
-
-  document.getElementById('calc').innerHTML=
-    `<div class="verdict ${cls}">${verdict}</div>
-     <p>
-     Estimated net profit: <b>£${net.toFixed(2)}</b><br>
-     ROI: <b>${roi.toFixed(0)}%</b><br>
-     Maximum buy price for a £${target.toFixed(2)} target: <b>£${Math.max(0,maxBuy).toFixed(2)}</b>
-     </p>`;
+ const buy=+document.getElementById('buy').value||0,sold=+document.getElementById('sold').value||0,fee=+document.getElementById('fee').value||0,post=+document.getElementById('post').value||0,pack=+document.getElementById('pack').value||0,target=+document.getElementById('target').value||0;
+ const net=sold-(sold*fee/100)-post-pack-buy,roi=buy?(net/buy)*100:0,maxBuy=sold-(sold*fee/100)-post-pack-target;
+ let cls='pass',verdict='❌ PASS';if(net>=target&&roi>=25){cls='buy';verdict='🔥 STRONG BUY'}else if(net>0){cls='watch';verdict='👀 WATCH'}
+ document.getElementById('calc').innerHTML='<div class="verdict '+cls+'">'+verdict+'</div><p>Estimated net profit: <b>£'+net.toFixed(2)+'</b><br>ROI: <b>'+roi.toFixed(0)+'%</b><br>Maximum buy price for a £'+target.toFixed(2)+' target: <b>£'+Math.max(0,maxBuy).toFixed(2)+'</b></p>';
 }
 window.addEventListener('pagehide',stopCamera);
 </script>
