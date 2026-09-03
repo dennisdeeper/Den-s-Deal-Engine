@@ -25,3 +25,5 @@ Optional for a paid UPCitemdb plan:
 Set `EBAY_MARKETPLACE_ID` to `EBAY_GB` for the UK market.
 
 After deployment, copy the Worker URL (for example `https://dens-deal-engine-api.<account>.workers.dev`) into **Scanner → Identification Connection → Secure Backend URL** and press **SAVE CONNECTION**.
+
+V7.5 also queries the CeX UK product service by barcode and returns current sell/cash/voucher reference prices when available.

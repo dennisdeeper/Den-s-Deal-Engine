@@ -22,12 +22,21 @@ export default {
     const evidence = [];
     let upcItem = null;
     let ebayItem = null;
+    let cexItem = null;
 
     try {
       upcItem = await lookupUpc(barcode, env);
       evidence.push({ source: 'UPCitemdb', ok: !!upcItem });
     } catch (e) {
       evidence.push({ source: 'UPCitemdb', ok: false, error: safeError(e) });
+    }
+
+
+    try {
+      cexItem = await lookupCex(barcode);
+      evidence.push({ source: 'CeX UK', ok: !!cexItem });
+    } catch (e) {
+      evidence.push({ source: 'CeX UK', ok: false, error: safeError(e) });
     }
 
     if (env.EBAY_CLIENT_ID && env.EBAY_CLIENT_SECRET) {
@@ -41,13 +50,13 @@ export default {
       evidence.push({ source: 'eBay Browse', ok: false, error: 'Credentials not configured' });
     }
 
-    const merged = mergeItems(upcItem, ebayItem);
+    const merged = mergeItems(upcItem, ebayItem, cexItem);
     if (!merged) return json({ barcode, item: null, source: null, evidence }, 404);
 
     return json({
       barcode,
       item: merged,
-      source: [upcItem && 'UPCitemdb', ebayItem && 'eBay Browse'].filter(Boolean).join(' + '),
+      source: [cexItem && 'CeX UK', upcItem && 'UPCitemdb', ebayItem && 'eBay Browse'].filter(Boolean).join(' + '),
       evidence
     });
   }
@@ -78,6 +87,31 @@ async function lookupUpc(barcode, env) {
     title: x.title || '', brand: x.brand || '', category: x.category || '', model: x.model || '',
     description: x.description || '', images: Array.isArray(x.images) ? x.images : [],
     sourceUrl: ''
+  };
+}
+
+async function lookupCex(barcode) {
+  const r = await fetch('https://wss2.cex.uk.webuy.io/v3/boxes/' + encodeURIComponent(barcode) + '/detail', { headers: { 'Accept': 'application/json' } });
+  if (!r.ok) throw new Error('CeX lookup HTTP ' + r.status);
+  const d = await r.json();
+  const x = d && d.boxDetails && d.boxDetails[0];
+  if (!x) return null;
+  const urls = x.imageUrls || {};
+  return {
+    title: x.boxName || '',
+    brand: x.publisher || x.manufacturer || '',
+    category: x.categoryName || x.categoryFriendlyName || '',
+    model: x.boxId || barcode,
+    description: [x.categoryFriendlyName, x.superCatFriendlyName].filter(Boolean).join(' · '),
+    images: [],
+    cexReferenceImage: urls.large || urls.medium || urls.small || '',
+    sourceUrl: 'https://uk.webuy.com/product-detail/?id=' + encodeURIComponent(x.boxId || barcode),
+    cex: {
+      sellPrice: Number(x.sellPrice),
+      cashPrice: Number(x.cashPrice),
+      exchangePrice: Number(x.exchangePrice),
+      boxId: x.boxId || barcode
+    }
   };
 }
 
@@ -136,18 +170,21 @@ async function lookupEbay(barcode, env) {
   };
 }
 
-function mergeItems(primary, ebay) {
-  if (!primary && !ebay) return null;
+function mergeItems(primary, ebay, cex) {
+  if (!primary && !ebay && !cex) return null;
   const a = primary || {};
   const b = ebay || {};
+  const c = cex || {};
   return {
-    title: a.title || b.title || '',
-    brand: a.brand || b.brand || '',
-    category: a.category || b.category || '',
-    model: a.model || b.model || '',
-    description: a.description || b.description || '',
+    title: c.title || a.title || b.title || '',
+    brand: a.brand || b.brand || c.brand || '',
+    category: c.category || a.category || b.category || '',
+    model: a.model || b.model || c.model || '',
+    description: a.description || c.description || b.description || '',
     images: [...new Set([...(b.images || []), ...(a.images || [])].filter(Boolean))],
-    sourceUrl: b.sourceUrl || a.sourceUrl || '',
-    activePrice: b.activePrice || null
+    cexReferenceImage: c.cexReferenceImage || '',
+    sourceUrl: b.sourceUrl || c.sourceUrl || a.sourceUrl || '',
+    activePrice: b.activePrice || null,
+    cex: c.cex || null
   };
 }
