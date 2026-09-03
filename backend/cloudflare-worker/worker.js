@@ -181,7 +181,7 @@ function mergeItems(primary, ebay, cex) {
     category: c.category || a.category || b.category || '',
     model: a.model || b.model || c.model || '',
     description: a.description || c.description || b.description || '',
-    images: [...new Set([...(b.images || []), ...(a.images || [])].filter(Boolean))],
+    images: [...new Set([...(b.images || []), ...(a.images || []), c.cexReferenceImage || ''].filter(Boolean))],
     cexReferenceImage: c.cexReferenceImage || '',
     sourceUrl: b.sourceUrl || c.sourceUrl || a.sourceUrl || '',
     activePrice: b.activePrice || null,
