@@ -1,97 +1,3598 @@
 <!doctype html>
-<html lang="en"><head>
-<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no"><meta name="theme-color" content="#03090b">
+<html lang="en">
+
+<head>
+<meta charset="utf-8">
+
+<meta
+  name="viewport"
+  content="width=device-width,initial-scale=1,viewport-fit=cover,user-scalable=no"
+>
+
+<meta name="theme-color" content="#03090b">
+
 <title>Media Deal Engine Scanner</title>
-<script src="https://unpkg.com/@zxing/browser@0.1.5/umd/zxing-browser.min.js">updateBackendStatus();
-</script>
+
+<script src="https://unpkg.com/@zxing/browser@0.1.5/umd/zxing-browser.min.js"></script>
+
 <style>
-:root{--seafoam:#BFE7D3;--ink:#10231d;--muted:#526861;--card:rgba(255,255,255,.74);--line:rgba(16,35,29,.13);--soft:#dff4ea;--buy:#0b6b4b;--watch:#8a6412;--pass:#9b2c2c;--white:#fff}
-*{box-sizing:border-box}
-html{scroll-behavior:smooth}
-body{margin:0;background:var(--seafoam);color:var(--ink);font-family:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;font-weight:400;letter-spacing:-.01em}
-.wrap{max-width:760px;margin:auto;padding:18px 14px 42px}
-.top{display:flex;gap:12px;align-items:flex-start;justify-content:space-between;margin:5px 2px 14px}.eyebrow{font-size:10px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted);margin-bottom:4px}h1{font-size:28px;font-weight:500;letter-spacing:-.04em;margin:0}
-.card{background:var(--card);backdrop-filter:blur(11px);border:1px solid var(--line);border-radius:20px;padding:16px;margin:12px 0;box-shadow:0 10px 30px rgba(16,35,29,.055)}
-video,.shelfPreview{width:100%;aspect-ratio:4/3;object-fit:cover;border-radius:15px;background:#17332a}.scanStage{position:relative;width:100%;aspect-ratio:4/3;border-radius:15px;overflow:hidden;background:#17332a}.scanStage video{position:absolute;inset:0;width:100%;height:100%;border-radius:0}.scanReveal{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:linear-gradient(145deg,#eefaf4,#d6f1e5);opacity:0;pointer-events:none;transition:opacity .18s ease}.scanReveal.show{opacity:1}.scanRevealInner{width:100%;height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:18px;text-align:center}.scanReveal img{max-width:72%;max-height:72%;object-fit:contain;border-radius:12px;background:#fff;box-shadow:0 14px 34px rgba(16,35,29,.13)}.scanRevealTitle{margin-top:11px;font-size:17px;font-weight:650;line-height:1.15}.scanRevealMeta{margin-top:5px;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}.scanSpinner{width:34px;height:34px;border:3px solid rgba(16,35,29,.15);border-top-color:var(--ink);border-radius:50%;animation:spin .7s linear infinite}@keyframes spin{to{transform:rotate(360deg)}}.cexCard{margin-top:12px;padding:13px;border-radius:14px;background:linear-gradient(145deg,rgba(255,255,255,.74),rgba(217,243,231,.9));border:1px solid var(--line)}.cexPrices{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-top:9px}.cexPrice{padding:9px 7px;border-radius:11px;background:rgba(255,255,255,.7);text-align:center}.cexPrice small{display:block;font-size:9px;text-transform:uppercase;letter-spacing:.08em;color:var(--muted)}.cexPrice b{display:block;margin-top:3px;font-size:17px}.cexUpdated{margin-top:7px;font-size:10px;color:var(--muted)}
-button,.btn{border:1px solid var(--line);border-radius:13px;padding:13px 14px;font:inherit;font-size:14px;font-weight:600;letter-spacing:.03em;margin:5px 2px;cursor:pointer;transition:transform .12s ease,opacity .12s ease}button:active,.btn:active{transform:scale(.985)}
-.btn{text-decoration:none;display:inline-block}.primary{width:100%;background:var(--ink);color:#fff;border-color:var(--ink)}.secondary{background:rgba(255,255,255,.54);color:var(--ink)}.homeBtn{padding:10px 12px;font-size:11px;letter-spacing:.12em}.green{background:#d8f4e7;color:#124a39;width:100%}.orange{background:#f2ead3;color:#5c4614;width:100%}.purple{background:#ece5f4;color:#4c3564;width:100%}
-.status{color:var(--muted);min-height:22px;margin-top:8px;font-size:13px}.barcode{font-size:25px;font-weight:500;letter-spacing:.02em;word-break:break-all}.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}label{font-size:10px;color:var(--muted);letter-spacing:.1em;text-transform:uppercase}input,select,textarea{width:100%;margin-top:6px;padding:12px;font:inherit;font-size:16px;border-radius:11px;border:1px solid var(--line);background:rgba(255,255,255,.7);color:var(--ink);outline:none}textarea{min-height:88px;resize:vertical}.quick{display:grid;grid-template-columns:repeat(5,1fr);gap:7px;margin-top:10px}.quick button{padding:11px 2px;background:var(--soft);color:var(--ink)}.verdict{font-size:26px;font-weight:550;letter-spacing:-.03em;margin-top:15px}.buy{color:var(--buy)}.watch{color:var(--watch)}.pass{color:var(--pass)}.small{font-size:12px;color:var(--muted);line-height:1.5}.product-title{font-size:22px;font-weight:550;letter-spacing:-.025em;margin:5px 0}.badges{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}.badge{background:var(--soft);border:1px solid var(--line);padding:6px 9px;border-radius:999px;font-size:11px;font-weight:600;letter-spacing:.03em}.kv{display:grid;grid-template-columns:125px 1fr;gap:7px 10px;margin-top:10px;font-size:13px}.k{color:var(--muted)}.v{font-weight:550;word-break:break-word}img.artStage{margin-top:14px;max-width:290px;background:linear-gradient(145deg,rgba(255,255,255,.88),rgba(237,250,244,.72));border:1px solid rgba(23,75,61,.12);border-radius:18px;padding:14px;box-shadow:0 12px 32px rgba(21,71,58,.08)}.artStage.hidden{display:none}.artMeta{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:10px}.exactBadge{display:inline-flex;align-items:center;gap:6px;padding:5px 8px;border-radius:999px;background:#dff5e9;color:#14563f;border:1px solid #b9e5cf;font-size:10px;font-weight:800;letter-spacing:.05em;text-transform:uppercase}.exactBadge:before{content:'â';font-size:11px}.artSource{font-size:10px;color:var(--muted);text-align:right}.product{display:block;width:100%;height:280px;object-fit:contain;object-position:center;border-radius:12px;background:#fff}.artNote{margin-top:9px;font-size:10px;line-height:1.4;color:var(--muted)}.hidden{display:none}.notice{background:rgba(255,255,255,.46);border:1px solid var(--line);padding:11px;border-radius:12px;color:var(--muted);font-size:12px;line-height:1.45}.score{font-size:40px;font-weight:500;letter-spacing:-.05em}.queueItem{display:flex;justify-content:space-between;gap:8px;align-items:center;background:var(--soft);border:1px solid var(--line);border-radius:12px;padding:9px 10px;margin-top:8px}.queueItem button{font-size:11px;padding:8px 10px}.tabs{position:sticky;top:8px;z-index:5;display:grid;grid-template-columns:repeat(3,1fr);gap:6px;padding:5px;background:rgba(191,231,211,.86);backdrop-filter:blur(12px);border:1px solid var(--line);border-radius:15px}.tabs button{background:rgba(255,255,255,.5);color:var(--ink);font-size:10px;letter-spacing:.12em;padding:10px 5px;margin:0}.sectionTitle{font-weight:600;font-size:16px;letter-spacing:-.015em;margin-bottom:7px}.marketGrid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}.metric{background:var(--soft);border:1px solid var(--line);border-radius:12px;padding:11px}.metric .mLabel{font-size:9px;text-transform:uppercase;letter-spacing:.1em;color:var(--muted)}.metric .mValue{font-size:18px;font-weight:600;margin-top:3px}
-@media(max-width:470px){.grid{grid-template-columns:1fr}.kv{grid-template-columns:105px 1fr}.marketGrid{grid-template-columns:1fr 1fr}.wrap{padding-left:11px;padding-right:11px}}
+
+:root{
+  --bg:#03090b;
+  --bg2:#061014;
+  --panel:rgba(7,19,23,.92);
+  --panel2:rgba(4,13,16,.98);
+  --line:rgba(61,238,224,.18);
+  --teal:#22e0d1;
+  --teal2:#75f3e9;
+  --steel:#d6dfe1;
+  --text:#f4f7f7;
+  --muted:#81969a;
+  --green:#31d887;
+  --amber:#e8ba58;
+  --red:#e87373;
+}
+
+*{
+  box-sizing:border-box;
+}
+
+html{
+  scroll-behavior:smooth;
+}
+
+body{
+  margin:0;
+  min-height:100vh;
+  color:var(--text);
+
+  font-family:
+    Inter,
+    ui-sans-serif,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
+
+  background:
+    radial-gradient(
+      circle at 50% -10%,
+      rgba(20,181,169,.20),
+      transparent 32%
+    ),
+    linear-gradient(
+      180deg,
+      #020708 0%,
+      #061014 56%,
+      #020709 100%
+    );
+}
+
+body:before{
+  content:"";
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  opacity:.12;
+
+  background-image:
+    linear-gradient(
+      rgba(255,255,255,.025) 1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      90deg,
+      rgba(255,255,255,.018) 1px,
+      transparent 1px
+    );
+
+  background-size:42px 42px;
+}
+
+.wrap{
+  position:relative;
+  max-width:760px;
+  margin:auto;
+  padding:12px 11px 80px;
+}
+
+
+/* TOP BAR */
+
+.top{
+  min-height:58px;
+
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+
+  gap:12px;
+
+  border-bottom:1px solid var(--line);
+}
+
+.home{
+  color:#e1e8e9;
+  text-decoration:none;
+
+  font-size:11px;
+  font-weight:700;
+  letter-spacing:.08em;
+}
+
+.brand{
+  text-align:center;
+}
+
+.brand small{
+  display:block;
+
+  color:#81969a;
+
+  font-size:8px;
+  letter-spacing:.19em;
+
+  margin-bottom:3px;
+}
+
+.brand strong{
+  font-size:11px;
+  letter-spacing:.14em;
+  font-weight:600;
+}
+
+.brand strong span{
+  color:var(--teal);
+}
+
+.live{
+  display:flex;
+  align-items:center;
+
+  gap:6px;
+
+  color:#8da2a5;
+
+  font-size:8px;
+  letter-spacing:.1em;
+}
+
+.dot{
+  width:7px;
+  height:7px;
+
+  border-radius:50%;
+
+  background:var(--green);
+
+  box-shadow:
+    0 0 12px rgba(49,216,135,.7);
+}
+
+
+/* HERO */
+
+.hero{
+  text-align:center;
+
+  padding:
+    22px 5px
+    16px;
+}
+
+.hero h1{
+  margin:0;
+
+  font-size:25px;
+  font-weight:300;
+
+  letter-spacing:.06em;
+}
+
+.hero h1 span{
+  color:var(--teal);
+}
+
+.hero p{
+  max-width:520px;
+
+  margin:
+    9px auto
+    0;
+
+  color:#7f9497;
+
+  font-size:12px;
+  line-height:1.55;
+}
+
+
+/* CARDS */
+
+.card{
+  margin:12px 0;
+
+  padding:13px;
+
+  border:1px solid var(--line);
+
+  border-radius:22px;
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(10,28,32,.94),
+      rgba(4,13,16,.98)
+    );
+
+  box-shadow:
+    0 18px 50px
+    rgba(0,0,0,.27);
+}
+
+.sectionTitle{
+  color:#e8eff0;
+
+  font-size:15px;
+  font-weight:600;
+
+  letter-spacing:.02em;
+
+  margin-bottom:10px;
+}
+
+
+/* CAMERA */
+
+.scanStage{
+  position:relative;
+
+  width:100%;
+  aspect-ratio:4/3;
+
+  overflow:hidden;
+
+  border-radius:18px;
+
+  background:#000;
+
+  border:
+    1px solid
+    rgba(61,238,224,.16);
+}
+
+video{
+  position:absolute;
+
+  inset:0;
+
+  width:100%;
+  height:100%;
+
+  object-fit:cover;
+
+  background:#000;
+}
+
+.scanFrame{
+  position:absolute;
+
+  left:8%;
+  right:8%;
+
+  top:35%;
+
+  height:128px;
+
+  z-index:5;
+
+  border:
+    2px solid
+    rgba(34,224,209,.76);
+
+  border-radius:18px;
+
+  box-shadow:
+    0 0 0 999px
+    rgba(0,0,0,.16),
+
+    0 0 24px
+    rgba(34,224,209,.13);
+
+  pointer-events:none;
+}
+
+.laser{
+  position:absolute;
+
+  left:10%;
+  right:10%;
+
+  top:50%;
+
+  z-index:6;
+
+  height:2px;
+
+  background:
+    linear-gradient(
+      90deg,
+      transparent,
+      #ff4545,
+      transparent
+    );
+
+  box-shadow:
+    0 0 12px
+    rgba(255,69,69,.9);
+
+  pointer-events:none;
+}
+
+
+/* REVEAL AFTER SCAN */
+
+.scanReveal{
+  position:absolute;
+
+  inset:0;
+
+  z-index:20;
+
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  opacity:0;
+
+  pointer-events:none;
+
+  transition:
+    opacity .16s ease;
+
+  background:
+    radial-gradient(
+      circle at 50% 35%,
+      rgba(24,110,108,.22),
+      transparent 42%
+    ),
+    linear-gradient(
+      145deg,
+      #071619,
+      #02090b
+    );
+}
+
+.scanReveal.show{
+  opacity:1;
+}
+
+.scanRevealInner{
+  width:100%;
+  height:100%;
+
+  display:flex;
+  flex-direction:column;
+
+  align-items:center;
+  justify-content:center;
+
+  padding:18px;
+
+  text-align:center;
+}
+
+.scanReveal img{
+  display:block;
+
+  max-width:72%;
+  max-height:70%;
+
+  object-fit:contain;
+
+  border-radius:14px;
+
+  background:white;
+
+  box-shadow:
+    0 18px 40px
+    rgba(0,0,0,.45);
+}
+
+.scanRevealTitle{
+  margin-top:12px;
+
+  font-size:17px;
+  font-weight:650;
+
+  line-height:1.2;
+}
+
+.scanRevealMeta{
+  margin-top:5px;
+
+  color:#7d9295;
+
+  font-size:9px;
+  letter-spacing:.11em;
+
+  text-transform:uppercase;
+}
+
+.spinner{
+  width:35px;
+  height:35px;
+
+  border:
+    3px solid
+    rgba(255,255,255,.13);
+
+  border-top-color:
+    var(--teal);
+
+  border-radius:50%;
+
+  animation:
+    spin .7s linear infinite;
+}
+
+@keyframes spin{
+  to{
+    transform:rotate(360deg);
+  }
+}
+
+
+/* STATUS */
+
+.status{
+  min-height:22px;
+
+  margin-top:11px;
+
+  color:#81969a;
+
+  text-align:center;
+
+  font-size:12px;
+  line-height:1.45;
+}
+
+
+/* BUTTONS */
+
+button{
+  min-height:51px;
+
+  border-radius:14px;
+
+  border:
+    1px solid
+    var(--line);
+
+  padding:
+    12px 14px;
+
+  font:inherit;
+
+  font-size:14px;
+  font-weight:750;
+
+  letter-spacing:.04em;
+
+  cursor:pointer;
+}
+
+button:active{
+  transform:scale(.985);
+}
+
+.primary{
+  width:100%;
+
+  color:white;
+
+  background:
+    linear-gradient(
+      135deg,
+      #20d9c9,
+      #147e7a
+    );
+
+  border-color:
+    rgba(54,235,219,.25);
+
+  box-shadow:
+    0 10px 28px
+    rgba(20,160,151,.15);
+}
+
+.secondary{
+  width:100%;
+
+  color:#e4ebec;
+
+  background:
+    rgba(4,15,18,.72);
+}
+
+.buttons{
+  display:grid;
+
+  grid-template-columns:
+    1fr 1fr;
+
+  gap:9px;
+
+  margin-top:10px;
+}
+
+
+/* MANUAL */
+
+.manualRow{
+  display:grid;
+
+  grid-template-columns:
+    1fr auto;
+
+  gap:9px;
+}
+
+input{
+  width:100%;
+
+  min-height:52px;
+
+  padding:
+    12px 14px;
+
+  color:white;
+
+  font:inherit;
+  font-size:16px;
+
+  outline:none;
+
+  border:
+    1px solid
+    rgba(61,238,224,.16);
+
+  border-radius:13px;
+
+  background:#02090b;
+}
+
+input:focus{
+  border-color:
+    rgba(34,224,209,.5);
+
+  box-shadow:
+    0 0 0 3px
+    rgba(34,224,209,.06);
+}
+
+
+/* PRODUCT RESULT */
+
+.hidden{
+  display:none !important;
+}
+
+.productLayout{
+  display:grid;
+
+  grid-template-columns:
+    150px 1fr;
+
+  gap:15px;
+}
+
+.artBox{
+  min-height:205px;
+
+  position:relative;
+
+  display:grid;
+  place-items:center;
+
+  overflow:hidden;
+
+  border-radius:16px;
+
+  border:
+    1px solid
+    rgba(61,238,224,.14);
+
+  background:
+    linear-gradient(
+      145deg,
+      rgba(255,255,255,.96),
+      rgba(230,242,242,.94)
+    );
+}
+
+.artBox img{
+  display:block;
+
+  width:100%;
+  height:100%;
+
+  min-height:205px;
+
+  max-height:260px;
+
+  object-fit:contain;
+
+  background:#fff;
+}
+
+.artFallback{
+  padding:15px;
+
+  color:#65787b;
+
+  text-align:center;
+
+  font-size:10px;
+
+  line-height:1.45;
+}
+
+.productTitle{
+  margin:
+    2px 0
+    7px;
+
+  color:#f3f6f6;
+
+  font-size:21px;
+  font-weight:700;
+
+  line-height:1.25;
+}
+
+.productMeta{
+  color:#7d9295;
+
+  font-size:11px;
+  line-height:1.6;
+}
+
+.badges{
+  display:flex;
+
+  flex-wrap:wrap;
+
+  gap:6px;
+
+  margin-top:10px;
+}
+
+.badge{
+  padding:
+    6px 8px;
+
+  border:
+    1px solid
+    var(--line);
+
+  border-radius:999px;
+
+  color:#b7c9cb;
+
+  background:
+    rgba(34,224,209,.06);
+
+  font-size:9px;
+  font-weight:700;
+
+  letter-spacing:.04em;
+}
+
+.good{
+  color:#80efbb;
+
+  border-color:
+    rgba(49,216,135,.28);
+
+  background:
+    rgba(49,216,135,.08);
+}
+
+.warn{
+  color:#f0cf87;
+
+  border-color:
+    rgba(232,186,88,.28);
+
+  background:
+    rgba(232,186,88,.08);
+}
+
+
+/* PRODUCT DETAILS */
+
+.details{
+  display:grid;
+
+  grid-template-columns:
+    120px 1fr;
+
+  gap:
+    7px 10px;
+
+  margin-top:15px;
+
+  font-size:12px;
+}
+
+.k{
+  color:#647b7e;
+}
+
+.v{
+  color:#e1e8e9;
+
+  font-weight:550;
+
+  word-break:
+    break-word;
+}
+
+
+/* METRICS */
+
+.metrics{
+  display:grid;
+
+  grid-template-columns:
+    repeat(3,1fr);
+
+  gap:7px;
+
+  margin-top:13px;
+}
+
+.metric{
+  padding:10px;
+
+  border:
+    1px solid
+    rgba(61,238,224,.10);
+
+  border-radius:12px;
+
+  background:
+    rgba(3,12,15,.76);
+}
+
+.metric small{
+  display:block;
+
+  color:#5f7679;
+
+  font-size:8px;
+
+  letter-spacing:.08em;
+
+  text-transform:uppercase;
+}
+
+.metric strong{
+  display:block;
+
+  margin-top:4px;
+
+  font-size:15px;
+}
+
+
+/* ARTWORK INFORMATION */
+
+.artInfo{
+  margin-top:12px;
+
+  padding:10px;
+
+  color:#73898c;
+
+  font-size:10px;
+  line-height:1.45;
+
+  border:
+    1px solid
+    rgba(61,238,224,.09);
+
+  border-radius:11px;
+
+  background:
+    rgba(255,255,255,.018);
+}
+
+
+/* CEX */
+
+.cex{
+  margin-top:13px;
+
+  padding:12px;
+
+  border:
+    1px solid
+    rgba(61,238,224,.12);
+
+  border-radius:14px;
+
+  background:
+    rgba(14,48,51,.22);
+}
+
+.cexTitle{
+  color:#7b9295;
+
+  font-size:9px;
+
+  letter-spacing:.1em;
+}
+
+.cexPrices{
+  display:grid;
+
+  grid-template-columns:
+    repeat(3,1fr);
+
+  gap:7px;
+
+  margin-top:9px;
+}
+
+.cexPrice{
+  padding:9px;
+
+  text-align:center;
+
+  border-radius:10px;
+
+  background:
+    rgba(2,10,12,.55);
+}
+
+.cexPrice small{
+  display:block;
+
+  color:#607679;
+
+  font-size:8px;
+
+  text-transform:uppercase;
+}
+
+.cexPrice b{
+  display:block;
+
+  margin-top:3px;
+
+  font-size:16px;
+}
+
+
+/* FOOTER */
+
+.footer{
+  margin-top:22px;
+
+  text-align:center;
+
+  color:#4c6265;
+
+  font-size:8px;
+
+  letter-spacing:.16em;
+
+  text-transform:uppercase;
+}
+
+
+/* MOBILE */
+
+@media(max-width:520px){
+
+  .wrap{
+    padding:
+      7px 8px
+      80px;
+  }
+
+  .scanStage{
+    aspect-ratio:
+      3/4;
+  }
+
+  .buttons{
+    grid-template-columns:
+      1fr;
+  }
+
+  .manualRow{
+    grid-template-columns:
+      1fr;
+  }
+
+  .productLayout{
+    grid-template-columns:
+      1fr 1.45fr;
+  }
+
+  .artBox{
+    min-height:185px;
+  }
+
+  .artBox img{
+    min-height:185px;
+  }
+
+  .details{
+    grid-template-columns:
+      95px 1fr;
+  }
+
+}
+
 </style>
-<style id="media-deal-engine-theme">
-:root{--seafoam:#03090b;--ink:#f4f7f7;--muted:#81969a;--card:rgba(7,19,23,.88);--line:rgba(61,238,224,.18);--soft:rgba(18,61,64,.32);--buy:#31d887;--watch:#e8ba58;--pass:#e87373;--white:#fff;--teal:#22e0d1;--steel:#cbd6d8}
-body{background:radial-gradient(circle at 50% -10%,rgba(20,181,169,.20),transparent 32%),linear-gradient(180deg,#020708 0%,#061014 56%,#020709 100%);color:var(--ink);letter-spacing:0}
-body:before{content:"";position:fixed;inset:0;pointer-events:none;opacity:.13;background-image:linear-gradient(rgba(255,255,255,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.018) 1px,transparent 1px);background-size:42px 42px}
-.wrap{position:relative;max-width:760px;padding:14px 12px 52px}
-.brandTop{align-items:center;margin:3px 2px 15px}.brandHome{display:flex;align-items:center;gap:11px;text-decoration:none;color:var(--ink)}.brandMark{position:relative;width:44px;height:44px;border:1px solid rgba(65,238,224,.32);border-radius:12px;background:linear-gradient(145deg,rgba(214,226,228,.17),rgba(15,136,131,.18));box-shadow:inset 0 1px rgba(255,255,255,.08),0 0 25px rgba(34,224,209,.10);display:grid;place-items:center}.markArrow{font-size:25px;line-height:1;color:var(--teal);text-shadow:0 0 14px rgba(34,224,209,.35)}.brandText{display:flex;flex-direction:column;gap:3px}.brandText .eyebrow{margin:0;color:#97aaad;letter-spacing:.2em}.brandText strong{font-size:13px;font-weight:520;letter-spacing:.12em}.brandText em{font-style:normal;color:var(--teal)}.livePill{display:flex;align-items:center;gap:7px;padding:7px 9px;border:1px solid var(--line);border-radius:999px;color:#93a7aa;font-size:8px;letter-spacing:.12em;background:rgba(5,15,18,.75)}.liveDot{width:7px;height:7px;border-radius:50%;background:var(--buy);box-shadow:0 0 11px rgba(49,216,135,.65)}
-.card{background:linear-gradient(145deg,rgba(10,28,32,.94),rgba(4,13,16,.97));border:1px solid var(--line);box-shadow:0 18px 50px rgba(0,0,0,.26),inset 0 1px rgba(255,255,255,.025);backdrop-filter:blur(12px)}
-.tabs{top:7px;background:rgba(4,14,17,.88);border-color:var(--line);box-shadow:0 10px 35px rgba(0,0,0,.24)}.tabs button{background:rgba(255,255,255,.025);color:#9eb1b4;border-color:rgba(61,238,224,.10)}.tabs button:active{background:rgba(34,224,209,.10);color:var(--teal)}
-.sectionTitle{color:#e9f1f2;letter-spacing:.02em;font-weight:550}.small,.k,label,.status,.artSource,.artNote,.cexUpdated{color:var(--muted)}
-.scanStage,video,.shelfPreview{background:#000;border:1px solid rgba(63,238,224,.14)}.scanStage:before{content:"";position:absolute;z-index:3;pointer-events:none;left:9%;right:9%;top:36%;height:30%;border:2px solid rgba(34,224,209,.78);border-radius:17px;box-shadow:0 0 24px rgba(34,224,209,.12)}.scanStage:after{content:"";position:absolute;z-index:4;pointer-events:none;left:12%;right:12%;top:51%;height:2px;background:linear-gradient(90deg,transparent,#ff4040,transparent);box-shadow:0 0 10px rgba(255,64,64,.9)}
-.scanReveal{z-index:6;background:radial-gradient(circle at 50% 30%,rgba(26,128,122,.25),transparent 38%),linear-gradient(145deg,#061317,#02090b)}.scanReveal img{background:#fff;box-shadow:0 14px 38px rgba(0,0,0,.42)}.scanRevealTitle{color:#f3f7f7}.scanRevealMeta{color:var(--teal)}.scanSpinner{border-color:rgba(255,255,255,.12);border-top-color:var(--teal)}
-button,.btn{border-color:var(--line);color:#dfe9ea;background:#071317}.primary{background:linear-gradient(135deg,#20d9c9,#147e7a);color:#fff;border-color:rgba(70,239,224,.32);box-shadow:0 8px 22px rgba(16,134,128,.16)}.secondary{background:#061216;color:#dce7e8}.green{background:rgba(49,216,135,.10);color:#83f3bf;border-color:rgba(49,216,135,.25)}.orange{background:rgba(232,186,88,.10);color:#f0cf86;border-color:rgba(232,186,88,.25)}.purple{background:rgba(163,131,211,.11);color:#cab7ed;border-color:rgba(163,131,211,.24)}
-input,select,textarea{background:#02090b;color:#f4f7f7;border-color:rgba(61,238,224,.16)}input:focus,select:focus,textarea:focus{border-color:rgba(61,238,224,.50);box-shadow:0 0 0 3px rgba(34,224,209,.06)}
-.quick button,.metric,.queueItem{background:#061216;color:#dce7e8;border-color:rgba(61,238,224,.12)}.badge{background:rgba(34,224,209,.07);border-color:rgba(61,238,224,.17);color:#b9cccf}.exactBadge{background:rgba(49,216,135,.10);color:#8df2c2;border-color:rgba(49,216,135,.25)}
-.notice{background:rgba(255,255,255,.025);border-color:rgba(61,238,224,.12);color:#91a5a8}.cexCard{background:linear-gradient(145deg,rgba(12,35,38,.9),rgba(5,18,21,.96));border-color:rgba(61,238,224,.14)}.cexPrice{background:rgba(255,255,255,.035)}.artStage{background:linear-gradient(145deg,rgba(255,255,255,.08),rgba(18,65,66,.18))!important;border-color:rgba(61,238,224,.14)!important;box-shadow:0 14px 35px rgba(0,0,0,.25)!important}
-.product-title{color:#f3f7f7}.barcode{color:var(--teal)}.metric .mLabel{color:#6f8588}.metric .mValue{color:#eef4f4}.buy{color:var(--buy)}.watch{color:var(--watch)}.pass{color:var(--pass)}
-@media(max-width:470px){.brandText strong{font-size:11px;letter-spacing:.09em}.livePill{font-size:7px;padding:6px 7px}.scanStage{aspect-ratio:3/4}.scanStage video{object-fit:cover}}
-</style>
-</head><body><div class="wrap">
-<div class="top brandTop"><div class="brandBlock"><a class="brandHome" href="index.html"><span class="brandMark"><span class="markArrow">â</span></span><span class="brandText"><span class="eyebrow">MEDIA DEAL ENGINE</span><strong>SCAN. <em>IDENTIFY.</em> PROFIT.</strong></span></a></div><div class="livePill"><span class="liveDot"></span>LIVE RESOLVER</div></div>
-<div class="tabs"><button onclick="jump('deal')">DEAL</button><button onclick="jump('collector')">COLLECT</button><button onclick="jump('shelf')">SHELF</button></div>
+</head>
 
-<div id="deal" class="card"><div class="sectionTitle">Media Deal Engine Scanner</div><div class="scanStage"><video id="video" muted playsinline></video><div id="scanReveal" class="scanReveal"><div class="scanRevealInner"><div id="scanSpinner" class="scanSpinner"></div><img id="scanRevealImage" class="hidden" alt="Identified product artwork"><div id="scanRevealTitle" class="scanRevealTitle">Identifying productâ¦</div><div id="scanRevealMeta" class="scanRevealMeta">Barcode locked</div></div></div></div><div id="status" class="status">Camera is off.</div><button id="cameraToggle" class="primary">START CAMERA</button><button id="stopBtn" class="secondary">STOP CAMERA</button></div>
-<div class="card"><div class="small">BARCODE DETECTED</div><div id="barcode" class="barcode">â</div><button id="identifyBtn" class="orange">IDENTIFY PRODUCT</button><button id="nextBtn" class="green">SCAN NEXT ITEM</button></div>
-<div id="productCard" class="card hidden"><div class="small">PRODUCT IDENTIFICATION</div><div id="productTitle" class="product-title">â</div><div id="badges" class="badges"></div><div id="artStage" class="artStage hidden"><div class="artMeta"><span class="exactBadge">Exact barcode artwork</span><span id="artSource" class="artSource"></span></div><img id="productImage" class="product" alt="Exact product artwork"><div id="artNote" class="artNote">Artwork supplied by the exact barcode-matched catalogue/listing. Always verify region, edition and packaging before buying.</div></div><div class="kv"><div class="k">Barcode</div><div id="pBarcode" class="v">â</div><div class="k">Brand / publisher</div><div id="pBrand" class="v">â</div><div class="k">Category</div><div id="pCategory" class="v">â</div><div class="k">Model / edition</div><div id="pModel" class="v">â</div><div class="k">Description</div><div id="pDescription" class="v">â</div></div><div id="confidence" class="notice" style="margin-top:12px"></div><div id="cexCard" class="cexCard hidden"><div class="small">CeX UK Â· CURRENT MARKET REFERENCE</div><div class="cexPrices"><div class="cexPrice"><small>WeSell</small><b id="cexSell">â</b></div><div class="cexPrice"><small>Cash</small><b id="cexCash">â</b></div><div class="cexPrice"><small>Voucher</small><b id="cexVoucher">â</b></div></div><div id="cexUpdated" class="cexUpdated"></div></div><button id="ebaySoldBtn" class="primary">OPEN eBAY SOLD RESULTS</button></div>
-<div class="card"><div class="small">QUICK BUY PRICE</div><div class="quick"><button onclick="setBuy(1)">Â£1</button><button onclick="setBuy(2)">Â£2</button><button onclick="setBuy(3)">Â£3</button><button onclick="setBuy(4)">Â£4</button><button onclick="setBuy(5)">Â£5</button></div><div class="grid"><div><label>YOUR BUY PRICE (Â£)</label><input id="buy" type="number" step="0.01" value="2.00"></div><div><label>eBay SOLD PRICE (Â£)</label><input id="sold" type="number" step="0.01" value="0"></div><div><label>eBay FEE (%)</label><input id="fee" type="number" step="0.5" value="13"></div><div><label>POSTAGE (Â£)</label><input id="post" type="number" step="0.10" value="2.00"></div><div><label>PACKAGING (Â£)</label><input id="pack" type="number" step="0.05" value="0.30"></div><div><label>PROFIT TARGET (Â£)</label><input id="target" type="number" step="1" value="7"></div></div><button class="primary" onclick="calculate()">CALCULATE DEAL</button><div id="calc"></div></div>
 
-<div id="market" class="card"><div class="sectionTitle">Market Radar Â· V7</div><p class="small">Paste a handful of realistic recent sold prices, separated by commas or spaces. V7.5 calculates a median and can push it straight into the deal calculator.</p><label>RECENT SOLD PRICES (Â£)</label><textarea id="marketPrices" placeholder="14.99, 17.50, 18, 21.99, 16.25"></textarea><button class="primary" onclick="analyseMarket()">ANALYSE MARKET</button><div id="marketResult" class="small" style="margin-top:10px">No market sample yet.</div></div>
+<body>
 
-<div id="collector" class="card"><div class="sectionTitle">Collector Intelligence</div><p class="small">After checking eBay SOLD results, enter a realistic sold value above and save it. Repeat observations for the same barcode build your own price history on this device.</p><div class="grid"><div><label>SCARCITY / AVAILABILITY</label><select id="scarcity"><option value="0">Common / unknown</option><option value="1">Less common</option><option value="2">Hard to find</option><option value="3">Very scarce</option></select></div><div><label>CONDITION</label><select id="condition"><option value="0">Used / average</option><option value="1">Very good</option><option value="2">Mint / sealed</option></select></div></div><button class="purple" onclick="saveObservation()">SAVE PRICE OBSERVATION</button><div id="intel" class="small" style="margin-top:12px">Scan an item to begin.</div></div>
+<div class="wrap">
 
-<div id="shelf" class="card"><div class="sectionTitle">Shelf Scan Â· Beta</div><p class="small">Take a clear shelf photo with several visible barcodes. This beta uses your browser's multi-barcode detector where available.</p><input id="shelfInput" type="file" accept="image/*" capture="environment"><img id="shelfPreview" class="shelfPreview hidden" alt="Shelf photo"><button class="primary" onclick="scanShelfPhoto()">FIND BARCODES IN PHOTO</button><div id="shelfStatus" class="status"></div><div id="shelfQueue"></div></div>
-<div class="card"><div class="sectionTitle">Identification Connection Â· V7.5</div><p class="small">V7.5 prioritises exact barcode matches and verified artwork. It tries a secure Deal Engine backend first (when connected), then public catalogue fallbacks. Your eBay secret must never be placed in this GitHub Pages file.</p><label>SECURE BACKEND URL (OPTIONAL)</label><input id="backendUrl" inputmode="url" placeholder="https://your-worker.workers.dev"><button class="secondary" onclick="saveBackend()">SAVE CONNECTION</button><div id="backendStatus" class="small" style="margin-top:8px">Public fallback mode is active.</div></div>
+
+<header class="top">
+
+<a
+  href="index.html"
+  class="home">
+  ← HOME
+</a>
+
+<div class="brand">
+
+  <small>
+    MEDIA DEAL ENGINE
+  </small>
+
+  <strong>
+    SCAN.
+    <span>
+      IDENTIFY.
+    </span>
+    PROFIT.
+  </strong>
+
 </div>
+
+<div class="live">
+  <span class="dot"></span>
+  LIVE
+</div>
+
+</header>
+
+
+<section class="hero">
+
+<h1>
+  MEDIA
+  <span>
+    DEAL
+  </span>
+  ENGINE
+</h1>
+
+<p>
+  Scan a physical media barcode and identify
+  the exact product using the live Deal Engine resolver.
+</p>
+
+</section>
+
+
+<section class="card">
+
+<div class="sectionTitle">
+  Product Scanner
+</div>
+
+
+<div class="scanStage">
+
+<video
+  id="video"
+  muted
+  playsinline>
+</video>
+
+
+<div class="scanFrame"></div>
+
+<div class="laser"></div>
+
+
+<div
+  id="scanReveal"
+  class="scanReveal">
+
+  <div class="scanRevealInner">
+
+    <div
+      id="scanSpinner"
+      class="spinner hidden">
+    </div>
+
+    <img
+      id="scanRevealImage"
+      class="hidden"
+      alt="Identified product artwork"
+    >
+
+    <div
+      id="scanRevealTitle"
+      class="scanRevealTitle">
+      Identifying product…
+    </div>
+
+    <div
+      id="scanRevealMeta"
+      class="scanRevealMeta">
+      Barcode locked
+    </div>
+
+  </div>
+
+</div>
+
+</div>
+
+
+<div
+  id="status"
+  class="status">
+  Camera is off.
+</div>
+
+
+<div class="buttons">
+
+<button
+  id="cameraToggle"
+  class="primary">
+  START CAMERA
+</button>
+
+<button
+  id="stopBtn"
+  class="secondary">
+  STOP CAMERA
+</button>
+
+</div>
+
+</section>
+
+
+
+<section class="card">
+
+<div class="sectionTitle">
+  Manual Barcode
+</div>
+
+<div class="manualRow">
+
+<input
+  id="manualBarcode"
+  inputmode="numeric"
+  autocomplete="off"
+  placeholder="EAN / UPC barcode"
+>
+
+<button
+  id="manualIdentify"
+  class="primary">
+  IDENTIFY
+</button>
+
+</div>
+
+</section>
+
+
+
+<section
+  id="productCard"
+  class="card hidden">
+
+
+<div class="productLayout">
+
+
+<div
+  id="artBox"
+  class="artBox">
+
+  <div
+    id="artFallback"
+    class="artFallback">
+    PRODUCT ARTWORK
+  </div>
+
+  <img
+    id="productImage"
+    class="hidden"
+    alt="Exact product artwork"
+  >
+
+</div>
+
+
+<div>
+
+<div
+  id="productTitle"
+  class="productTitle">
+  —
+</div>
+
+
+<div
+  id="productMeta"
+  class="productMeta">
+</div>
+
+
+<div
+  id="badges"
+  class="badges">
+</div>
+
+</div>
+
+</div>
+
+
+
+<div class="metrics">
+
+<div class="metric">
+
+<small>
+  Identity
+</small>
+
+<strong id="confidence">
+  —
+</strong>
+
+</div>
+
+
+<div class="metric">
+
+<small>
+  Artwork
+</small>
+
+<strong id="artConfidence">
+  —
+</strong>
+
+</div>
+
+
+<div class="metric">
+
+<small>
+  Decision
+</small>
+
+<strong id="decision">
+  —
+</strong>
+
+</div>
+
+</div>
+
+
+
+<div class="details">
+
+<div class="k">
+  Barcode
+</div>
+
+<div
+  id="pBarcode"
+  class="v">
+  —
+</div>
+
+
+<div class="k">
+  Platform
+</div>
+
+<div
+  id="pPlatform"
+  class="v">
+  —
+</div>
+
+
+<div class="k">
+  Publisher
+</div>
+
+<div
+  id="pBrand"
+  class="v">
+  —
+</div>
+
+
+<div class="k">
+  Category
+</div>
+
+<div
+  id="pCategory"
+  class="v">
+  —
+</div>
+
+
+<div class="k">
+  Model / edition
+</div>
+
+<div
+  id="pModel"
+  class="v">
+  —
+</div>
+
+</div>
+
+
+
+<div
+  id="artInfo"
+  class="artInfo">
+</div>
+
+
+
+<div
+  id="cexBox"
+  class="cex hidden">
+
+<div class="cexTitle">
+  CEX UK · MARKET REFERENCE
+</div>
+
+
+<div class="cexPrices">
+
+<div class="cexPrice">
+
+<small>
+  WeSell
+</small>
+
+<b id="cexSell">
+  —
+</b>
+
+</div>
+
+
+<div class="cexPrice">
+
+<small>
+  Cash
+</small>
+
+<b id="cexCash">
+  —
+</b>
+
+</div>
+
+
+<div class="cexPrice">
+
+<small>
+  Voucher
+</small>
+
+<b id="cexVoucher">
+  —
+</b>
+
+</div>
+
+</div>
+
+</div>
+
+
+<button
+  id="nextBtn"
+  class="secondary"
+  style="margin-top:13px">
+  SCAN ANOTHER PRODUCT
+</button>
+
+
+</section>
+
+
+
+<div class="footer">
+  Media Deal Engine · Live Resolver
+</div>
+
+
+</div>
+
+
+
 <script>
-let controls=null,reader=null,cameraOn=false,currentProduct=null,shelfFile=null,productImageCandidates=[],productImageIndex=0;
-const video=document.getElementById('video'),statusEl=document.getElementById('status'),barcodeEl=document.getElementById('barcode'),toggleBtn=document.getElementById('cameraToggle');
-function clean(s){return(s||'').toString().trim()} function esc(s){return clean(s).replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[m]))} function jump(id){document.getElementById(id).scrollIntoView({behavior:'smooth'})}
-function inferMedia(item){const blob=(clean(item.title)+' '+clean(item.category)+' '+clean(item.description)+' '+clean(item.brand)+' '+clean(item.model)).toLowerCase();let media='Media';if(/\bps5\b|playstation 5/.test(blob))media='PS5';else if(/\bps4\b|playstation 4/.test(blob))media='PS4';else if(/\bps3\b|playstation 3/.test(blob))media='PS3';else if(/xbox series/.test(blob))media='Xbox Series';else if(/xbox one/.test(blob))media='Xbox One';else if(/nintendo switch/.test(blob))media='Nintendo Switch';else if(/4k.*uhd|uhd.*4k|ultra hd/.test(blob))media='4K UHD';else if(/blu[\s-]?ray/.test(blob))media='Blu-ray';else if(/\bdvd\b/.test(blob))media='DVD';else if(/compact disc|audio cd|\bcd\b/.test(blob))media='CD';else if(/vinyl|lp record/.test(blob))media='Vinyl';else if(/book|paperback|hardcover/.test(blob))media='Book';const editions=[];[['SteelBook',/steel[\s-]?book/],['Collectorâs Edition',/collector'?s edition|collectors edition/],['Limited Edition',/limited edition/],['Deluxe Edition',/deluxe edition/],['Day One Edition',/day one edition/],['Special Edition',/special edition/],['Game of the Year',/game of the year|\bgoty\b/],['Directorâs Cut',/director'?s cut/],['Extended Edition',/extended edition/],['Box Set',/box set|boxset/],['Anniversary',/anniversary/],['Criterion',/criterion/]].forEach(([name,re])=>{if(re.test(blob))editions.push(name)});let region='Not stated';if(/\bpal\b|region 2|region b|\buk\b/.test(blob))region='UK / PAL clue';if(/region free/.test(blob))region='Region Free';return{media,editions,region}}
-function resetScanReveal(){const r=document.getElementById('scanReveal'),img=document.getElementById('scanRevealImage'),sp=document.getElementById('scanSpinner');r.classList.remove('show');img.classList.add('hidden');img.removeAttribute('src');sp.classList.add('hidden');document.getElementById('scanRevealTitle').textContent='Identifying productâ¦';document.getElementById('scanRevealMeta').textContent='Barcode locked'}
-function showScanLoading(code){const r=document.getElementById('scanReveal'),img=document.getElementById('scanRevealImage'),sp=document.getElementById('scanSpinner');r.classList.add('show');img.classList.add('hidden');sp.classList.remove('hidden');document.getElementById('scanRevealTitle').textContent='Identifying productâ¦';document.getElementById('scanRevealMeta').textContent='Barcode '+code}
-function showScanArtwork(item){const r=document.getElementById('scanReveal'),img=document.getElementById('scanRevealImage'),sp=document.getElementById('scanSpinner'),cands=artworkCandidates(item);r.classList.add('show');sp.classList.add('hidden');document.getElementById('scanRevealTitle').textContent=clean(item.title)||'Product identified';document.getElementById('scanRevealMeta').textContent=(item.source||'Exact barcode match');if(!cands.length){img.classList.add('hidden');return}let i=0;const next=()=>{if(i>=cands.length){img.classList.add('hidden');return}img.src=cands[i++];img.classList.remove('hidden')};img.onerror=next;next()}
-function showScanUnresolved(code){const r=document.getElementById('scanReveal'),img=document.getElementById('scanRevealImage'),sp=document.getElementById('scanSpinner');r.classList.add('show');img.classList.add('hidden');sp.classList.add('hidden');document.getElementById('scanRevealTitle').textContent='Barcode recognised';document.getElementById('scanRevealMeta').textContent=code+' Â· exact product not yet identified'}
-function money(v){return Number.isFinite(Number(v))?'Â£'+Number(v).toFixed(2):'â'}
-function renderCex(item){const c=document.getElementById('cexCard'),d=item&&item.cex;if(!d){c.classList.add('hidden');return}c.classList.remove('hidden');document.getElementById('cexSell').textContent=money(d.sellPrice);document.getElementById('cexCash').textContent=money(d.cashPrice);document.getElementById('cexVoucher').textContent=money(d.exchangePrice);document.getElementById('cexUpdated').textContent='Live CeX reference checked '+new Date().toLocaleTimeString('en-GB',{hour:'2-digit',minute:'2-digit'})+'. Prices can change without notice.'}
-async function startCamera(){try{resetScanReveal();statusEl.textContent='Starting rear cameraâ¦';if(!window.ZXingBrowser)throw new Error('Scanner library could not load.');reader=new ZXingBrowser.BrowserMultiFormatReader();const devices=await ZXingBrowser.BrowserCodeReader.listVideoInputDevices();let device=devices.find(d=>/back|rear|environment/i.test(d.label))||devices[devices.length-1];if(!device)throw new Error('No camera found.');controls=await reader.decodeFromVideoDevice(device.deviceId,video,(result)=>{if(result){barcodeEl.textContent=result.getText();statusEl.textContent='Barcode captured â identifying productâ¦';if(navigator.vibrate)navigator.vibrate(120);showScanLoading(result.getText());stopCamera();identifyProduct()}});cameraOn=true;toggleBtn.textContent='CAMERA ON';statusEl.textContent='Point the camera at the barcodeâ¦'}catch(e){statusEl.textContent='Camera error: '+e.message;cameraOn=false;toggleBtn.textContent='START CAMERA'}}
-function stopCamera(){if(controls){controls.stop();controls=null}if(video.srcObject){video.srcObject.getTracks().forEach(t=>t.stop());video.srcObject=null}cameraOn=false;toggleBtn.textContent='START CAMERA'}
-toggleBtn.onclick=()=>cameraOn?stopCamera():startCamera();document.getElementById('stopBtn').onclick=stopCamera;document.getElementById('nextBtn').onclick=()=>{barcodeEl.textContent='â';currentProduct=null;resetScanReveal();document.getElementById('productCard').classList.add('hidden');document.getElementById('intel').textContent='Scan an item to begin.';startCamera()};document.getElementById('identifyBtn').onclick=identifyProduct;
-async function fetchJsonTimeout(url,options={},ms=6500){const c=new AbortController(),t=setTimeout(()=>c.abort(),ms);try{const r=await fetch(url,{...options,signal:c.signal});if(!r.ok)throw new Error('HTTP '+r.status);return await r.json()}finally{clearTimeout(t)}}
-function backendBase(){return (localStorage.getItem('dens_backend_url')||'https://deal-engine-api.dennis-deeper.workers.dev').trim().replace(/\/$/,'')}
-function saveBackend(){const el=document.getElementById('backendUrl'),v=(el.value||'').trim().replace(/\/$/,'');if(v&&!/^https:\/\//i.test(v)){document.getElementById('backendStatus').textContent='Use an https:// backend address.';return}if(v)localStorage.setItem('dens_backend_url',v);else localStorage.removeItem('dens_backend_url');updateBackendStatus()}
-function updateBackendStatus(){const v=backendBase(),el=document.getElementById('backendStatus'),inp=document.getElementById('backendUrl');if(inp)inp.value=v;if(el)el.textContent=v?'Secure backend connected: '+v:'Public fallback mode is active. Exact artwork is not guaranteed until the secure backend is connected. V7.7 proxies exact artwork through the backend so images display reliably on GitHub Pages.'}
-function normItem(x,source){if(!x)return null;return{title:clean(x.title),brand:clean(x.brand||x.publisher||x.artist),category:clean(x.category),model:clean(x.model||x.edition),description:clean(x.description),images:Array.isArray(x.images)?x.images.filter(Boolean):x.image?[x.image]:[],source:source||x.source||'Catalogue',sourceUrl:x.sourceUrl||'',raw:x}}
-async function lookupBackend(code){const base=backendBase();if(!base)return null;const d=await fetchJsonTimeout(base+'/lookup?barcode='+encodeURIComponent(code),{},10000);if(!(d&&d.item))return null;const item=normItem(d.item,d.source||'Deal Engine backend');item.backendConnected=true;item.evidence=d.evidence||[];return item}
-async function lookupUPC(code){const d=await fetchJsonTimeout('https://api.upcitemdb.com/prod/trial/lookup?upc='+encodeURIComponent(code),{headers:{Accept:'application/json'}},6000),x=(d.items||[])[0];return x?normItem(x,'UPCitemdb'):null}
-async function lookupCeX(code){const d=await fetchJsonTimeout('https://wss2.cex.uk.webuy.io/v3/boxes/'+encodeURIComponent(code)+'/detail',{headers:{Accept:'application/json'}},6000),x=d&&d.boxDetails&&d.boxDetails[0];if(!x)return null;const urls=x.imageUrls||{};const ref=urls.large||urls.medium||urls.small||'';const item=normItem({title:x.boxName||'',brand:x.publisher||x.manufacturer||'',category:x.categoryName||x.categoryFriendlyName||'',model:x.boxId||'',description:[x.categoryFriendlyName,x.superCatFriendlyName].filter(Boolean).join(' Â· '),images:ref?[ref]:[]},'CeX UK');item.cexReferenceImage=ref;item.cex={sellPrice:Number(x.sellPrice),cashPrice:Number(x.cashPrice),exchangePrice:Number(x.exchangePrice),boxId:x.boxId||code};return item}
-async function lookupGoogleBooks(code){if(!/^(978|979)\d{10}$/.test(code))return null;const d=await fetchJsonTimeout('https://www.googleapis.com/books/v1/volumes?q=isbn:'+encodeURIComponent(code),{},6000),v=d.items&&d.items[0]&&d.items[0].volumeInfo;if(!v)return null;return normItem({title:v.title,brand:v.publisher||((v.authors||[]).join(', ')),category:(v.categories||['Book'])[0],model:v.publishedDate||'',description:v.description||'',images:[v.imageLinks&&(v.imageLinks.thumbnail||v.imageLinks.smallThumbnail)].filter(Boolean)},'Google Books')}
-async function lookupOpenLibrary(code){if(!/^(978|979)\d{10}$/.test(code))return null;const key='ISBN:'+code,d=await fetchJsonTimeout('https://openlibrary.org/api/books?bibkeys='+encodeURIComponent(key)+'&jscmd=data&format=json',{},6000),v=d[key];if(!v)return null;return normItem({title:v.title,brand:(v.publishers||[]).map(x=>x.name).join(', ')||(v.authors||[]).map(x=>x.name).join(', '),category:'Book',model:v.publish_date||'',description:'ISBN catalogue match',images:[v.cover&&(v.cover.large||v.cover.medium||v.cover.small)].filter(Boolean)},'Open Library')}
-async function lookupMusicBrainz(code){try{const d=await fetchJsonTimeout('https://musicbrainz.org/ws/2/release/?query='+encodeURIComponent('barcode:'+code)+'&fmt=json&limit=3',{},6500),r=d.releases&&d.releases[0];if(!r)return null;const artist=(r['artist-credit']||[]).map(a=>a.name||a.artist&&a.artist.name).filter(Boolean).join(', '),fmt=(r.media||[]).map(m=>m.format).filter(Boolean).join(', ');return normItem({title:r.title,brand:artist,category:fmt||'Music release',model:r.status||'',description:'MusicBrainz barcode match',images:r.id?['https://coverartarchive.org/release/'+r.id+'/front-250']:[]},'MusicBrainz')}catch(e){return null}}
-function mergeLookupItems(items){if(!items.length)return null;const ranked=[...items].sort((a,b)=>{const sa=(a.images&&a.images.length?100:0)+(a.source&&/eBay/i.test(a.source)?50:0)+(a.title?20:0)+(a.cex?10:0);const sb=(b.images&&b.images.length?100:0)+(b.source&&/eBay/i.test(b.source)?50:0)+(b.title?20:0)+(b.cex?10:0);return sb-sa});const best=ranked[0],allImages=[];for(const it of ranked){for(const img of (it.images||[]))if(img&&!allImages.includes(img))allImages.push(img)}return{...best,title:items.find(x=>x.title)?.title||best.title,brand:items.find(x=>x.brand)?.brand||best.brand,category:items.find(x=>x.category)?.category||best.category,model:items.find(x=>x.model)?.model||best.model,description:items.find(x=>x.description)?.description||best.description,images:allImages,cex:items.find(x=>x.cex)?.cex||best.cex||null,cexReferenceImage:items.find(x=>x.cexReferenceImage)?.cexReferenceImage||best.cexReferenceImage||'',source:[...new Set(items.map(x=>x.source).filter(Boolean))].join(' + '),backendConnected:items.some(x=>x.backendConnected),evidence:items.find(x=>x.evidence)?.evidence||[]}}
-async function identifyProduct(){const code=clean(barcodeEl.textContent);if(!/^\d{8,14}$/.test(code)){statusEl.textContent='Scan a valid EAN/UPC barcode first.';return}const steps=[],matches=[];const attempts=[['Deal Engine backend',lookupBackend],['UPC catalogue',lookupUPC],['CeX UK',lookupCeX],['Google Books',lookupGoogleBooks],['Open Library',lookupOpenLibrary],['MusicBrainz',lookupMusicBrainz]];for(const [name,fn] of attempts){if(name==='Deal Engine backend'&&!backendBase())continue;statusEl.textContent='Barcode recognised â Â· checking '+name+'â¦';try{const item=await fn(code);if(item){matches.push(item);steps.push(name+' â match'+((item.images||[]).length?' + artwork':''))}else steps.push(name+' â no match')}catch(e){steps.push(name+' â unavailable')}}if(matches.length){const item=mergeLookupItems(matches);currentProduct=item;showProduct(code,item);showScanArtwork(item);renderCex(item);const hasArt=(item.images||[]).length>0;statusEl.textContent=hasArt?'Product identified â Â· artwork matched':'Product identified â Â· exact artwork still unavailable';document.getElementById('confidence').textContent+=' Lookup trail: '+steps.join(' Â· ')+'.';renderIntel();return}currentProduct=null;showUnknown(code,steps);showScanUnresolved(code);renderCex(null);statusEl.textContent='Barcode recognised â Â· product catalogue match not found';renderIntel()}
-function hideArtwork(){productImageCandidates=[];productImageIndex=0;const stage=document.getElementById('artStage'),img=document.getElementById('productImage');stage.classList.add('hidden');img.removeAttribute('src');img.onerror=null}
-function artworkCandidates(item){return [...new Set((item.images||[]).map(x=>clean(x).replace(/^http:/,'https:')).filter(x=>/^https:\/\//i.test(x)))]}
-function showExactArtwork(item){const stage=document.getElementById('artStage'),img=document.getElementById('productImage'),src=document.getElementById('artSource');productImageCandidates=artworkCandidates(item);productImageIndex=0;if(!productImageCandidates.length){hideArtwork();return}src.textContent=item.source||'Exact catalogue match';stage.classList.remove('hidden');const loadNext=()=>{if(productImageIndex>=productImageCandidates.length){hideArtwork();return}img.src=productImageCandidates[productImageIndex++];};img.onerror=loadNext;loadNext()}
-function showUnknown(code,steps=[]){document.getElementById('productCard').classList.remove('hidden');document.getElementById('productTitle').textContent='Barcode recognised â exact product not yet identified';document.getElementById('pBarcode').textContent=code;['pBrand','pCategory','pModel'].forEach(id=>document.getElementById(id).textContent='â');document.getElementById('pDescription').textContent='The barcode was read correctly, but no catalogue returned an exact product match. V7.7 found the barcode but could not confirm a matching product record from the available sources.';document.getElementById('badges').innerHTML='<span class="badge">BARCODE OK</span><span class="badge">AWAITING EXACT MATCH</span>';hideArtwork();document.getElementById('confidence').textContent='No exact product image is being shown. Connect the secure eBay GTIN backend for the strongest identification and artwork results. '+(steps.length?'Lookup trail: '+steps.join(' Â· '):'');document.getElementById('ebaySoldBtn').onclick=()=>openEbaySold(code)}
-function showProduct(code,item){const inf=inferMedia(item);document.getElementById('productCard').classList.remove('hidden');document.getElementById('productTitle').textContent=clean(item.title)||'Product found';document.getElementById('pBarcode').textContent=code;document.getElementById('pBrand').textContent=clean(item.brand)||'Not stated';document.getElementById('pCategory').textContent=clean(item.category)||'Not stated';document.getElementById('pModel').textContent=clean(item.model)||(inf.editions.length?inf.editions.join(', '):'Not stated');document.getElementById('pDescription').textContent=clean(item.description)||'Not stated';let badges=[inf.media].concat(inf.editions);if(inf.region!=='Not stated')badges.push(inf.region);if(item.source)badges.push(item.source);if((item.images||[]).length)badges.push('EXACT ARTWORK');if(item.backendConnected)badges.push('ARTWORK PROXY ON');document.getElementById('badges').innerHTML=badges.filter(Boolean).map(x=>'<span class="badge">'+esc(x)+'</span>').join('');showExactArtwork(item);renderCex(item);let note='Exact barcode match found via '+(item.source||'catalogue')+'. ';if((item.images||[]).length)note+='Artwork is attached to that barcode-matched result; broken image URLs automatically fall through to the next exact-match candidate. ';else note+='No artwork was supplied by the exact-match source, so V7.7 keeps searching all barcode sources before giving up on artwork. ';if(inf.media==='Media')note+='The format is not completely certain, so verify the cover before valuing it. ';else note+='Detected format: '+inf.media+'. ';if(inf.editions.length)note+='Edition clues: '+inf.editions.join(', ')+'. ';note+='Always verify sealed/pre-owned condition, region, special packaging and completeness.';document.getElementById('confidence').textContent=note;document.getElementById('ebaySoldBtn').onclick=()=>openEbaySold(code,item)}
-function setBuy(v){document.getElementById('buy').value=v.toFixed(2)} function economics(){const buy=+document.getElementById('buy').value||0,sold=+document.getElementById('sold').value||0,fee=+document.getElementById('fee').value||0,post=+document.getElementById('post').value||0,pack=+document.getElementById('pack').value||0,target=+document.getElementById('target').value||0;const net=sold-(sold*fee/100)-post-pack-buy,roi=buy?(net/buy)*100:0,maxBuy=sold-(sold*fee/100)-post-pack-target;return{buy,sold,fee,post,pack,target,net,roi,maxBuy}}
-function calculate(){const e=economics();let cls='pass',verdict='PASS';if(e.net>=e.target&&e.roi>=25){cls='buy';verdict='STRONG BUY'}else if(e.net>0){cls='watch';verdict='WATCH'}document.getElementById('calc').innerHTML='<div class="verdict '+cls+'">'+verdict+'</div><p>Estimated net profit: <b>Â£'+e.net.toFixed(2)+'</b><br>ROI: <b>'+e.roi.toFixed(0)+'%</b><br>Maximum buy price for a Â£'+e.target.toFixed(2)+' target: <b>Â£'+Math.max(0,e.maxBuy).toFixed(2)+'</b></p>';renderIntel()}
-function historyAll(){try{return JSON.parse(localStorage.getItem('dens_history_v7')||'{}')}catch{return{}}}function getHistory(code){return historyAll()[code]||[]}function saveObservation(){const code=clean(barcodeEl.textContent),e=economics();if(!/^\d{8,14}$/.test(code)){alert('Scan an item first.');return}if(e.sold<=0){alert('Enter a realistic eBay SOLD price first.');return}const all=historyAll();all[code]=all[code]||[];all[code].push({date:new Date().toISOString(),sold:e.sold,buy:e.buy,title:currentProduct?clean(currentProduct.title):'',scarcity:+document.getElementById('scarcity').value,condition:+document.getElementById('condition').value});all[code]=all[code].slice(-24);localStorage.setItem('dens_history_v7',JSON.stringify(all));renderIntel()}
-function collectorScore(){const code=clean(barcodeEl.textContent),h=getHistory(code),e=economics();let score=25,parts=[];const scarcity=+document.getElementById('scarcity').value,condition=+document.getElementById('condition').value;score+=scarcity*10+condition*5;if(scarcity)parts.push('scarcity +'+scarcity*10);if(condition)parts.push('condition +'+condition*5);if(currentProduct){const inf=inferMedia(currentProduct);if(inf.editions.length){score+=Math.min(20,inf.editions.length*10);parts.push('edition clues +'+Math.min(20,inf.editions.length*10))}}if(e.roi>=100){score+=15;parts.push('ROI +15')}else if(e.roi>=50){score+=10;parts.push('ROI +10')}else if(e.roi>=25){score+=5;parts.push('ROI +5')}let trend=null;if(h.length>=2){const first=h[0].sold,last=h[h.length-1].sold;if(first>0){trend=((last-first)/first)*100;if(trend>=20)score+=20;else if(trend>=10)score+=12;else if(trend>0)score+=5;else if(trend<=-20)score-=15;else if(trend<0)score-=7;parts.push('trend '+(trend>=0?'+':'')+trend.toFixed(0)+'%')}}return{score:Math.max(0,Math.min(100,Math.round(score))),trend,h,parts}}
-function renderIntel(){const code=clean(barcodeEl.textContent);if(!/^\d{8,14}$/.test(code)){document.getElementById('intel').textContent='Scan an item to begin.';return}const c=collectorScore(),h=c.h;let label=c.score>=75?'ð¥ COLLECT / HOLD':c.score>=55?'ð WATCH':'â¡ FLIP FIRST';let hist=h.length?h.slice().reverse().slice(0,5).map(x=>new Date(x.date).toLocaleDateString('en-GB')+' â Â£'+(+x.sold).toFixed(2)).join('<br>'):'No saved observations yet.';let trend=c.trend===null?'Not enough history':(c.trend>=0?'+':'')+c.trend.toFixed(1)+'%';document.getElementById('intel').innerHTML='<div class="score">'+c.score+'/100</div><b>'+label+'</b><p>Saved observations: <b>'+h.length+'</b><br>Observed price trend: <b>'+trend+'</b></p><div class="notice">This is an experimental signal, not a guaranteed future-value prediction. It rewards scarcity, special-edition clues, economics and your own recorded price movement.</div><p><b>Recent values</b><br>'+hist+'</p>'}
-function analyseMarket(){const raw=document.getElementById('marketPrices').value||'';const vals=(raw.match(/\d+(?:\.\d{1,2})?/g)||[]).map(Number).filter(v=>v>0&&v<100000).sort((a,b)=>a-b);const out=document.getElementById('marketResult');if(vals.length<2){out.textContent='Enter at least two sold prices.';return}const mid=Math.floor(vals.length/2),median=vals.length%2?vals[mid]:(vals[mid-1]+vals[mid])/2,avg=vals.reduce((a,b)=>a+b,0)/vals.length,low=vals[0],high=vals[vals.length-1];document.getElementById('sold').value=median.toFixed(2);out.innerHTML='<div class="marketGrid"><div class="metric"><div class="mLabel">Median</div><div class="mValue">Â£'+median.toFixed(2)+'</div></div><div class="metric"><div class="mLabel">Average</div><div class="mValue">Â£'+avg.toFixed(2)+'</div></div><div class="metric"><div class="mLabel">Range</div><div class="mValue">Â£'+low.toFixed(2)+'âÂ£'+high.toFixed(2)+'</div></div></div><p>Using <b>'+vals.length+'</b> sold prices. The median has been loaded into the deal calculator.</p>';calculate()}
-const shelfInput=document.getElementById('shelfInput');shelfInput.onchange=e=>{shelfFile=e.target.files&&e.target.files[0];if(!shelfFile)return;const img=document.getElementById('shelfPreview');img.src=URL.createObjectURL(shelfFile);img.classList.remove('hidden');document.getElementById('shelfStatus').textContent='Photo ready.'};
-async function scanShelfPhoto(){const out=document.getElementById('shelfStatus'),q=document.getElementById('shelfQueue');q.innerHTML='';if(!shelfFile){out.textContent='Take or choose a shelf photo first.';return}if(!('BarcodeDetector'in window)){out.textContent='This browser does not expose multi-barcode photo detection. Live barcode scanning still works above.';return}try{out.textContent='Scanning photo for EAN/UPC barcodesâ¦';const formats=await BarcodeDetector.getSupportedFormats();const wanted=['ean_13','ean_8','upc_a','upc_e'].filter(x=>formats.includes(x));const detector=new BarcodeDetector(wanted.length?{formats:wanted}:undefined);const bitmap=await createImageBitmap(shelfFile);const hits=await detector.detect(bitmap);const codes=[...new Set(hits.map(h=>clean(h.rawValue)).filter(x=>/^\d{8,14}$/.test(x)))];if(!codes.length){out.textContent='No clear retail barcodes found. Try a closer, sharper photo with labels facing the camera.';return}out.textContent='Found '+codes.length+' barcode'+(codes.length===1?'':'s')+'. Tap one to identify it.';codes.forEach(code=>{const row=document.createElement('div');row.className='queueItem';row.innerHTML='<b>'+esc(code)+'</b><button class="orange">IDENTIFY</button>';row.querySelector('button').onclick=()=>{barcodeEl.textContent=code;jump('deal');identifyProduct()};q.appendChild(row)})}catch(e){out.textContent='Shelf scan error: '+e.message}}
-window.addEventListener('pagehide',stopCamera);
-updateBackendStatus();
-</script></body></html>
+
+const API =
+  'https://deal-engine-api.dennis-deeper.workers.dev';
+
+
+const video =
+  document.getElementById(
+    'video'
+  );
+
+
+const statusEl =
+  document.getElementById(
+    'status'
+  );
+
+
+const cameraToggle =
+  document.getElementById(
+    'cameraToggle'
+  );
+
+
+const productCard =
+  document.getElementById(
+    'productCard'
+  );
+
+
+let controls = null;
+
+let reader = null;
+
+let cameraOn = false;
+
+let scanLocked = false;
+
+let currentProduct = null;
+
+
+
+/* -------------------------
+   SMALL HELPERS
+------------------------- */
+
+
+function clean(value){
+
+  return String(
+    value || ''
+  ).trim();
+
+}
+
+
+function digits(value){
+
+  return clean(value)
+    .replace(
+      /\D/g,
+      ''
+    );
+
+}
+
+
+function money(value){
+
+  return Number.isFinite(
+    Number(value)
+  )
+    ? '£' +
+      Number(value)
+      .toFixed(2)
+
+    : '—';
+
+}
+
+
+function unique(values){
+
+  return [
+    ...new Set(
+      values.filter(Boolean)
+    )
+  ];
+
+}
+
+
+function backendBase(){
+
+  return API.replace(
+    /\/$/,
+    ''
+  );
+
+}
+
+
+
+/* -------------------------
+   SCANNER REVEAL
+------------------------- */
+
+
+function resetReveal(){
+
+  const reveal =
+    document.getElementById(
+      'scanReveal'
+    );
+
+  const img =
+    document.getElementById(
+      'scanRevealImage'
+    );
+
+  const spinner =
+    document.getElementById(
+      'scanSpinner'
+    );
+
+  reveal.classList.remove(
+    'show'
+  );
+
+  spinner.classList.add(
+    'hidden'
+  );
+
+  img.classList.add(
+    'hidden'
+  );
+
+  img.removeAttribute(
+    'src'
+  );
+
+  img.onerror = null;
+
+  img.onload = null;
+
+
+  document.getElementById(
+    'scanRevealTitle'
+  ).textContent =
+    'Identifying product…';
+
+
+  document.getElementById(
+    'scanRevealMeta'
+  ).textContent =
+    'Barcode locked';
+
+}
+
+
+
+function showLoading(code){
+
+  const reveal =
+    document.getElementById(
+      'scanReveal'
+    );
+
+  const spinner =
+    document.getElementById(
+      'scanSpinner'
+    );
+
+  const img =
+    document.getElementById(
+      'scanRevealImage'
+    );
+
+
+  reveal.classList.add(
+    'show'
+  );
+
+  spinner.classList.remove(
+    'hidden'
+  );
+
+  img.classList.add(
+    'hidden'
+  );
+
+
+  document.getElementById(
+    'scanRevealTitle'
+  ).textContent =
+    'Identifying product…';
+
+
+  document.getElementById(
+    'scanRevealMeta'
+  ).textContent =
+    'Barcode ' + code;
+
+}
+
+
+
+/* -------------------------
+   CAMERA
+------------------------- */
+
+
+async function startCamera(){
+
+  try{
+
+    resetReveal();
+
+    productCard.classList.add(
+      'hidden'
+    );
+
+    scanLocked = false;
+
+
+    statusEl.textContent =
+      'Starting rear camera…';
+
+
+    if(
+      !window.ZXingBrowser
+    ){
+
+      throw new Error(
+        'Scanner library could not load.'
+      );
+
+    }
+
+
+    if(controls){
+
+      try{
+
+        controls.stop();
+
+      }catch(e){}
+
+      controls = null;
+
+    }
+
+
+    reader =
+      new ZXingBrowser
+      .BrowserMultiFormatReader();
+
+
+    const devices =
+      await ZXingBrowser
+      .BrowserCodeReader
+      .listVideoInputDevices();
+
+
+    let device =
+      devices.find(
+        d =>
+          /back|rear|environment/i
+          .test(
+            d.label
+          )
+      );
+
+
+    if(!device){
+
+      device =
+        devices[
+          devices.length - 1
+        ];
+
+    }
+
+
+    if(!device){
+
+      throw new Error(
+        'No camera found.'
+      );
+
+    }
+
+
+    controls =
+      await reader
+      .decodeFromVideoDevice(
+
+        device.deviceId,
+
+        video,
+
+        result => {
+
+          if(
+            !result ||
+            scanLocked
+          ){
+
+            return;
+
+          }
+
+
+          const code =
+            digits(
+              result.getText()
+            );
+
+
+          if(
+            !/^\d{8,14}$/
+            .test(code)
+          ){
+
+            return;
+
+          }
+
+
+          scanLocked = true;
+
+
+          statusEl.textContent =
+            'Barcode captured — identifying product…';
+
+
+          if(
+            navigator.vibrate
+          ){
+
+            navigator.vibrate(
+              120
+            );
+
+          }
+
+
+          showLoading(
+            code
+          );
+
+
+          stopCamera(
+            true
+          );
+
+
+          identifyProduct(
+            code
+          );
+
+        }
+
+      );
+
+
+    cameraOn = true;
+
+
+    cameraToggle.textContent =
+      'CAMERA ON';
+
+
+    statusEl.textContent =
+      'Point the camera at the barcode…';
+
+  }
+  catch(error){
+
+    cameraOn = false;
+
+
+    cameraToggle.textContent =
+      'START CAMERA';
+
+
+    statusEl.textContent =
+      'Camera error: ' +
+      (
+        error?.message ||
+        'Unable to start camera.'
+      );
+
+  }
+
+}
+
+
+
+function stopCamera(
+  keepStatus = false
+){
+
+  try{
+
+    if(controls){
+
+      controls.stop();
+
+    }
+
+  }catch(e){}
+
+
+  controls = null;
+
+
+  try{
+
+    if(
+      video.srcObject
+    ){
+
+      video
+      .srcObject
+      .getTracks()
+      .forEach(
+        track =>
+          track.stop()
+      );
+
+      video.srcObject =
+        null;
+
+    }
+
+  }catch(e){}
+
+
+  cameraOn = false;
+
+
+  cameraToggle.textContent =
+    'START CAMERA';
+
+
+  if(!keepStatus){
+
+    statusEl.textContent =
+      'Camera stopped.';
+
+  }
+
+}
+
+
+
+/* -------------------------
+   FETCH
+------------------------- */
+
+
+async function fetchJson(
+  url,
+  options = {},
+  timeout = 7000
+){
+
+  const controller =
+    new AbortController();
+
+
+  const timer =
+    setTimeout(
+
+      () =>
+        controller.abort(),
+
+      timeout
+
+    );
+
+
+  try{
+
+    const response =
+      await fetch(
+
+        url,
+
+        {
+          ...options,
+
+          signal:
+            controller.signal,
+
+          cache:
+            'no-store'
+        }
+
+      );
+
+
+    if(
+      !response.ok
+    ){
+
+      throw new Error(
+        'HTTP ' +
+        response.status
+      );
+
+    }
+
+
+    return await response.json();
+
+  }
+  finally{
+
+    clearTimeout(
+      timer
+    );
+
+  }
+
+}
+
+
+
+/* -------------------------
+   NORMALISE PRODUCT
+------------------------- */
+
+
+function normaliseItem(
+  x,
+  source
+){
+
+  if(!x){
+
+    return null;
+
+  }
+
+
+  return {
+
+    title:
+      clean(
+        x.title
+      ),
+
+    platform:
+      clean(
+        x.platform
+      ),
+
+    brand:
+      clean(
+        x.brand ||
+        x.publisher ||
+        x.manufacturer
+      ),
+
+    category:
+      clean(
+        x.category
+      ),
+
+    model:
+      clean(
+        x.model ||
+        x.edition
+      ),
+
+    description:
+      clean(
+        x.description
+      ),
+
+    images:
+      Array.isArray(
+        x.images
+      )
+        ? x.images.filter(Boolean)
+
+        : x.image
+          ? [x.image]
+
+          : [],
+
+    source:
+      clean(
+        source ||
+        x.primarySource ||
+        x.source
+      ) ||
+      'Catalogue',
+
+    cex:
+      x.cex ||
+      null,
+
+    cexReferenceImage:
+      x.cexReferenceImage ||
+      ''
+
+  };
+
+}
+
+
+
+/* -------------------------
+   BACKEND LOOKUP
+------------------------- */
+
+
+async function lookupBackend(
+  code
+){
+
+  try{
+
+    const data =
+      await fetchJson(
+
+        backendBase() +
+        '/lookup?barcode=' +
+        encodeURIComponent(
+          code
+        ),
+
+        {},
+
+        11000
+
+      );
+
+
+    if(
+      !data ||
+      !data.item
+    ){
+
+      return {
+        item:null,
+        data
+      };
+
+    }
+
+
+    const item =
+      normaliseItem(
+
+        data.item,
+
+        data.item.primarySource ||
+        data.source ||
+        'Deal Engine Resolver'
+
+      );
+
+
+    return {
+      item,
+      data
+    };
+
+  }
+  catch(e){
+
+    return {
+      item:null,
+      data:null
+    };
+
+  }
+
+}
+
+
+
+/* -------------------------
+   CEX LOOKUP
+------------------------- */
+
+
+async function lookupCeX(
+  code
+){
+
+  try{
+
+    const data =
+      await fetchJson(
+
+        'https://wss2.cex.uk.webuy.io/v3/boxes/' +
+        encodeURIComponent(
+          code
+        ) +
+        '/detail',
+
+        {
+          headers:{
+            Accept:
+              'application/json'
+          }
+        },
+
+        7000
+
+      );
+
+
+    const x =
+      data &&
+      data.boxDetails &&
+      data.boxDetails[0];
+
+
+    if(!x){
+
+      return null;
+
+    }
+
+
+    const urls =
+      x.imageUrls ||
+      {};
+
+
+    const image =
+      urls.large ||
+      urls.medium ||
+      urls.small ||
+      '';
+
+
+    return {
+
+      title:
+        clean(
+          x.boxName
+        ),
+
+      platform:'',
+
+      brand:
+        clean(
+          x.publisher ||
+          x.manufacturer
+        ),
+
+      category:
+        clean(
+          x.categoryName ||
+          x.categoryFriendlyName
+        ),
+
+      model:
+        clean(
+          x.boxId
+        ),
+
+      description:
+        clean(
+          [
+            x.categoryFriendlyName,
+            x.superCatFriendlyName
+          ]
+          .filter(Boolean)
+          .join(' · ')
+        ),
+
+      images:
+        image
+          ? [image]
+          : [],
+
+      source:
+        'CeX UK',
+
+      cexReferenceImage:
+        image,
+
+      cex:{
+        sellPrice:
+          Number(
+            x.sellPrice
+          ),
+
+        cashPrice:
+          Number(
+            x.cashPrice
+          ),
+
+        exchangePrice:
+          Number(
+            x.exchangePrice
+          )
+      }
+
+    };
+
+  }
+  catch(e){
+
+    return null;
+
+  }
+
+}
+
+
+
+/* -------------------------
+   UPC FALLBACK
+------------------------- */
+
+
+async function lookupUPC(
+  code
+){
+
+  try{
+
+    const data =
+      await fetchJson(
+
+        'https://api.upcitemdb.com/prod/trial/lookup?upc=' +
+        encodeURIComponent(
+          code
+        ),
+
+        {
+          headers:{
+            Accept:
+              'application/json'
+          }
+        },
+
+        6500
+
+      );
+
+
+    const x =
+      data &&
+      data.items &&
+      data.items[0];
+
+
+    if(!x){
+
+      return null;
+
+    }
+
+
+    return normaliseItem(
+      x,
+      'UPCitemdb'
+    );
+
+  }
+  catch(e){
+
+    return null;
+
+  }
+
+}
+
+
+
+/* -------------------------
+   MERGE PRODUCT SOURCES
+------------------------- */
+
+
+function mergeItems(
+  backendItem,
+  cexItem,
+  upcItem
+){
+
+  const items =
+    [
+      backendItem,
+      cexItem,
+      upcItem
+    ]
+    .filter(Boolean);
+
+
+  if(!items.length){
+
+    return null;
+
+  }
+
+
+  /*
+    Identity remains backend-first.
+    Artwork may use any exact barcode
+    source that returned a usable image.
+  */
+
+
+  const primary =
+    backendItem ||
+    cexItem ||
+    upcItem;
+
+
+  const allImages =
+    unique(
+
+      [
+
+        ...(
+          backendItem?.images ||
+          []
+        ),
+
+        backendItem
+          ?.cexReferenceImage,
+
+        ...(
+          cexItem?.images ||
+          []
+        ),
+
+        cexItem
+          ?.cexReferenceImage,
+
+        ...(
+          upcItem?.images ||
+          []
+        )
+
+      ]
+
+    );
+
+
+  return {
+
+    ...primary,
+
+
+    title:
+      clean(
+        backendItem?.title
+      ) ||
+
+      clean(
+        cexItem?.title
+      ) ||
+
+      clean(
+        upcItem?.title
+      ),
+
+
+    platform:
+      clean(
+        backendItem?.platform
+      ) ||
+
+      clean(
+        cexItem?.platform
+      ) ||
+
+      clean(
+        upcItem?.platform
+      ),
+
+
+    brand:
+      clean(
+        backendItem?.brand
+      ) ||
+
+      clean(
+        cexItem?.brand
+      ) ||
+
+      clean(
+        upcItem?.brand
+      ),
+
+
+    category:
+      clean(
+        backendItem?.category
+      ) ||
+
+      clean(
+        cexItem?.category
+      ) ||
+
+      clean(
+        upcItem?.category
+      ),
+
+
+    model:
+      clean(
+        backendItem?.model
+      ) ||
+
+      clean(
+        cexItem?.model
+      ) ||
+
+      clean(
+        upcItem?.model
+      ),
+
+
+    images:
+      allImages,
+
+
+    source:
+      unique(
+
+        items.map(
+          x =>
+            x.source
+        )
+
+      )
+      .join(
+        ' + '
+      ),
+
+
+    cex:
+      cexItem?.cex ||
+      backendItem?.cex ||
+      null
+
+  };
+
+}
+
+
+
+/* -------------------------
+   IMAGE HELPERS
+------------------------- */
+
+
+function normaliseImageUrl(
+  value
+){
+
+  let url =
+    clean(
+      value
+    );
+
+
+  if(!url){
+
+    return '';
+
+  }
+
+
+  if(
+    url.startsWith(
+      '//'
+    )
+  ){
+
+    url =
+      'https:' +
+      url;
+
+  }
+
+
+  url =
+    url.replace(
+      /^http:/i,
+      'https:'
+    );
+
+
+  if(
+    !/^https:\/\//i
+    .test(
+      url
+    )
+  ){
+
+    return '';
+
+  }
+
+
+  return url;
+
+}
+
+
+
+/*
+  If the Worker already supplied
+  /image?url= we do NOT proxy it again.
+*/
+
+
+function imageCandidate(
+  value
+){
+
+  const url =
+    normaliseImageUrl(
+      value
+    );
+
+
+  if(!url){
+
+    return '';
+
+  }
+
+
+  try{
+
+    const parsed =
+      new URL(
+        url
+      );
+
+
+    if(
+      parsed.hostname ===
+      'deal-engine-api.dennis-deeper.workers.dev' &&
+
+      parsed.pathname ===
+      '/image'
+    ){
+
+      return url;
+
+    }
+
+  }
+  catch(e){}
+
+
+  return (
+    backendBase() +
+    '/image?url=' +
+    encodeURIComponent(
+      url
+    )
+  );
+
+}
+
+
+
+function artworkCandidates(
+  item
+){
+
+  if(!item){
+
+    return [];
+
+  }
+
+
+  return unique(
+
+    [
+
+      ...(
+        item.images ||
+        []
+      ),
+
+      item.image,
+
+      item.cexReferenceImage
+
+    ]
+    .map(
+      imageCandidate
+    )
+    .filter(Boolean)
+
+  );
+
+}
+
+
+
+/*
+  Attempts every exact artwork
+  candidate until one genuinely loads.
+*/
+
+
+function loadArtwork(
+  img,
+  candidates,
+  success,
+  failure
+){
+
+  let index = 0;
+
+
+  const next = () => {
+
+    if(
+      index >=
+      candidates.length
+    ){
+
+      img.onerror =
+        null;
+
+      img.onload =
+        null;
+
+
+      if(failure){
+
+        failure();
+
+      }
+
+
+      return;
+
+    }
+
+
+    const candidate =
+      candidates[
+        index++
+      ];
+
+
+    img.classList.add(
+      'hidden'
+    );
+
+
+    img.removeAttribute(
+      'src'
+    );
+
+
+    img.referrerPolicy =
+      'no-referrer';
+
+
+    img.onload =
+      () => {
+
+        /*
+          Reject tiny broken
+          placeholder images.
+        */
+
+        if(
+          img.naturalWidth < 80 ||
+          img.naturalHeight < 80
+        ){
+
+          next();
+
+          return;
+
+        }
+
+
+        img.classList.remove(
+          'hidden'
+        );
+
+
+        if(success){
+
+          success(
+            candidate
+          );
+
+        }
+
+      };
+
+
+    img.onerror =
+      next;
+
+
+    img.src =
+      candidate;
+
+  };
+
+
+  next();
+
+}
+
+
+
+/* -------------------------
+   SCAN REVEAL ARTWORK
+------------------------- */
+
+
+function showRevealArtwork(
+  item
+){
+
+  const reveal =
+    document.getElementById(
+      'scanReveal'
+    );
+
+
+  const spinner =
+    document.getElementById(
+      'scanSpinner'
+    );
+
+
+  const img =
+    document.getElementById(
+      'scanRevealImage'
+    );
+
+
+  const candidates =
+    artworkCandidates(
+      item
+    );
+
+
+  reveal.classList.add(
+    'show'
+  );
+
+
+  spinner.classList.add(
+    'hidden'
+  );
+
+
+  document.getElementById(
+    'scanRevealTitle'
+  ).textContent =
+    item.title ||
+    'Product identified';
+
+
+  document.getElementById(
+    'scanRevealMeta'
+  ).textContent =
+    item.source ||
+    'Exact barcode match';
+
+
+  if(
+    !candidates.length
+  ){
+
+    img.classList.add(
+      'hidden'
+    );
+
+    return;
+
+  }
+
+
+  loadArtwork(
+
+    img,
+
+    candidates,
+
+    () => {},
+
+    () => {
+
+      img.classList.add(
+        'hidden'
+      );
+
+    }
+
+  );
+
+}
+
+
+
+/* -------------------------
+   MAIN PRODUCT ARTWORK
+------------------------- */
+
+
+function showProductArtwork(
+  item
+){
+
+  const img =
+    document.getElementById(
+      'productImage'
+    );
+
+
+  const fallback =
+    document.getElementById(
+      'artFallback'
+    );
+
+
+  const info =
+    document.getElementById(
+      'artInfo'
+    );
+
+
+  const candidates =
+    artworkCandidates(
+      item
+    );
+
+
+  img.classList.add(
+    'hidden'
+  );
+
+
+  fallback.classList.remove(
+    'hidden'
+  );
+
+
+  if(
+    !candidates.length
+  ){
+
+    fallback.innerHTML =
+      'PRODUCT IDENTIFIED<br>NO EXACT ARTWORK RETURNED';
+
+
+    info.textContent =
+      'The barcode matched a product, but none of the exact barcode sources supplied artwork.';
+
+
+    return;
+
+  }
+
+
+  fallback.innerHTML =
+    'LOADING EXACT ARTWORK…';
+
+
+  info.textContent =
+    'Checking exact artwork sources…';
+
+
+  loadArtwork(
+
+    img,
+
+    candidates,
+
+    source => {
+
+      fallback.classList.add(
+        'hidden'
+      );
+
+
+      info.textContent =
+        'Exact barcode artwork loaded successfully through the secure Media Deal Engine image pipeline.';
+
+    },
+
+    () => {
+
+      img.classList.add(
+        'hidden'
+      );
+
+
+      fallback.classList.remove(
+        'hidden'
+      );
+
+
+      fallback.innerHTML =
+        'PRODUCT IDENTIFIED<br>ARTWORK SOURCE UNAVAILABLE';
+
+
+      info.textContent =
+        'Product identification succeeded, but the available artwork URLs could not be displayed.';
+
+    }
+
+  );
+
+}
+
+
+
+/* -------------------------
+   CEX DISPLAY
+------------------------- */
+
+
+function showCeX(
+  item
+){
+
+  const box =
+    document.getElementById(
+      'cexBox'
+    );
+
+
+  if(
+    !item ||
+    !item.cex
+  ){
+
+    box.classList.add(
+      'hidden'
+    );
+
+    return;
+
+  }
+
+
+  box.classList.remove(
+    'hidden'
+  );
+
+
+  document.getElementById(
+    'cexSell'
+  ).textContent =
+    money(
+      item.cex.sellPrice
+    );
+
+
+  document.getElementById(
+    'cexCash'
+  ).textContent =
+    money(
+      item.cex.cashPrice
+    );
+
+
+  document.getElementById(
+    'cexVoucher'
+  ).textContent =
+    money(
+      item.cex.exchangePrice
+    );
+
+}
+
+
+
+/* -------------------------
+   DISPLAY RESULT
+------------------------- */
+
+
+function displayProduct(
+  code,
+  item,
+  resolverData
+){
+
+  currentProduct =
+    item;
+
+
+  productCard.classList.remove(
+    'hidden'
+  );
+
+
+  document.getElementById(
+    'productTitle'
+  ).textContent =
+    item.title ||
+    'Identified product';
+
+
+  const metadata =
+    [
+
+      item.platform,
+      item.brand,
+      item.category
+
+    ]
+    .filter(Boolean)
+    .join(
+      ' · '
+    );
+
+
+  document.getElementById(
+    'productMeta'
+  ).textContent =
+    metadata;
+
+
+  document.getElementById(
+    'pBarcode'
+  ).textContent =
+    code;
+
+
+  document.getElementById(
+    'pPlatform'
+  ).textContent =
+    item.platform ||
+    'Not stated';
+
+
+  document.getElementById(
+    'pBrand'
+  ).textContent =
+    item.brand ||
+    'Not stated';
+
+
+  document.getElementById(
+    'pCategory'
+  ).textContent =
+    item.category ||
+    'Not stated';
+
+
+  document.getElementById(
+    'pModel'
+  ).textContent =
+    item.model ||
+    'Not stated';
+
+
+  const confidence =
+    resolverData?.confidence ??
+    0;
+
+
+  const artworkConfidence =
+    resolverData
+      ?.artworkConfidence ??
+    (
+      item.images?.length
+        ? 70
+        : 0
+    );
+
+
+  const decision =
+    resolverData?.decision ||
+    (
+      item.title
+        ? 'IDENTIFIED'
+        : 'UNRESOLVED'
+    );
+
+
+  document.getElementById(
+    'confidence'
+  ).textContent =
+    confidence +
+    '%';
+
+
+  document.getElementById(
+    'artConfidence'
+  ).textContent =
+    artworkConfidence +
+    '%';
+
+
+  document.getElementById(
+    'decision'
+  ).textContent =
+    decision;
+
+
+  let badgeHtml = '';
+
+
+  badgeHtml +=
+    '<span class="badge good">' +
+    decision +
+    '</span>';
+
+
+  if(
+    resolverData?.exactMatch
+  ){
+
+    badgeHtml +=
+      '<span class="badge good">EXACT MATCH</span>';
+
+  }
+
+
+  if(
+    item.platform
+  ){
+
+    badgeHtml +=
+      '<span class="badge">' +
+      item.platform +
+      '</span>';
+
+  }
+
+
+  if(
+    item.source
+  ){
+
+    badgeHtml +=
+      '<span class="badge">' +
+      item.source +
+      '</span>';
+
+  }
+
+
+  document.getElementById(
+    'badges'
+  ).innerHTML =
+    badgeHtml;
+
+
+  showProductArtwork(
+    item
+  );
+
+
+  showRevealArtwork(
+    item
+  );
+
+
+  showCeX(
+    item
+  );
+
+
+  statusEl.textContent =
+    'Product identified successfully.';
+
+}
+
+
+
+/* -------------------------
+   UNRESOLVED
+------------------------- */
+
+
+function displayUnresolved(
+  code,
+  resolverData
+){
+
+  productCard.classList.remove(
+    'hidden'
+  );
+
+
+  document.getElementById(
+    'productTitle'
+  ).textContent =
+    'Barcode recognised — product unresolved';
+
+
+  document.getElementById(
+    'productMeta'
+  ).textContent =
+    'Barcode ' +
+    code;
+
+
+  document.getElementById(
+    'pBarcode'
+  ).textContent =
+    code;
+
+
+  document.getElementById(
+    'pPlatform'
+  ).textContent =
+    '—';
+
+
+  document.getElementById(
+    'pBrand'
+  ).textContent =
+    '—';
+
+
+  document.getElementById(
+    'pCategory'
+  ).textContent =
+    '—';
+
+
+  document.getElementById(
+    'pModel'
+  ).textContent =
+    '—';
+
+
+  document.getElementById(
+    'confidence'
+  ).textContent =
+    (
+      resolverData
+        ?.confidence ||
+      0
+    ) +
+    '%';
+
+
+  document.getElementById(
+    'artConfidence'
+  ).textContent =
+    (
+      resolverData
+        ?.artworkConfidence ||
+      0
+    ) +
+    '%';
+
+
+  document.getElementById(
+    'decision'
+  ).textContent =
+    resolverData
+      ?.decision ||
+    'UNRESOLVED';
+
+
+  document.getElementById(
+    'badges'
+  ).innerHTML =
+    '<span class="badge warn">BARCODE OK</span>' +
+    '<span class="badge warn">NO VERIFIED PRODUCT</span>';
+
+
+  document.getElementById(
+    'productImage'
+  ).classList.add(
+    'hidden'
+  );
+
+
+  const fallback =
+    document.getElementById(
+      'artFallback'
+    );
+
+
+  fallback.classList.remove(
+    'hidden'
+  );
+
+
+  fallback.innerHTML =
+    'NO EXACT ARTWORK';
+
+
+  document.getElementById(
+    'artInfo'
+  ).textContent =
+    'The barcode was read correctly but the current sources did not return a reliable exact product match.';
+
+
+  showCeX(
+    null
+  );
+
+
+  statusEl.textContent =
+    'Barcode recognised, but exact product identification is unresolved.';
+
+
+  const reveal =
+    document.getElementById(
+      'scanReveal'
+    );
+
+
+  reveal.classList.add(
+    'show'
+  );
+
+
+  document.getElementById(
+    'scanSpinner'
+  ).classList.add(
+    'hidden'
+  );
+
+
+  document.getElementById(
+    'scanRevealImage'
+  ).classList.add(
+    'hidden'
+  );
+
+
+  document.getElementById(
+    'scanRevealTitle'
+  ).textContent =
+    'Barcode recognised';
+
+
+  document.getElementById(
+    'scanRevealMeta'
+  ).textContent =
+    code +
+    ' · exact product not yet identified';
+
+}
+
+
+
+/* -------------------------
+   IDENTIFY
+------------------------- */
+
+
+async function identifyProduct(
+  rawCode
+){
+
+  const code =
+    digits(
+      rawCode
+    );
+
+
+  if(
+    !/^\d{8,14}$/
+    .test(
+      code
+    )
+  ){
+
+    statusEl.textContent =
+      'Please scan or enter a valid barcode.';
+
+    scanLocked = false;
+
+    return;
+
+  }
+
+
+  showLoading(
+    code
+  );
+
+
+  statusEl.textContent =
+    'Barcode recognised — checking Media Deal Engine…';
+
+
+  /*
+    Backend first because it now has
+    live eBay production access.
+  */
+
+
+  const backendResult =
+    await lookupBackend(
+      code
+    );
+
+
+  statusEl.textContent =
+    'Product search active — checking artwork sources…';
+
+
+  /*
+    These fallbacks are also useful
+    for recovering exact artwork when
+    the primary catalogue image is dead.
+  */
+
+
+  const [
+    cexItem,
+    upcItem
+  ] =
+    await Promise.all([
+
+      lookupCeX(
+        code
+      ),
+
+      lookupUPC(
+        code
+      )
+
+    ]);
+
+
+  const merged =
+    mergeItems(
+
+      backendResult.item,
+
+      cexItem,
+
+      upcItem
+
+    );
+
+
+  if(!merged){
+
+    displayUnresolved(
+
+      code,
+
+      backendResult.data
+
+    );
+
+    return;
+
+  }
+
+
+  displayProduct(
+
+    code,
+
+    merged,
+
+    backendResult.data
+
+  );
+
+}
+
+
+
+/* -------------------------
+   MANUAL
+------------------------- */
+
+
+document.getElementById(
+  'manualIdentify'
+).onclick = () => {
+
+  const input =
+    document.getElementById(
+      'manualBarcode'
+    );
+
+
+  const code =
+    digits(
+      input.value
+    );
+
+
+  if(
+    !/^\d{8,14}$/
+    .test(
+      code
+    )
+  ){
+
+    statusEl.textContent =
+      'Enter a valid EAN / UPC barcode.';
+
+    return;
+
+  }
+
+
+  scanLocked = true;
+
+
+  stopCamera(
+    true
+  );
+
+
+  identifyProduct(
+    code
+  );
+
+};
+
+
+
+document.getElementById(
+  'manualBarcode'
+).addEventListener(
+
+  'keydown',
+
+  event => {
+
+    if(
+      event.key ===
+      'Enter'
+    ){
+
+      document.getElementById(
+        'manualIdentify'
+      ).click();
+
+    }
+
+  }
+
+);
+
+
+
+/* -------------------------
+   BUTTONS
+------------------------- */
+
+
+cameraToggle.onclick =
+  () => {
+
+    if(cameraOn){
+
+      stopCamera();
+
+    }
+    else{
+
+      startCamera();
+
+    }
+
+  };
+
+
+document.getElementById(
+  'stopBtn'
+).onclick =
+  () =>
+    stopCamera();
+
+
+document.getElementById(
+  'nextBtn'
+).onclick =
+  () => {
+
+    currentProduct =
+      null;
+
+
+    scanLocked =
+      false;
+
+
+    productCard.classList.add(
+      'hidden'
+    );
+
+
+    resetReveal();
+
+
+    document.getElementById(
+      'manualBarcode'
+    ).value =
+      '';
+
+
+    startCamera();
+
+  };
+
+
+
+/* -------------------------
+   CLEANUP
+------------------------- */
+
+
+window.addEventListener(
+
+  'pagehide',
+
+  () => {
+
+    try{
+
+      stopCamera(
+        true
+      );
+
+    }
+    catch(e){}
+
+  }
+
+);
+
+</script>
+
+</body>
+</html>
