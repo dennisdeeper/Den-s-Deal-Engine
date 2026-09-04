@@ -6,15 +6,18 @@
 <meta name="theme-color" content="#03090b">
 <title>Media Deal Engine Scanner</title>
 
+<script src="https://unpkg.com/@zxing/browser@latest"></script>
+
 <style>
 :root{
   --bg:#03090b;
   --panel:#071317;
-  --line:rgba(61,238,224,.16);
+  --line:rgba(61,238,224,.18);
   --teal:#22e0d1;
   --text:#f4f7f7;
   --muted:#81969a;
   --green:#31d887;
+  --red:#ff4040;
 }
 
 *{box-sizing:border-box}
@@ -32,11 +35,11 @@ body{
 .wrap{
   max-width:760px;
   margin:auto;
-  padding:16px 14px 90px;
+  padding:12px 12px 90px;
 }
 
 .topbar{
-  height:58px;
+  height:55px;
   display:flex;
   align-items:center;
   justify-content:space-between;
@@ -44,24 +47,23 @@ body{
 }
 
 .back{
-  color:#d9e3e4;
+  color:#dce7e8;
   text-decoration:none;
-  font-size:14px;
+  font-size:13px;
 }
 
 .brand{
-  font-size:11px;
-  letter-spacing:.18em;
+  font-size:10px;
+  letter-spacing:.16em;
   text-transform:uppercase;
-  color:#dbe5e6;
 }
 
 .live{
   display:flex;
   align-items:center;
   gap:7px;
-  color:#9db0b3;
-  font-size:10px;
+  color:#91a5a8;
+  font-size:9px;
 }
 
 .dot{
@@ -69,48 +71,19 @@ body{
   height:8px;
   border-radius:50%;
   background:var(--green);
-  box-shadow:0 0 0 5px rgba(49,216,135,.08),0 0 14px rgba(49,216,135,.35);
+  box-shadow:0 0 12px rgba(49,216,135,.6);
 }
 
 .hero{
   text-align:center;
-  padding:34px 0 18px;
-}
-
-.logo{
-  width:130px;
-  height:130px;
-  margin:0 auto 18px;
-  position:relative;
-}
-
-.logoD{
-  position:absolute;
-  inset:0;
-  border:18px solid transparent;
-  border-right-color:#20d9c9;
-  border-top-color:#d9e4e5;
-  border-bottom-color:#6e8387;
-  border-radius:0 80px 80px 0;
-  filter:drop-shadow(0 0 14px rgba(34,224,209,.25));
-}
-
-.logoArrow{
-  position:absolute;
-  left:28px;
-  top:56px;
-  width:62px;
-  height:18px;
-  background:linear-gradient(90deg,#63787c,#20d9c9);
-  transform:rotate(-45deg);
-  clip-path:polygon(0 22%,68% 22%,68% 0,100% 50%,68% 100%,68% 78%,0 78%);
+  padding:24px 0 18px;
 }
 
 .hero h1{
   margin:0;
+  font-size:25px;
   font-weight:300;
-  font-size:30px;
-  letter-spacing:.06em;
+  letter-spacing:.08em;
 }
 
 .hero h1 span{
@@ -118,19 +91,16 @@ body{
 }
 
 .hero p{
-  margin:10px auto 0;
-  max-width:500px;
-  color:#879b9e;
-  font-size:13px;
-  line-height:1.6;
+  margin:9px auto 0;
+  color:#81969a;
+  font-size:12px;
 }
 
 .scannerCard{
-  border:1px solid var(--line);
+  padding:12px;
   border-radius:22px;
+  border:1px solid var(--line);
   background:linear-gradient(145deg,rgba(10,27,31,.94),rgba(4,13,16,.98));
-  padding:14px;
-  box-shadow:0 28px 70px rgba(0,0,0,.42);
 }
 
 .cameraWrap{
@@ -138,20 +108,19 @@ body{
   overflow:hidden;
   border-radius:18px;
   background:#000;
-  min-height:360px;
-  border:1px solid rgba(70,236,223,.12);
+  height:58vh;
+  min-height:390px;
+  max-height:620px;
 }
 
 video{
   width:100%;
   height:100%;
-  min-height:360px;
   object-fit:cover;
   display:block;
-  background:#000;
 }
 
-.scanOverlay{
+.overlay{
   position:absolute;
   inset:0;
   pointer-events:none;
@@ -159,110 +128,222 @@ video{
 
 .scanBox{
   position:absolute;
-  left:10%;
-  right:10%;
+  left:9%;
+  right:9%;
   top:36%;
-  height:120px;
-  border:2px solid rgba(34,224,209,.68);
-  border-radius:14px;
+  height:150px;
+  border:2px solid rgba(34,224,209,.82);
+  border-radius:18px;
   box-shadow:
-    0 0 0 999px rgba(0,0,0,.30),
-    0 0 24px rgba(34,224,209,.16);
+    0 0 0 999px rgba(0,0,0,.15),
+    0 0 26px rgba(34,224,209,.14);
 }
 
 .laser{
   position:absolute;
-  left:12%;
-  right:12%;
+  left:11%;
+  right:11%;
   top:50%;
   height:2px;
-  background:linear-gradient(90deg,transparent,#ff4040,transparent);
-  box-shadow:0 0 10px rgba(255,64,64,.9);
+  background:linear-gradient(
+    90deg,
+    transparent,
+    var(--red),
+    transparent
+  );
+  box-shadow:0 0 12px rgba(255,64,64,.9);
 }
 
 .status{
-  margin:14px 2px 0;
-  min-height:20px;
-  color:#82979a;
+  min-height:40px;
+  padding:13px 5px 4px;
   text-align:center;
+  color:#91a5a8;
   font-size:12px;
+  line-height:1.45;
 }
 
 .controls{
   display:grid;
   grid-template-columns:1fr 1fr;
   gap:10px;
-  margin-top:14px;
+  margin-top:11px;
 }
 
 button{
-  min-height:50px;
-  border:0;
+  min-height:52px;
   border-radius:14px;
+  border:0;
   font:inherit;
-  font-weight:700;
-  letter-spacing:.04em;
-  cursor:pointer;
+  font-weight:750;
+  letter-spacing:.05em;
 }
 
 .primary{
-  color:#fff;
+  color:white;
   background:linear-gradient(135deg,#20d9c9,#147e7a);
 }
 
 .secondary{
   color:#dce7e8;
-  background:#071317;
+  background:#061216;
   border:1px solid var(--line);
 }
 
 .manual{
-  margin-top:16px;
-  padding:16px;
+  margin-top:14px;
+  padding:15px;
   border:1px solid var(--line);
   border-radius:18px;
-  background:rgba(5,15,18,.82);
+  background:rgba(5,15,18,.85);
 }
 
 .manual h2{
   margin:0 0 10px;
-  font-size:16px;
+  font-size:15px;
   font-weight:500;
 }
 
 .manualRow{
   display:grid;
   grid-template-columns:1fr auto;
-  gap:10px;
+  gap:9px;
 }
 
 .manual input{
   width:100%;
-  border:1px solid rgba(80,238,224,.16);
-  background:#02090b;
-  color:white;
   padding:14px;
   border-radius:12px;
+  border:1px solid var(--line);
+  background:#02090b;
+  color:white;
   font-size:16px;
   outline:none;
 }
 
 .manual button{
-  padding:0 18px;
+  padding:0 17px;
 }
 
-.footer{
-  margin-top:24px;
-  text-align:center;
-  color:#52696c;
+.result{
+  display:none;
+  margin-top:15px;
+  padding:16px;
+  border:1px solid var(--line);
+  border-radius:20px;
+  background:linear-gradient(145deg,rgba(9,25,29,.95),rgba(4,13,16,.98));
+}
+
+.result.show{
+  display:block;
+}
+
+.productTop{
+  display:grid;
+  grid-template-columns:125px 1fr;
+  gap:15px;
+}
+
+.art{
+  min-height:160px;
+  border-radius:14px;
+  overflow:hidden;
+  background:#061115;
+  border:1px solid var(--line);
+  display:grid;
+  place-items:center;
+}
+
+.art img{
+  width:100%;
+  height:100%;
+  max-height:200px;
+  object-fit:contain;
+  background:white;
+}
+
+.artEmpty{
   font-size:9px;
-  letter-spacing:.14em;
+  text-align:center;
+  color:#637a7d;
+}
+
+.result h2{
+  margin:0 0 6px;
+  font-size:20px;
+  font-weight:550;
+}
+
+.meta{
+  color:#82979a;
+  font-size:11px;
+  line-height:1.6;
+}
+
+.badges{
+  display:flex;
+  gap:6px;
+  flex-wrap:wrap;
+  margin-top:10px;
+}
+
+.badge{
+  padding:6px 8px;
+  border-radius:999px;
+  font-size:9px;
+  border:1px solid var(--line);
+  background:rgba(34,224,209,.07);
+}
+
+.good{
+  color:#84efbd;
+  border-color:rgba(49,216,135,.28);
+  background:rgba(49,216,135,.08);
+}
+
+.metrics{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:7px;
+  margin-top:13px;
+}
+
+.metric{
+  padding:10px;
+  background:#051014;
+  border-radius:11px;
+  border:1px solid rgba(61,238,224,.1);
+}
+
+.metric small{
+  display:block;
+  color:#637a7d;
+  font-size:8px;
   text-transform:uppercase;
 }
 
-@media(max-width:600px){
-  .wrap{padding:10px 10px 80px}
-  .cameraWrap,video{min-height:420px}
+.metric b{
+  display:block;
+  margin-top:4px;
+  font-size:14px;
+}
+
+.rescan{
+  width:100%;
+  margin-top:13px;
+}
+
+.footer{
+  text-align:center;
+  margin-top:20px;
+  color:#53696d;
+  font-size:9px;
+  letter-spacing:.18em;
+}
+
+@media(max-width:520px){
+  .wrap{padding:8px 8px 80px}
+  .cameraWrap{height:62vh}
   .controls{grid-template-columns:1fr}
   .manualRow{grid-template-columns:1fr}
   .manual button{padding:14px}
@@ -274,222 +355,654 @@ button{
 
 <div class="wrap">
 
-  <header class="topbar">
-    <a href="index.html" class="back">← Home</a>
+<header class="topbar">
 
-    <div class="brand">
-      Media Deal Engine
-    </div>
+  <a class="back" href="index.html">
+    ← HOME
+  </a>
 
-    <div class="live">
-      <span class="dot"></span>
-      LIVE
-    </div>
-  </header>
-
-  <section class="hero">
-    <div class="logo">
-      <div class="logoD"></div>
-      <div class="logoArrow"></div>
-    </div>
-
-    <h1>MEDIA <span>DEAL</span> ENGINE</h1>
-
-    <p>
-      Scan the barcode. Identify the exact product. Then send it into the
-      live Media Deal Engine resolver.
-    </p>
-  </section>
-
-  <section class="scannerCard">
-
-    <div class="cameraWrap">
-      <video id="video" playsinline muted></video>
-
-      <div class="scanOverlay">
-        <div class="scanBox"></div>
-        <div class="laser"></div>
-      </div>
-    </div>
-
-    <div class="status" id="status">
-      Camera not started.
-    </div>
-
-    <div class="controls">
-      <button class="primary" id="startBtn">
-        START CAMERA
-      </button>
-
-      <button class="secondary" id="stopBtn">
-        STOP CAMERA
-      </button>
-    </div>
-
-  </section>
-
-  <section class="manual">
-    <h2>Manual Barcode</h2>
-
-    <div class="manualRow">
-      <input
-        id="manualBarcode"
-        inputmode="numeric"
-        autocomplete="off"
-        placeholder="Enter EAN / UPC"
-      >
-
-      <button class="primary" id="identifyBtn">
-        IDENTIFY
-      </button>
-    </div>
-  </section>
-
-  <div class="footer">
-    Scan · Identify · Profit
+  <div class="brand">
+    MEDIA DEAL ENGINE
   </div>
+
+  <div class="live">
+    <span class="dot"></span>
+    LIVE
+  </div>
+
+</header>
+
+<section class="hero">
+  <h1>SCAN. <span>IDENTIFY.</span> PROFIT.</h1>
+  <p>Hold the barcode steady inside the scan frame.</p>
+</section>
+
+<section class="scannerCard">
+
+  <div class="cameraWrap">
+
+    <video
+      id="video"
+      playsinline
+      muted>
+    </video>
+
+    <div class="overlay">
+      <div class="scanBox"></div>
+      <div class="laser"></div>
+    </div>
+
+  </div>
+
+  <div class="status" id="status">
+    Tap Start Camera.
+  </div>
+
+  <div class="controls">
+
+    <button
+      class="primary"
+      id="startBtn">
+      START CAMERA
+    </button>
+
+    <button
+      class="secondary"
+      id="stopBtn">
+      STOP CAMERA
+    </button>
+
+  </div>
+
+</section>
+
+<section class="manual">
+
+  <h2>Manual Barcode</h2>
+
+  <div class="manualRow">
+
+    <input
+      id="manualBarcode"
+      inputmode="numeric"
+      autocomplete="off"
+      placeholder="EAN / UPC barcode">
+
+    <button
+      class="primary"
+      id="identifyBtn">
+      IDENTIFY
+    </button>
+
+  </div>
+
+</section>
+
+<section
+  class="result"
+  id="result">
+
+  <div class="productTop">
+
+    <div
+      class="art"
+      id="art">
+
+      <div class="artEmpty">
+        EXACT ARTWORK
+      </div>
+
+    </div>
+
+    <div>
+
+      <h2 id="title">
+        Product
+      </h2>
+
+      <div
+        class="meta"
+        id="meta">
+      </div>
+
+      <div
+        class="badges"
+        id="badges">
+      </div>
+
+    </div>
+
+  </div>
+
+  <div class="metrics">
+
+    <div class="metric">
+      <small>Identity</small>
+      <b id="confidence">—</b>
+    </div>
+
+    <div class="metric">
+      <small>Artwork</small>
+      <b id="artConfidence">—</b>
+    </div>
+
+    <div class="metric">
+      <small>Decision</small>
+      <b id="decision">—</b>
+    </div>
+
+  </div>
+
+  <button
+    class="secondary rescan"
+    id="rescanBtn">
+    SCAN ANOTHER PRODUCT
+  </button>
+
+</section>
+
+<div class="footer">
+  MEDIA DEAL ENGINE · LIVE RESOLVER
+</div>
 
 </div>
 
+
 <script>
 
-const video = document.getElementById('video');
-const statusEl = document.getElementById('status');
-const startBtn = document.getElementById('startBtn');
-const stopBtn = document.getElementById('stopBtn');
-const manualBarcode = document.getElementById('manualBarcode');
-const identifyBtn = document.getElementById('identifyBtn');
+const API =
+  'https://deal-engine-api.dennis-deeper.workers.dev';
 
-let stream = null;
-let detector = null;
-let scanning = false;
+const video =
+  document.getElementById('video');
 
-function goToLookup(code){
-  const clean = String(code || '').replace(/\D/g,'');
+const statusEl =
+  document.getElementById('status');
 
-  if(!clean){
-    statusEl.textContent = 'No valid barcode detected.';
-    return;
-  }
+const resultBox =
+  document.getElementById('result');
 
-  window.location.href =
-    'index.html?barcode=' + encodeURIComponent(clean) + '#lookup';
+const startBtn =
+  document.getElementById('startBtn');
+
+const stopBtn =
+  document.getElementById('stopBtn');
+
+const rescanBtn =
+  document.getElementById('rescanBtn');
+
+const manualInput =
+  document.getElementById('manualBarcode');
+
+const identifyBtn =
+  document.getElementById('identifyBtn');
+
+let reader = null;
+let controls = null;
+let locked = false;
+
+
+/* -----------------------------
+   BARCODE VALIDATION
+----------------------------- */
+
+function cleanBarcode(value){
+
+  return String(value || '')
+    .replace(/\D/g,'');
+
 }
 
-async function startCamera(){
 
-  statusEl.textContent = 'Starting camera…';
+function validLength(code){
+
+  return [
+    8,
+    12,
+    13,
+    14
+  ].includes(code.length);
+
+}
+
+
+/* -----------------------------
+   CAMERA
+----------------------------- */
+
+async function startScanner(){
+
+  if(locked){
+    locked = false;
+  }
+
+  resultBox.classList.remove('show');
+
+  statusEl.textContent =
+    'Starting rear camera…';
 
   try{
 
-    stream = await navigator.mediaDevices.getUserMedia({
-      video:{
-        facingMode:{ideal:'environment'},
-        width:{ideal:1920},
-        height:{ideal:1080}
-      },
-      audio:false
-    });
+    if(
+      typeof ZXingBrowser === 'undefined'
+    ){
 
-    video.srcObject = stream;
-    await video.play();
-
-    statusEl.textContent =
-      'Camera ready. Hold barcode inside the frame.';
-
-    if('BarcodeDetector' in window){
-
-      const formats = [
-        'ean_13',
-        'ean_8',
-        'upc_a',
-        'upc_e',
-        'code_128'
-      ];
-
-      detector = new BarcodeDetector({formats});
-      scanning = true;
-      scanLoop();
-
-    }else{
-
-      statusEl.textContent =
-        'Camera is working, but this browser does not support automatic barcode detection. Use Manual Barcode below.';
+      throw new Error(
+        'ZXing scanner library did not load.'
+      );
 
     }
 
-  }catch(err){
+    if(controls){
+
+      try{
+        controls.stop();
+      }catch(e){}
+
+      controls = null;
+
+    }
+
+    reader =
+      new ZXingBrowser.BrowserMultiFormatReader();
+
+    const devices =
+      await ZXingBrowser.BrowserCodeReader
+      .listVideoInputDevices();
+
+    let deviceId = undefined;
+
+    if(devices && devices.length){
+
+      const rear =
+        devices.find(d =>
+          /back|rear|environment/i
+          .test(d.label)
+        );
+
+      deviceId =
+        rear
+        ? rear.deviceId
+        : devices[devices.length - 1].deviceId;
+
+    }
 
     statusEl.textContent =
-      'Unable to start camera: ' +
-      (err?.message || 'camera permission error');
+      'Scanning… hold the barcode steady.';
+
+    controls =
+      await reader.decodeFromVideoDevice(
+        deviceId,
+        video,
+        async (scanResult, error) => {
+
+          if(
+            scanResult &&
+            !locked
+          ){
+
+            const code =
+              cleanBarcode(
+                scanResult.getText()
+              );
+
+            if(
+              !validLength(code)
+            ){
+              return;
+            }
+
+            locked = true;
+
+            statusEl.textContent =
+              'Barcode detected: ' + code;
+
+            try{
+
+              if(controls){
+                controls.stop();
+              }
+
+            }catch(e){}
+
+            await resolveBarcode(code);
+
+          }
+
+        }
+      );
 
   }
+  catch(err){
+
+    statusEl.textContent =
+      'Scanner error: ' +
+      (err?.message || 'Unable to start camera.');
+
+  }
+
 }
 
-async function scanLoop(){
 
-  if(!scanning || !detector) return;
+function stopScanner(){
 
   try{
 
-    const codes = await detector.detect(video);
-
-    if(codes && codes.length){
-
-      const raw =
-        codes[0].rawValue || '';
-
-      if(raw){
-
-        scanning = false;
-
-        statusEl.textContent =
-          'Barcode found: ' + raw;
-
-        stopCamera();
-
-        setTimeout(()=>{
-          goToLookup(raw);
-        },350);
-
-        return;
-      }
+    if(controls){
+      controls.stop();
     }
 
   }catch(e){}
 
-  requestAnimationFrame(scanLoop);
+  controls = null;
+
+  statusEl.textContent =
+    'Camera stopped.';
+
 }
 
-function stopCamera(){
 
-  scanning = false;
+/* -----------------------------
+   MEDIA DEAL ENGINE RESOLVER
+----------------------------- */
 
-  if(stream){
-    stream.getTracks().forEach(track=>track.stop());
-    stream = null;
+async function resolveBarcode(rawCode){
+
+  const code =
+    cleanBarcode(rawCode);
+
+  if(!code){
+
+    statusEl.textContent =
+      'Please enter a valid barcode.';
+
+    return;
+
   }
 
-  video.srcObject = null;
+  stopScanner();
+
+  statusEl.textContent =
+    'Barcode found. Identifying exact product…';
+
+  try{
+
+    const response =
+      await fetch(
+        API +
+        '/lookup?barcode=' +
+        encodeURIComponent(code),
+        {
+          cache:'no-store'
+        }
+      );
+
+    const data =
+      await response.json();
+
+    if(!response.ok){
+
+      throw new Error(
+        data?.error ||
+        ('Resolver ' + response.status)
+      );
+
+    }
+
+    displayResult(
+      code,
+      data
+    );
+
+  }
+  catch(err){
+
+    statusEl.textContent =
+      'Product lookup failed: ' +
+      (err?.message || 'Unknown error.');
+
+    locked = false;
+
+  }
+
 }
 
-startBtn.addEventListener('click', startCamera);
 
-stopBtn.addEventListener('click', ()=>{
-  stopCamera();
-  statusEl.textContent = 'Camera stopped.';
-});
+/* -----------------------------
+   PRODUCT RESULT
+----------------------------- */
 
-identifyBtn.addEventListener('click', ()=>{
-  goToLookup(manualBarcode.value);
-});
+function displayResult(
+  code,
+  data
+){
 
-manualBarcode.addEventListener('keydown', e=>{
-  if(e.key === 'Enter'){
-    goToLookup(manualBarcode.value);
+  const item =
+    data.item;
+
+  resultBox.classList.add('show');
+
+  if(!item){
+
+    document.getElementById('title')
+      .textContent =
+      'Product unresolved';
+
+    document.getElementById('meta')
+      .textContent =
+      'Barcode: ' + code;
+
+    document.getElementById('badges')
+      .innerHTML =
+      '<span class="badge">UNRESOLVED</span>';
+
+    document.getElementById('confidence')
+      .textContent =
+      (data.confidence || 0) + '%';
+
+    document.getElementById('artConfidence')
+      .textContent =
+      (data.artworkConfidence || 0) + '%';
+
+    document.getElementById('decision')
+      .textContent =
+      data.decision || 'UNRESOLVED';
+
+    document.getElementById('art')
+      .innerHTML =
+      '<div class="artEmpty">NO EXACT ARTWORK FOUND</div>';
+
+    statusEl.textContent =
+      'Barcode recognised, but no verified product match was found.';
+
+    return;
+
   }
-});
+
+
+  document.getElementById('title')
+    .textContent =
+    item.title ||
+    'Identified Product';
+
+
+  const detailParts = [
+
+    item.platform,
+    item.brand,
+    item.model,
+    item.category
+
+  ].filter(Boolean);
+
+
+  document.getElementById('meta')
+    .textContent =
+    'Barcode: ' +
+    code +
+    (
+      detailParts.length
+      ? ' · ' +
+        detailParts.join(' · ')
+      : ''
+    );
+
+
+  let badges = '';
+
+  badges +=
+    '<span class="badge good">' +
+    (data.decision || 'IDENTIFIED') +
+    '</span>';
+
+
+  if(data.exactMatch){
+
+    badges +=
+      '<span class="badge good">EXACT MATCH</span>';
+
+  }
+
+
+  document.getElementById('badges')
+    .innerHTML =
+    badges;
+
+
+  document.getElementById('confidence')
+    .textContent =
+    (data.confidence ?? 0) + '%';
+
+
+  document.getElementById('artConfidence')
+    .textContent =
+    (data.artworkConfidence ?? 0) + '%';
+
+
+  document.getElementById('decision')
+    .textContent =
+    data.decision || '—';
+
+
+  const images =
+    (item.images || [])
+    .filter(Boolean);
+
+
+  if(images.length){
+
+    const imageURL =
+      API +
+      '/image?url=' +
+      encodeURIComponent(
+        images[0]
+      );
+
+
+    document.getElementById('art')
+      .innerHTML =
+      '<img src="' +
+      imageURL +
+      '" alt="Exact product artwork">';
+
+  }
+  else{
+
+    document.getElementById('art')
+      .innerHTML =
+      '<div class="artEmpty">NO EXACT ARTWORK AVAILABLE</div>';
+
+  }
+
+
+  statusEl.textContent =
+    'Product identified successfully.';
+
+}
+
+
+/* -----------------------------
+   BUTTONS
+----------------------------- */
+
+startBtn.addEventListener(
+  'click',
+  startScanner
+);
+
+
+stopBtn.addEventListener(
+  'click',
+  stopScanner
+);
+
+
+identifyBtn.addEventListener(
+  'click',
+  () => {
+
+    locked = true;
+
+    resolveBarcode(
+      manualInput.value
+    );
+
+  }
+);
+
+
+manualInput.addEventListener(
+  'keydown',
+  e => {
+
+    if(e.key === 'Enter'){
+
+      locked = true;
+
+      resolveBarcode(
+        manualInput.value
+      );
+
+    }
+
+  }
+);
+
+
+rescanBtn.addEventListener(
+  'click',
+  () => {
+
+    locked = false;
+
+    resultBox.classList.remove(
+      'show'
+    );
+
+    startScanner();
+
+  }
+);
+
+
+/* -----------------------------
+   CLEANUP
+----------------------------- */
+
+window.addEventListener(
+  'pagehide',
+  () => {
+
+    try{
+
+      if(controls){
+        controls.stop();
+      }
+
+    }catch(e){}
+
+  }
+);
 
 </script>
 
