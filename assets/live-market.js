@@ -2,6 +2,8 @@
   'use strict';
 
   const API = 'https://deal-engine-api.dennis-deeper.workers.dev';
+  const STATIC_FEED = 'data/live-market.json';
+
   const grid = document.getElementById('marketGrid');
   const empty = document.getElementById('emptyState');
   const feedStatus = document.getElementById('feedStatus');
@@ -11,8 +13,12 @@
   let items = [];
   let activeFilter = 'all';
 
-  const esc = (v='') => String(v).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'}[c]));
-  const money = v => Number.isFinite(Number(v)) ? '£' + Number(v).toFixed(2) : '—';
+  const esc = (v='') => String(v).replace(/[&<>"']/g, c => ({
+    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'
+  }[c]));
+
+  const money = v =>
+    Number.isFinite(Number(v)) ? '£' + Number(v).toFixed(2) : '—';
 
   function parseDate(v){
     if(!v) return null;
@@ -34,18 +40,20 @@
     const expiry = parseDate(item.expiresAt);
     if(expiry && expiry.getTime() <= Date.now()) return false;
 
-    if(item.availability && /sold out|out of stock|unavailable|ended|expired/i.test(item.availability)) return false;
+    if(item.availability && /sold out|out of stock|unavailable|ended|expired/i.test(item.availability)) {
+      return false;
+    }
 
-    // Margin safety: if the feed marks a margin failure, never surface the card.
     if(item.marginSafe === false) return false;
-
     return true;
   }
 
   function filterMatch(item){
     if(activeFilter === 'all') return true;
     const type = String(item.dealType || '').toLowerCase();
-    const tags = Array.isArray(item.tags) ? item.tags.map(x => String(x).toLowerCase()) : [];
+    const tags = Array.isArray(item.tags)
+      ? item.tags.map(x => String(x).toLowerCase())
+      : [];
     return type === activeFilter || tags.includes(activeFilter);
   }
 
@@ -66,7 +74,9 @@
 
   function publicSeller(item){
     if(item.publicSeller) return item.publicSeller;
-    if(String(item.channel || '').toLowerCase() === 'affiliate' && item.retailer) return item.retailer;
+    if(String(item.channel || '').toLowerCase() === 'affiliate' && item.retailer) {
+      return item.retailer;
+    }
     return 'Media Deal Engine';
   }
 
@@ -75,33 +85,77 @@
     const roiClass = Number.isFinite(roi) && roi >= 50 ? 'good' : 'watch';
     const timer = item.expiresAt ? countdown(item.expiresAt) : '';
     const verified = parseDate(item.verifiedAt);
-    const verifiedText = verified ? verified.toLocaleString('en-GB', {dateStyle:'short', timeStyle:'short'}) : '—';
+    const verifiedText = verified
+      ? verified.toLocaleString('en-GB', {dateStyle:'short', timeStyle:'short'})
+      : '—';
 
-    // sourceRetailer/sourceUrl/acquisitionCost are intentionally NOT rendered.
     return `
       <article class="deal" data-id="${esc(item.id || '')}">
         <div class="media">
-          ${item.image ? `<img src="${esc(item.image)}" alt="${esc(item.title || 'Product artwork')}" loading="lazy">` : `<div class="noimg">EXACT ARTWORK PENDING</div>`}
+          ${item.image
+            ? `<img src="${esc(item.image)}" alt="${esc(item.title || 'Product artwork')}" loading="lazy">`
+            : `<div class="noimg">EXACT ARTWORK PENDING</div>`}
         </div>
         <div class="body">
           <div class="eyebrow">
             <span class="signal">${esc(item.signal || item.dealType || 'VERIFIED')}</span>
-            <span class="timer" data-expiry="${esc(item.expiresAt || '')}">${timer ? `ENDS ${esc(timer)}` : 'SUBJECT TO AVAILABILITY'}</span>
+            <span class="timer" data-expiry="${esc(item.expiresAt || '')}">
+              ${timer ? `ENDS ${esc(timer)}` : 'SUBJECT TO AVAILABILITY'}
+            </span>
           </div>
+
           <h3>${esc(item.title || 'Untitled product')}</h3>
-          <div class="meta">${esc([item.format, item.label, item.region, publicSeller(item)].filter(Boolean).join(' · '))}</div>
+
+          <div class="meta">
+            ${esc([item.format, item.label, item.region, publicSeller(item)]
+              .filter(Boolean).join(' · '))}
+          </div>
 
           <div class="prices">
-            <div class="metric"><small>MDE PRICE</small><b>${money(item.price)}</b></div>
-            <div class="metric"><small>MARKET</small><b>${Number.isFinite(Number(item.marketLow)) || Number.isFinite(Number(item.marketHigh)) ? `${money(item.marketLow)}–${money(item.marketHigh)}` : '—'}</b></div>
-            <div class="metric"><small>ROI</small><b class="roi ${roiClass}">${Number.isFinite(roi) ? Math.round(roi) + '%' : '—'}</b></div>
+            <div class="metric">
+              <small>MDE PRICE</small>
+              <b>${money(item.price)}</b>
+            </div>
+
+            <div class="metric">
+              <small>MARKET</small>
+              <b>${
+                Number.isFinite(Number(item.marketLow)) ||
+                Number.isFinite(Number(item.marketHigh))
+                  ? `${money(item.marketLow)}–${money(item.marketHigh)}`
+                  : '—'
+              }</b>
+            </div>
+
+            <div class="metric">
+              <small>ROI</small>
+              <b class="roi ${roiClass}">
+                ${Number.isFinite(roi) ? Math.round(roi) + '%' : '—'}
+              </b>
+            </div>
           </div>
 
           <div class="reason">${esc(item.reason || 'Verified MDE opportunity.')}</div>
-          <div class="availability">${esc(item.availability || 'Availability verified')} · Verified ${esc(verifiedText)}</div>
 
-          ${item.url ? `<a class="cta" href="${esc(item.url)}" rel="nofollow sponsored noopener" target="_blank">${String(item.channel || '').toLowerCase() === 'affiliate' ? 'VIEW PARTNER OFFER' : 'VIEW OFFER'}</a>` : ''}
-          ${String(item.channel || '').toLowerCase() === 'affiliate' ? `<div class="disclosure">Affiliate link: MDE may earn a commission if you purchase. This does not affect MDE scoring.</div>` : ''}
+          <div class="availability">
+            ${esc(item.availability || 'Availability verified')}
+            · Verified ${esc(verifiedText)}
+          </div>
+
+          ${item.url
+            ? `<a class="cta" href="${esc(item.url)}" rel="nofollow sponsored noopener" target="_blank">
+                ${String(item.channel || '').toLowerCase() === 'affiliate'
+                  ? 'VIEW PARTNER OFFER'
+                  : 'VIEW OFFER'}
+               </a>`
+            : ''}
+
+          ${String(item.channel || '').toLowerCase() === 'affiliate'
+            ? `<div class="disclosure">
+                Affiliate link: MDE may earn a commission if you purchase.
+                This does not affect MDE scoring.
+               </div>`
+            : ''}
         </div>
       </article>`;
   }
@@ -112,29 +166,55 @@
     empty.hidden = visible.length !== 0;
   }
 
+  async function fetchJson(url){
+    const r = await fetch(url, {cache:'no-store'});
+    if(!r.ok) throw new Error(`HTTP ${r.status}`);
+    return r.json();
+  }
+
   async function load(){
+    let data = null;
+    let sourceLabel = 'MDE API';
+
     try{
-      const r = await fetch(API + '/live-market', {cache:'no-store'});
-      if(!r.ok) throw new Error(`Feed HTTP ${r.status}`);
-      const data = await r.json();
-
-      const list = Array.isArray(data) ? data : Array.isArray(data.items) ? data.items : [];
-      items = list;
-
-      const liveCount = items.filter(isLive).length;
-      feedStatus.textContent = liveCount ? `${liveCount} verified live opportunit${liveCount === 1 ? 'y' : 'ies'}` : 'Feed connected · no verified live opportunities';
-      feedStatus.className = liveCount ? 'live' : '';
-
-      const stamp = parseDate(data.verifiedAt || data.generatedAt);
-      feedTime.textContent = 'Last verified: ' + (stamp ? stamp.toLocaleString('en-GB', {dateStyle:'short', timeStyle:'short'}) : 'per-item verification');
-      render();
-    }catch(err){
-      items = [];
-      feedStatus.textContent = 'Live feed not connected yet';
-      feedStatus.className = 'warn';
-      feedTime.textContent = 'No customer deals displayed without verification';
-      render();
+      data = await fetchJson(API + '/live-market');
+    }catch(apiError){
+      sourceLabel = 'safe fallback feed';
+      try{
+        data = await fetchJson(STATIC_FEED);
+      }catch(staticError){
+        data = {items:[]};
+        sourceLabel = 'offline-safe mode';
+      }
     }
+
+    const list = Array.isArray(data)
+      ? data
+      : Array.isArray(data.items)
+        ? data.items
+        : [];
+
+    items = list;
+    const liveCount = items.filter(isLive).length;
+
+    if(sourceLabel === 'offline-safe mode'){
+      feedStatus.textContent = 'Live feed unavailable · no unverified deals shown';
+      feedStatus.className = 'warn';
+    }else{
+      feedStatus.textContent = liveCount
+        ? `${liveCount} verified live opportunit${liveCount === 1 ? 'y' : 'ies'} · ${sourceLabel}`
+        : `Feed connected · no verified live opportunities · ${sourceLabel}`;
+      feedStatus.className = liveCount ? 'live' : '';
+    }
+
+    const stamp = parseDate(data.verifiedAt || data.generatedAt);
+    feedTime.textContent = 'Last verified: ' + (
+      stamp
+        ? stamp.toLocaleString('en-GB', {dateStyle:'short', timeStyle:'short'})
+        : 'per-item verification'
+    );
+
+    render();
   }
 
   filters.forEach(btn => btn.addEventListener('click', () => {
@@ -152,7 +232,6 @@
       el.textContent = text === 'ENDED' ? 'ENDED' : `ENDS ${text}`;
     });
 
-    // Automatically remove any cards whose real expiry just passed.
     render();
   }, 30000);
 

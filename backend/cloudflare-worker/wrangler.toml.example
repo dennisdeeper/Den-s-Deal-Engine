@@ -1,6 +1,22 @@
-name = "dens-deal-engine-api"
+name = "deal-engine-api"
 main = "worker.js"
-compatibility_date = "2026-09-03"
+compatibility_date = "2026-09-01"
 
-[vars]
-EBAY_MARKETPLACE_ID = "EBAY_GB"
+# Existing secrets should remain configured in Cloudflare:
+# EBAY_CLIENT_ID
+# EBAY_CLIENT_SECRET
+#
+# Optional:
+# UPCITEMDB_USER_KEY
+# UPCITEMDB_KEY_TYPE
+# EBAY_MARKETPLACE_ID = "EBAY_GB"
+# MDE_MIN_IMMEDIATE_ROI = "50"
+# MDE_DEFAULT_FEE_RATE = "0.13"
+#
+# Later, for private admin-managed Live Market storage:
+#
+# [[kv_namespaces]]
+# binding = "MDE_MARKET_KV"
+# id = "YOUR_KV_NAMESPACE_ID"
+#
+# Then add MDE_ADMIN_TOKEN as a Cloudflare secret.
