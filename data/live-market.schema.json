@@ -1,0 +1,97 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "Media Deal Engine Live Market Feed",
+  "type": "object",
+  "required": [
+    "generatedAt",
+    "items"
+  ],
+  "properties": {
+    "generatedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "items": {
+      "type": "array",
+      "maxItems": 250,
+      "items": {
+        "type": "object",
+        "required": [
+          "id",
+          "title",
+          "price",
+          "channel",
+          "status",
+          "verifiedAt"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "minLength": 1
+          },
+          "title": {
+            "type": "string",
+            "minLength": 1
+          },
+          "price": {
+            "type": "number",
+            "minimum": 0
+          },
+          "referencePrice": {
+            "type": [
+              "number",
+              "null"
+            ],
+            "minimum": 0
+          },
+          "channel": {
+            "enum": [
+              "affiliate",
+              "discovery",
+              "owned",
+              "dropship"
+            ]
+          },
+          "status": {
+            "enum": [
+              "live",
+              "paused"
+            ]
+          },
+          "sourceVerified": {
+            "type": "boolean"
+          },
+          "affiliateApproved": {
+            "type": "boolean"
+          },
+          "verifiedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "sourceExpiresAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "expiryVerified": {
+            "type": "boolean"
+          },
+          "marginSafe": {
+            "type": "boolean"
+          },
+          "publicUrl": {
+            "type": "string",
+            "format": "uri"
+          },
+          "partnerUrl": {
+            "type": "string",
+            "format": "uri"
+          }
+        }
+      }
+    }
+  }
+}

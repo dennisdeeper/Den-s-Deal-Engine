@@ -1,6 +1,6 @@
 let ebayTokenCache = { token: null, expiresAt: 0 };
 
-const VERSION = '8.1-live-market';
+const VERSION = '8.2-retail-discovery';
 const DEFAULT_PUBLIC_FEED =
   'https://dennisdeeper.github.io/Den-s-Deal-Engine/data/live-market.json';
 
@@ -233,6 +233,14 @@ function eligibleMarketItem(item, env) {
     if (!validHttps(item.partnerUrl || item.publicUrl || item.url)) return false;
   }
 
+  // Verified retailer discovery is deliberately separate from affiliate,
+  // owned-stock and dropship inventory.
+  if (channel === 'discovery') {
+    if (item.sourceVerified !== true) return false;
+    if (!validHttps(item.publicUrl || item.url)) return false;
+    if (num(item.publicPrice ?? item.price) === null) return false;
+  }
+
   const economics = calculateEconomics(item, env);
   const minRoi = num(item.minRoi) ?? num(env.MDE_MIN_IMMEDIATE_ROI) ?? 50;
 
@@ -258,6 +266,8 @@ function publicMarketItem(item, requestUrl, env) {
   let publicUrl = '';
   if (channel === 'affiliate') {
     publicUrl = validHttps(item.partnerUrl || item.publicUrl || item.url);
+  } else if (channel === 'discovery') {
+    publicUrl = validHttps(item.publicUrl || item.url);
   } else {
     publicUrl = validHttps(item.publicUrl);
   }
@@ -275,6 +285,13 @@ function publicMarketItem(item, requestUrl, env) {
 
   const marketLow = num(item.marketLow);
   const marketHigh = num(item.marketHigh);
+  const referencePrice = num(item.referencePrice);
+  const savingPct =
+    referencePrice !== null &&
+    economics.price !== null &&
+    referencePrice > 0
+      ? Math.max(0, ((referencePrice - economics.price) / referencePrice) * 100)
+      : null;
 
   return {
     id: clean(item.id, 120),
@@ -282,6 +299,9 @@ function publicMarketItem(item, requestUrl, env) {
     price: economics.price,
     marketLow,
     marketHigh,
+    referencePrice,
+    savingPct,
+    offerText: clean(item.offerText, 240),
     format: clean(item.format, 80),
     label: clean(item.label, 120),
     region: clean(item.region, 80),
@@ -290,11 +310,11 @@ function publicMarketItem(item, requestUrl, env) {
     channel,
     publicSeller:
       clean(item.publicSeller, 100) ||
-      (channel === 'affiliate'
+      (['affiliate', 'discovery'].includes(channel)
         ? clean(item.retailer, 100)
         : 'Media Deal Engine'),
     retailer:
-      channel === 'affiliate'
+      ['affiliate', 'discovery'].includes(channel)
         ? clean(item.retailer, 100)
         : '',
     status: 'live',

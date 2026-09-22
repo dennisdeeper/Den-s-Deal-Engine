@@ -50,6 +50,9 @@
 
   function filterMatch(item){
     if(activeFilter === 'all') return true;
+    const channel = String(item.channel || '').toLowerCase();
+    if(activeFilter === 'discovery') return channel === 'discovery';
+
     const type = String(item.dealType || '').toLowerCase();
     const tags = Array.isArray(item.tags)
       ? item.tags.map(x => String(x).toLowerCase())
@@ -74,20 +77,47 @@
 
   function publicSeller(item){
     if(item.publicSeller) return item.publicSeller;
-    if(String(item.channel || '').toLowerCase() === 'affiliate' && item.retailer) {
+    const channel = String(item.channel || '').toLowerCase();
+    if(['affiliate', 'discovery'].includes(channel) && item.retailer) {
       return item.retailer;
     }
     return 'Media Deal Engine';
   }
 
   function card(item){
+    const channel = String(item.channel || '').toLowerCase();
+    const isDiscovery = channel === 'discovery';
+
     const roi = Number(item.roi);
     const roiClass = Number.isFinite(roi) && roi >= 50 ? 'good' : 'watch';
+    const savingPct = Number(item.savingPct);
     const timer = item.expiresAt ? countdown(item.expiresAt) : '';
     const verified = parseDate(item.verifiedAt);
     const verifiedText = verified
       ? verified.toLocaleString('en-GB', {dateStyle:'short', timeStyle:'short'})
       : '—';
+
+    const middleLabel = isDiscovery ? 'RRP' : 'MARKET';
+    const middleValue = isDiscovery
+      ? money(item.referencePrice)
+      : (
+          Number.isFinite(Number(item.marketLow)) ||
+          Number.isFinite(Number(item.marketHigh))
+            ? `${money(item.marketLow)}–${money(item.marketHigh)}`
+            : '—'
+        );
+
+    const thirdLabel = isDiscovery ? 'SAVE' : 'ROI';
+    const thirdValue = isDiscovery
+      ? (Number.isFinite(savingPct) ? Math.round(savingPct) + '%' : '—')
+      : (Number.isFinite(roi) ? Math.round(roi) + '%' : '—');
+
+    const ctaLabel =
+      channel === 'affiliate'
+        ? 'VIEW PARTNER OFFER'
+        : isDiscovery
+          ? 'VIEW RETAILER'
+          : 'VIEW OFFER';
 
     return `
       <article class="deal" data-id="${esc(item.id || '')}">
@@ -103,9 +133,7 @@
               ${timer ? `ENDS ${esc(timer)}` : 'SUBJECT TO AVAILABILITY'}
             </span>
           </div>
-
           <h3>${esc(item.title || 'Untitled product')}</h3>
-
           <div class="meta">
             ${esc([item.format, item.label, item.region, publicSeller(item)]
               .filter(Boolean).join(' · '))}
@@ -113,48 +141,39 @@
 
           <div class="prices">
             <div class="metric">
-              <small>MDE PRICE</small>
+              <small>${isDiscovery ? 'RETAIL PRICE' : 'MDE PRICE'}</small>
               <b>${money(item.price)}</b>
             </div>
-
             <div class="metric">
-              <small>MARKET</small>
-              <b>${
-                Number.isFinite(Number(item.marketLow)) ||
-                Number.isFinite(Number(item.marketHigh))
-                  ? `${money(item.marketLow)}–${money(item.marketHigh)}`
-                  : '—'
-              }</b>
+              <small>${middleLabel}</small>
+              <b>${middleValue}</b>
             </div>
-
             <div class="metric">
-              <small>ROI</small>
-              <b class="roi ${roiClass}">
-                ${Number.isFinite(roi) ? Math.round(roi) + '%' : '—'}
-              </b>
+              <small>${thirdLabel}</small>
+              <b class="roi ${isDiscovery ? 'good' : roiClass}">${thirdValue}</b>
             </div>
           </div>
 
-          <div class="reason">${esc(item.reason || 'Verified MDE opportunity.')}</div>
+          ${item.offerText
+            ? `<div class="reason"><strong>${esc(item.offerText)}</strong></div>`
+            : ''}
 
+          <div class="reason">${esc(item.reason || 'Verified MDE opportunity.')}</div>
           <div class="availability">
             ${esc(item.availability || 'Availability verified')}
             · Verified ${esc(verifiedText)}
           </div>
 
           ${item.url
-            ? `<a class="cta" href="${esc(item.url)}" rel="nofollow sponsored noopener" target="_blank">
-                ${String(item.channel || '').toLowerCase() === 'affiliate'
-                  ? 'VIEW PARTNER OFFER'
-                  : 'VIEW OFFER'}
-               </a>`
+            ? `<a class="cta" href="${esc(item.url)}" rel="${channel === 'affiliate' ? 'nofollow sponsored noopener' : 'nofollow noopener'}" target="_blank">${ctaLabel}</a>`
             : ''}
 
-          ${String(item.channel || '').toLowerCase() === 'affiliate'
-            ? `<div class="disclosure">
-                Affiliate link: MDE may earn a commission if you purchase.
-                This does not affect MDE scoring.
-               </div>`
+          ${channel === 'affiliate'
+            ? `<div class="disclosure">Affiliate link: MDE may earn a commission if you purchase. This does not affect MDE scoring.</div>`
+            : ''}
+
+          ${isDiscovery
+            ? `<div class="disclosure">Retail discovery link. No affiliate relationship is assumed by this card.</div>`
             : ''}
         </div>
       </article>`;
