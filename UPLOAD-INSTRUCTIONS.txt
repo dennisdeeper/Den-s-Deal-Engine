@@ -1,0 +1,28 @@
+MEDIA DEAL ENGINE V8 — SIMPLE WEB UPLOAD
+
+This package changes only:
+- /index.html
+- /live-market.html (new)
+- /assets/live-market.js (new)
+
+It does NOT overwrite:
+- scanner.html
+- backend/
+- Cloudflare Worker
+- your existing image assets
+
+UPLOAD USING THE BROWSER EDITOR YOU ALREADY OPENED:
+
+1. In the left Explorer, click index.html.
+2. Select all its text and replace it with the index.html from this package.
+3. Save (Ctrl+S).
+4. Drag live-market.html into the repository root in the Explorer.
+5. Expand assets and drag live-market.js into assets.
+6. Click the Source Control icon on the left.
+7. Enter commit message:
+   MDE v8 live market shell and safety controls
+8. Click Commit / Sync Changes.
+
+IMPORTANT:
+The Live Market page will deliberately show "Live feed not connected yet" until the Cloudflare Worker has a real /live-market endpoint.
+That is intentional: no fake products, prices or countdowns are shown.
