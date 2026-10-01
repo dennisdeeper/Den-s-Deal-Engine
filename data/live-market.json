@@ -1,10 +1,10 @@
 {
-  "generatedAt": "2026-10-01T11:18:02+01:00",
+  "generatedAt": "2026-10-01T11:58:00+01:00",
   "items": [
     {
       "id": "zavvi-princess-frog-4k-13168847",
       "title": "The Princess And The Frog - Zavvi Exclusive 4K Ultra HD Collection",
-      "price": 7.99,
+      "price": 6.99,
       "referencePrice": 19.99,
       "format": "4K UHD",
       "label": "Disney",
@@ -21,17 +21,17 @@
         "4k",
         "zavvi-exclusive"
       ],
-      "signal": "60% OFF",
-      "reason": "Exact Zavvi-exclusive 4K edition re-verified in stock at £7.99 versus £19.99 RRP.",
+      "signal": "65% OFF",
+      "reason": "Exact Zavvi-exclusive 4K edition re-verified in stock at £6.99 versus £19.99 RRP.",
       "sourceVerified": true,
-      "verifiedAt": "2026-10-01T11:18:02+01:00",
+      "verifiedAt": "2026-10-01T11:58:00+01:00",
       "maxVerificationAgeHours": 24,
       "expiryVerified": false
     },
     {
       "id": "zavvi-incredibles2-4k-13241396",
       "title": "Incredibles 2 - Zavvi Exclusive 4K Ultra HD Collection",
-      "price": 7.99,
+      "price": 6.99,
       "referencePrice": 19.99,
       "format": "4K UHD",
       "label": "Pixar",
@@ -48,17 +48,17 @@
         "4k",
         "zavvi-exclusive"
       ],
-      "signal": "60% OFF",
-      "reason": "Exact Zavvi-exclusive 4K edition re-verified in stock at £7.99 versus £19.99 RRP.",
+      "signal": "65% OFF",
+      "reason": "Exact Zavvi-exclusive 4K edition re-verified in stock at £6.99 versus £19.99 RRP.",
       "sourceVerified": true,
-      "verifiedAt": "2026-10-01T11:18:02+01:00",
+      "verifiedAt": "2026-10-01T11:58:00+01:00",
       "maxVerificationAgeHours": 24,
       "expiryVerified": false
     },
     {
       "id": "zavvi-cars2-4k-13174328",
       "title": "Cars 2 - Zavvi Exclusive 4K Ultra HD Collection",
-      "price": 7.99,
+      "price": 6.99,
       "referencePrice": 19.99,
       "format": "4K UHD",
       "label": "Pixar",
@@ -75,10 +75,10 @@
         "4k",
         "zavvi-exclusive"
       ],
-      "signal": "60% OFF",
-      "reason": "Exact Zavvi-exclusive 4K edition re-verified in stock at £7.99 versus £19.99 RRP.",
+      "signal": "65% OFF",
+      "reason": "Exact Zavvi-exclusive 4K edition re-verified in stock at £6.99 versus £19.99 RRP.",
       "sourceVerified": true,
-      "verifiedAt": "2026-10-01T11:18:02+01:00",
+      "verifiedAt": "2026-10-01T11:58:00+01:00",
       "maxVerificationAgeHours": 24,
       "expiryVerified": false
     },
@@ -267,8 +267,8 @@
       "retailer": "Arrow Films UK",
       "publicSeller": "Arrow Films UK",
       "publicUrl": "https://www.arrowfilms.com/p/4k/the-last-starfighter-limited-edition-4k-uhd/15359275/",
-      "status": "live",
-      "availability": "In stock",
+      "status": "sold-out",
+      "availability": "Out of stock",
       "dealType": "hold",
       "tags": [
         "discovery",
@@ -279,9 +279,9 @@
       ],
       "signal": "2 FOR £40",
       "offerText": "Selected UHDs are currently 2 for £40; offer applies at checkout while stocks last and may be withdrawn.",
-      "reason": "Exact Arrow Limited Edition 4K UHD re-verified in stock at £25, with current 2-for-£40 UHD eligibility.",
+      "reason": "Exact Arrow Limited Edition 4K UHD re-verified out of stock; hidden from the public Live Market until availability returns.",
       "sourceVerified": true,
-      "verifiedAt": "2026-10-01T11:18:02+01:00",
+      "verifiedAt": "2026-10-01T11:58:00+01:00",
       "maxVerificationAgeHours": 24,
       "expiryVerified": false
     },
@@ -318,7 +318,7 @@
     {
       "id": "zavvi-ralph-breaks-internet-4k-13241398",
       "title": "Ralph Breaks The Internet - Zavvi Exclusive 4K Ultra HD Collection",
-      "price": 7.99,
+      "price": 6.99,
       "referencePrice": 19.99,
       "format": "4K UHD",
       "label": "Disney",
@@ -336,17 +336,17 @@
         "zavvi-exclusive",
         "disney"
       ],
-      "signal": "60% OFF",
-      "reason": "Exact Zavvi-exclusive 4K edition re-verified in stock at £7.99 versus £19.99 RRP.",
+      "signal": "65% OFF",
+      "reason": "Exact Zavvi-exclusive 4K edition re-verified in stock at £6.99 versus £19.99 RRP.",
       "sourceVerified": true,
-      "verifiedAt": "2026-10-01T11:18:02+01:00",
+      "verifiedAt": "2026-10-01T11:58:00+01:00",
       "maxVerificationAgeHours": 24,
       "expiryVerified": false
     },
     {
       "id": "zavvi-nutcracker-four-realms-4k-13241399",
       "title": "The Nutcracker and The Four Realms - Zavvi Exclusive 4K Ultra HD Collection",
-      "price": 7.99,
+      "price": 6.99,
       "referencePrice": 19.99,
       "format": "4K UHD",
       "label": "Disney",
@@ -364,10 +364,10 @@
         "zavvi-exclusive",
         "disney"
       ],
-      "signal": "60% OFF",
-      "reason": "Exact Zavvi-exclusive 4K edition re-verified in stock at £7.99 versus £19.99 RRP.",
+      "signal": "65% OFF",
+      "reason": "Exact Zavvi-exclusive 4K edition re-verified in stock at £6.99 versus £19.99 RRP.",
       "sourceVerified": true,
-      "verifiedAt": "2026-10-01T11:18:02+01:00",
+      "verifiedAt": "2026-10-01T11:58:00+01:00",
       "maxVerificationAgeHours": 24,
       "expiryVerified": false
     }
