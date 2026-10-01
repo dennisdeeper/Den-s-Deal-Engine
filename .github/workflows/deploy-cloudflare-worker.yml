@@ -13,42 +13,72 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    env:
+      RAW_CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
     steps:
       - name: Checkout
         uses: actions/checkout@v6
 
-      - name: Deploy deal-engine-api
+      - name: Authenticate Cloudflare safely
         shell: bash
-        env:
-          RAW_CF_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          RAW_CF_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         run: |
           python - <<'PY'
-          import os, re
-          raw = os.environ.get("RAW_CF_API_TOKEN", "")
-          s = raw.strip().strip('"').strip("'")
-          m = re.search(r'Authorization:\s*Bearer\s+([A-Za-z0-9._~-]+)', s, re.I)
+          import json, os, re, urllib.request
+
+          raw = os.environ.get("RAW_CLOUDFLARE_API_TOKEN", "")
+          candidates = []
+
+          def add(v):
+              v = (v or "").strip().strip("'\"")
+              if v and v not in candidates:
+                  candidates.append(v)
+
+          add(raw)
+          m = re.search(r"(?i)bearer\s+([A-Za-z0-9._~+/-]{20,})", raw)
           if m:
-              s = m.group(1)
-          elif s.lower().startswith("bearer "):
-              s = s[7:].strip()
-          s = re.sub(r'[\r\n\t ]+', '', s)
+              add(m.group(1))
+          for token in re.findall(r"[A-Za-z0-9._~+/-]{20,}", raw):
+              add(token)
 
-          aid = os.environ.get("RAW_CF_ACCOUNT_ID", "")
-          aid = re.sub(r'\s+', '', aid)
+          good = None
+          for token in candidates:
+              req = urllib.request.Request(
+                  "https://api.cloudflare.com/client/v4/user/tokens/verify",
+                  headers={"Authorization": "Bearer " + token, "Content-Type": "application/json"},
+              )
+              try:
+                  with urllib.request.urlopen(req, timeout=15) as r:
+                      body = json.load(r)
+                  if body.get("success"):
+                      good = token
+                      break
+              except Exception:
+                  pass
 
-          if not s:
-              raise SystemExit("CLOUDFLARE_API_TOKEN is empty after normalization")
-          if not aid:
-              raise SystemExit("CLOUDFLARE_ACCOUNT_ID is empty after normalization")
+          if not good:
+              raise SystemExit("Could not validate the stored Cloudflare API token.")
 
-          open("/tmp/cf_api_token", "w").write(s)
-          open("/tmp/cf_account_id", "w").write(aid)
-          print("Cloudflare credentials normalized for Wrangler.")
+          print("Cloudflare API token validated.")
+          print("::add-mask::" + good)
+          with open(os.environ["GITHUB_ENV"], "a") as fh:
+              fh.write("CLOUDFLARE_API_TOKEN=" + good + "\n")
           PY
-          export CLOUDFLARE_API_TOKEN="$(cat /tmp/cf_api_token)"
-          export CLOUDFLARE_ACCOUNT_ID="$(cat /tmp/cf_account_id)"
-          npx wrangler@latest deploy --config backend/cloudflare-worker/wrangler.toml
+
+      - name: Deploy deal-engine-api
+        working-directory: backend/cloudflare-worker
+        shell: bash
+        run: npx wrangler@latest deploy
+
+      - name: Seed verified Live Market KV
+        shell: bash
+        run: |
+          curl -fsS -X PUT \
+            "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/storage/kv/namespaces/763b501028384e6aa55aa33878ce9450/values/live-market-feed" \
+            -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
+            -H "Content-Type: application/json" \
+            --data-binary @data/live-market.json
+          echo
 
       - name: Verify production health
         shell: bash
@@ -75,7 +105,8 @@ jobs:
                   market = get_json("/live-market?ci=1")
                   last = {"health": health, "status": status, "market": {
                       "source": market.get("source"),
-                      "count": market.get("count")
+                      "count": market.get("count"),
+                      "verifiedAt": market.get("verifiedAt")
                   }}
                   if (
                       health.get("version") == expected_version
@@ -84,7 +115,7 @@ jobs:
                       and status.get("storage") == "kv"
                       and status.get("adminWriteReady") is True
                       and market.get("source") == "kv"
-                      and int(market.get("count", 0)) > 0
+                      and int(market.get("count", 0)) >= 13
                   ):
                       print(json.dumps(last, indent=2))
                       raise SystemExit(0)
