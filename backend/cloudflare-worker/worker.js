@@ -2,7 +2,7 @@ let ebayTokenCache = { token: null, expiresAt: 0 };
 
 const VERSION = '8.2.1-live-market-kv';
 const DEFAULT_PUBLIC_FEED =
-  'https://dennisdeeper.github.io/Den-s-Deal-Engine/data/live-market.json';
+  'https://raw.githubusercontent.com/dennisdeeper/Den-s-Deal-Engine/main/data/live-market.json';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
