@@ -1,0 +1,1 @@
+Deploy Cloudflare Worker production build 8.2.1-live-market-kv with token normalization.
