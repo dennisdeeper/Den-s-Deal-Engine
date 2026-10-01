@@ -277,7 +277,9 @@ function publicMarketItem(item, requestUrl, env) {
   }
 
   const rawImage = validHttps(item.image);
-  const image = rawImage ? proxyUrlFor(requestUrl, rawImage) : '';
+  const image = rawImage
+    ? proxyUrlFor(requestUrl, rawImage)
+    : (publicUrl ? productArtworkUrlFor(requestUrl, publicUrl) : '');
 
   // A countdown is emitted only when the feed explicitly says the
   // source expiry was verified. Otherwise the browser shows
@@ -559,6 +561,13 @@ function proxyUrlFor(requestUrl, src) {
   if (!cleanUrl) return '';
   const base = new URL(requestUrl);
   return base.origin + '/image?url=' + encodeURIComponent(cleanUrl);
+}
+
+function productArtworkUrlFor(requestUrl, productUrl) {
+  const cleanUrl = validHttps(productUrl);
+  if (!cleanUrl) return '';
+  const base = new URL(requestUrl);
+  return base.origin + '/product-artwork?url=' + encodeURIComponent(cleanUrl);
 }
 
 function isBlockedHost(hostname) {
