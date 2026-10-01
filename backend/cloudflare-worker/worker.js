@@ -84,7 +84,7 @@ export default {
         liveMarket: true,
         marketStorage: marketStorage(env),
         marketAdminConfigured: !!(
-          env.MDE_ADMIN_TOKEN &&
+          (env.MDE_ADMIN_TOKEN || env.ADMIN_TOKEN) &&
           env.MDE_MARKET_KV &&
           typeof env.MDE_MARKET_KV.put === 'function'
         )
@@ -102,7 +102,7 @@ export default {
         storage: marketStorage(env),
         publicFeedFallback: DEFAULT_PUBLIC_FEED,
         adminWriteReady: !!(
-          env.MDE_ADMIN_TOKEN &&
+          (env.MDE_ADMIN_TOKEN || env.ADMIN_TOKEN) &&
           env.MDE_MARKET_KV &&
           typeof env.MDE_MARKET_KV.put === 'function'
         )
@@ -375,7 +375,8 @@ async function publicLiveMarket(request, env) {
 }
 
 async function updateLiveMarket(request, env) {
-  if (!env.MDE_ADMIN_TOKEN) {
+  const adminToken = env.MDE_ADMIN_TOKEN || env.ADMIN_TOKEN;
+  if (!adminToken) {
     return json({ error: 'Admin market updates are not configured' }, 503);
   }
 
@@ -384,7 +385,7 @@ async function updateLiveMarket(request, env) {
   }
 
   const auth = request.headers.get('Authorization') || '';
-  if (auth !== `Bearer ${env.MDE_ADMIN_TOKEN}`) {
+  if (auth !== `Bearer ${adminToken}`) {
     return json({ error: 'Unauthorized' }, 401);
   }
 
