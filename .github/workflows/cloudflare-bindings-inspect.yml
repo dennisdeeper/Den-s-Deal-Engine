@@ -13,16 +13,29 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 10
     env:
-      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      RAW_CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
       CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
     steps:
       - name: Checkout
         uses: actions/checkout@v6
 
+      - name: Normalize token
+        shell: bash
+        run: |
+          token="$RAW_CLOUDFLARE_API_TOKEN"
+          token="${token//$'\r'/}"
+          token="${token//$'\n'/}"
+          token="${token#Authorization: }"
+          token="${token#authorization: }"
+          token="${token#Bearer }"
+          token="${token#bearer }"
+          echo "::add-mask::$token"
+          echo "CLOUDFLARE_API_TOKEN=$token" >> "$GITHUB_ENV"
+
       - name: Verify API token
         shell: bash
         run: |
-          curl -sS https://api.cloudflare.com/client/v4/user/tokens/verify \
+          curl -fsS https://api.cloudflare.com/client/v4/user/tokens/verify \
             -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
             -H "Content-Type: application/json"
           echo
@@ -30,7 +43,7 @@ jobs:
       - name: Verify account access
         shell: bash
         run: |
-          curl -sS "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID" \
+          curl -fsS "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID" \
             -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
             -H "Content-Type: application/json"
           echo
@@ -38,7 +51,7 @@ jobs:
       - name: List KV namespaces
         shell: bash
         run: |
-          curl -sS "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/storage/kv/namespaces?per_page=100" \
+          curl -fsS "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/storage/kv/namespaces?per_page=100" \
             -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
             -H "Content-Type: application/json"
           echo
