@@ -133,10 +133,15 @@ def now_iso() -> str:
     return datetime.now(timezone.utc).isoformat().replace("+00:00", "Z")
 
 
-def fetch_text(url: str) -> str:
+def _validate_url(url: str):
     parsed = urlparse(url)
     if parsed.scheme != "https" or parsed.hostname not in ALLOWED_HOSTS:
         raise ValueError(f"unsupported URL host: {url}")
+    return parsed
+
+
+def fetch_text(url: str) -> str:
+    _validate_url(url)
     req = Request(
         url,
         headers={
@@ -151,6 +156,21 @@ def fetch_text(url: str) -> str:
             raise RuntimeError(f"unexpected content type: {ctype}")
         raw = resp.read(3_500_000)
     return raw.decode("utf-8", "replace")
+
+
+def fetch_json_url(url: str) -> Any:
+    _validate_url(url)
+    req = Request(
+        url,
+        headers={
+            "User-Agent": UA,
+            "Accept": "application/json",
+            "Accept-Language": "en-GB,en;q=0.9",
+        },
+    )
+    with urlopen(req, timeout=TIMEOUT) as resp:
+        raw = resp.read(5_000_000)
+    return json.loads(raw.decode("utf-8", "replace"))
 
 
 def flatten_json(value: Any):
@@ -597,11 +617,28 @@ def main() -> int:
 
     for source in SOURCES:
         try:
-            page = fetch_text(source.url)
-            links = discover_links(page, source.url, source.max_links)
+            host = urlparse(source.url).hostname or ""
+            if "rarewaves.com" in host:
+                endpoint = source.url.rstrip("/") + "/products.json?limit=50"
+                data = fetch_json_url(endpoint)
+                products = data.get("products", []) if isinstance(data, dict) else []
+                links = []
+                for product in products:
+                    handle = str(product.get("handle") or "").strip()
+                    if not handle:
+                        continue
+                    links.append("https://www.rarewaves.com/products/" + handle)
+                    if len(links) >= source.max_links:
+                        break
+            else:
+                page = fetch_text(source.url)
+                links = discover_links(page, source.url, source.max_links)
+
             for link in links:
                 candidates.setdefault(link.rstrip("/") + "/", source)
-            source_stats.append({"source": source.url, "links": len(links), "ok": True})
+            source_stats.append({"source": source.url, "links": len(links), "ok": len(links) > 0})
+            if not links:
+                errors.append(f"collection {source.url}: no product links discovered")
         except Exception as exc:
             errors.append(f"collection {source.url}: {exc}")
             source_stats.append({"source": source.url, "links": 0, "ok": False})
@@ -658,6 +695,7 @@ def main() -> int:
             {"title": x["title"], "price": x["price"], "signal": x["signal"], "retailer": x["retailer"]}
             for x in selected[:8]
         ],
+        "sourceHealth": source_stats,
         "errors": errors[-12:],
     }
     if args.summary:
