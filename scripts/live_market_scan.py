@@ -85,6 +85,20 @@ SOURCES = (
         tags=("arrow", "boutique", "limited-edition"),
         max_links=16,
     ),
+    Source(
+        "HMV UK",
+        "https://hmv.com/store/hmv-offers/4k-ultra-hd-blu-ray-offers",
+        region="UK",
+        tags=("hmv", "4k", "sale"),
+        max_links=14,
+    ),
+    Source(
+        "HMV UK",
+        "https://hmv.com/store/promotions/limitededitionsteelbook",
+        region="UK",
+        tags=("hmv", "steelbook", "limited-edition"),
+        max_links=12,
+    ),
 )
 
 ALLOWED_HOSTS = {
@@ -92,6 +106,8 @@ ALLOWED_HOSTS = {
     "zavvi.com",
     "www.arrowfilms.com",
     "arrowfilms.com",
+    "www.hmv.com",
+    "hmv.com",
 }
 
 MEDIA_RE = re.compile(
@@ -208,8 +224,16 @@ def discover_links(page: str, collection_url: str, max_links: int) -> list[str]:
         p = urlparse(full)
         if p.hostname not in ALLOWED_HOSTS:
             continue
-        if not re.search(r"/p/(?:[^/?]+/)*[^/?]+/\d+/?$", p.path, re.I):
+
+        is_thg_product = bool(re.search(r"/p/(?:[^/?]+/)*[^/?]+/\d+/?$", p.path, re.I))
+        is_hmv_product = bool(re.search(
+            r"^/store/film-tv/(?:4k-ultra-hd-blu-ray|steelbooks?)/[^/]+/?$",
+            p.path,
+            re.I,
+        ))
+        if not (is_thg_product or is_hmv_product):
             continue
+
         if full not in seen:
             seen.add(full)
             links.append(full)
@@ -260,14 +284,21 @@ def parse_product(url: str, page: str, source: Source | None = None) -> dict[str
 
     price = money_from(offer.get("price"))
     if price is None:
-        m = re.search(r"Current price:\s*£\s*([\d,.]+)", text, re.I)
-        if m:
-            price = money_from(m.group(1))
+        for pat in (
+            r"Current price:\s*£\s*([\d,.]+)",
+            r"\bNow\s*£\s*([\d,.]+)",
+        ):
+            m = re.search(pat, text, re.I)
+            if m:
+                price = money_from(m.group(1))
+                if price is not None:
+                    break
 
     rrp = None
     for pat in (
         r"Recommended Retail Price:\s*£\s*([\d,.]+)",
         r"\bRRP:\s*£\s*([\d,.]+)",
+        r"\bWas\s*£\s*([\d,.]+)",
     ):
         m = re.search(pat, text, re.I)
         if m:
@@ -279,7 +310,7 @@ def parse_product(url: str, page: str, source: Source | None = None) -> dict[str
     if not availability:
         if re.search(r"\b(out of stock|sold out|currently unavailable)\b", text, re.I):
             availability = "Out of stock"
-        elif re.search(r"\bin stock\b", text, re.I):
+        elif re.search(r"\bin stock\b", text, re.I) or re.search(r"\badd to basket\b", text, re.I):
             availability = "In stock"
 
     image = ""
@@ -315,7 +346,12 @@ def product_id(url: str, retailer: str) -> str:
     p = urlparse(url)
     numeric = re.findall(r"(\d+)", p.path)
     suffix = numeric[-1] if numeric else re.sub(r"[^a-z0-9]+", "-", p.path.lower()).strip("-")[-48:]
-    prefix = "zavvi" if "zavvi" in retailer.lower() else "arrow" if "arrow" in retailer.lower() else "media"
+    prefix = (
+        "zavvi" if "zavvi" in retailer.lower()
+        else "arrow" if "arrow" in retailer.lower()
+        else "hmv" if "hmv" in retailer.lower()
+        else "media"
+    )
     slug = p.path.strip("/").split("/")[-2] if p.path.rstrip("/").split("/")[-1].isdigit() else p.path.strip("/").split("/")[-1]
     slug = re.sub(r"[^a-z0-9]+", "-", slug.lower()).strip("-")[:54]
     return f"{prefix}-{slug}-{suffix}".strip("-")[:120]
@@ -353,6 +389,8 @@ def infer_tags(title: str, source: Source | None, retailer: str) -> list[str]:
         tags.add("zavvi")
     if "arrow" in retailer.lower():
         tags.update(("arrow", "boutique"))
+    if "hmv" in retailer.lower():
+        tags.add("hmv")
     for needle, tag in (
         ("4k", "4k"),
         ("ultra hd", "4k"),
@@ -476,6 +514,8 @@ def source_for_existing(url: str) -> Source | None:
         return Source("Arrow Films UK", "https://www.arrowfilms.com/", region="Region Free", label="Arrow Films", tags=("arrow", "boutique"))
     if "zavvi.com" in host:
         return Source("Zavvi UK", "https://www.zavvi.com/", tags=("zavvi",))
+    if "hmv.com" in host:
+        return Source("HMV UK", "https://hmv.com/", region="UK", tags=("hmv",))
     return None
 
 
