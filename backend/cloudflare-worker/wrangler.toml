@@ -1,0 +1,18 @@
+name = "deal-engine-api"
+main = "worker.js"
+compatibility_date = "2026-09-01"
+
+[[kv_namespaces]]
+binding = "MDE_MARKET_KV"
+id = "763b501028384e6aa55aa33878ce9450"
+
+# Secrets are configured in Cloudflare, not committed here:
+# ADMIN_TOKEN (supported for backward compatibility)
+# MDE_ADMIN_TOKEN (preferred)
+# EBAY_CLIENT_ID
+# EBAY_CLIENT_SECRET
+#
+# Optional runtime variables:
+# EBAY_MARKETPLACE_ID = "EBAY_GB"
+# MDE_MIN_IMMEDIATE_ROI = "50"
+# MDE_DEFAULT_FEE_RATE = "0.13"
