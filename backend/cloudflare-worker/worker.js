@@ -1,8 +1,10 @@
 let ebayTokenCache = { token: null, expiresAt: 0 };
 
-const VERSION = '8.2.6-feed-guard';
+const VERSION = '8.2.7-household-recommendations';
 const DEFAULT_PUBLIC_FEED =
   'https://raw.githubusercontent.com/dennisdeeper/Den-s-Deal-Engine/main/data/live-market.json';
+const DEFAULT_RECOMMENDATIONS_FEED =
+  'https://raw.githubusercontent.com/dennisdeeper/Den-s-Deal-Engine/main/data/household-recommendations.json';
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -86,6 +88,7 @@ export default {
         ebayConfigured: !!(env.EBAY_CLIENT_ID && env.EBAY_CLIENT_SECRET),
         artworkProxy: true,
         liveMarket: true,
+        householdRecommendations: true,
         marketStorage: marketStorage(env),
         marketAdminConfigured: !!(
           (env.MDE_ADMIN_TOKEN || env.ADMIN_TOKEN) &&
@@ -97,6 +100,32 @@ export default {
 
     if (url.pathname === '/live-market' && request.method === 'GET') {
       return publicLiveMarket(request, env);
+    }
+
+    if (url.pathname === '/recommendations' && request.method === 'GET') {
+      return publicHouseholdRecommendations(request, env);
+    }
+
+    if (url.pathname === '/recommendations/status' && request.method === 'GET') {
+      const feed = await readHouseholdRecommendations(env);
+      const data = feed.data || {};
+      const items = Array.isArray(data.items) ? data.items : [];
+      return json({
+        ok: items.length > 0,
+        version: VERSION,
+        source: feed.source,
+        generatedAt: clean(data.generatedAt, 80),
+        total: items.length,
+        current: items.filter(x => String(x?.state || '').toLowerCase() === 'current').length,
+        previous: items.filter(x => String(x?.state || '').toLowerCase() === 'previous').length,
+        automation: data.automation && typeof data.automation === 'object'
+          ? {
+              dailyRecheck: data.automation.dailyRecheck === true,
+              discoveryRun: data.automation.discoveryRun === true,
+              discoveredCount: num(data.automation.discoveredCount)
+            }
+          : null
+      }, 200, { 'Cache-Control': 'no-store' });
     }
 
     if (url.pathname === '/live-market/status' && request.method === 'GET') {
@@ -529,6 +558,104 @@ async function updateLiveMarket(request, env) {
     generatedAt: payload.generatedAt,
     protectedAgainstStaleOverwrite: true
   }, 200, { 'Cache-Control': 'no-store' });
+}
+
+
+
+/* =========================================================
+   HOUSEHOLD RECOMMENDATIONS
+========================================================= */
+
+async function readHouseholdRecommendations(env) {
+  if (env.MDE_MARKET_KV && typeof env.MDE_MARKET_KV.get === 'function') {
+    try {
+      const raw = await env.MDE_MARKET_KV.get('household-recommendations-feed');
+      if (raw) return { data: JSON.parse(raw), source: 'kv' };
+    } catch (_) {}
+  }
+
+  try {
+    const response = await fetch(DEFAULT_RECOMMENDATIONS_FEED, {
+      headers: { Accept: 'application/json' },
+      cf: { cacheTtl: 300, cacheEverything: true }
+    });
+    if (response.ok) {
+      return { data: await response.json(), source: 'remote' };
+    }
+  } catch (_) {}
+
+  return {
+    data: { generatedAt: new Date().toISOString(), items: [] },
+    source: 'empty'
+  };
+}
+
+function publicRecommendationItem(item, requestUrl) {
+  const rawImage = validHttps(item?.image);
+  const productUrl = validHttps(item?.url);
+  const image = rawImage
+    ? proxyUrlFor(requestUrl, rawImage)
+    : (productUrl ? productArtworkUrlFor(requestUrl, productUrl) : '');
+
+  return {
+    id: clean(item?.id, 120),
+    problem: clean(item?.problem, 120),
+    problemTitle: clean(item?.problemTitle, 160),
+    title: clean(item?.title, 240),
+    retailer: clean(item?.retailer, 120),
+    url: productUrl,
+    image,
+    price: num(item?.price),
+    previousPrice: num(item?.previousPrice),
+    availability: clean(item?.availability, 80),
+    state: ['current','previous'].includes(String(item?.state || '').toLowerCase())
+      ? String(item.state).toLowerCase()
+      : 'previous',
+    tier: ['primary','alternative'].includes(String(item?.tier || '').toLowerCase())
+      ? String(item.tier).toLowerCase()
+      : 'alternative',
+    sourceType: clean(item?.sourceType, 80),
+    firstSeenAt: clean(item?.firstSeenAt, 80),
+    lastCheckedAt: clean(item?.lastCheckedAt, 80),
+    lastCheckOk: item?.lastCheckOk !== false,
+    summary: clean(item?.summary, 420),
+    previousReason: clean(item?.previousReason, 180)
+  };
+}
+
+async function publicHouseholdRecommendations(request, env) {
+  try {
+    const feed = await readHouseholdRecommendations(env);
+    const data = feed.data || {};
+    const items = (Array.isArray(data.items) ? data.items : [])
+      .map(item => publicRecommendationItem(item, request.url))
+      .filter(item => item.id && item.title && item.url);
+
+    return json({
+      generatedAt: clean(data.generatedAt, 80) || new Date().toISOString(),
+      source: feed.source,
+      count: items.length,
+      currentCount: items.filter(x => x.state === 'current').length,
+      previousCount: items.filter(x => x.state === 'previous').length,
+      automation: data.automation && typeof data.automation === 'object'
+        ? {
+            dailyRecheck: data.automation.dailyRecheck === true,
+            discoveryRun: data.automation.discoveryRun === true,
+            discoveredCount: num(data.automation.discoveredCount)
+          }
+        : null,
+      items
+    }, 200, { 'Cache-Control': 'public, max-age=60, s-maxage=300' });
+  } catch (_) {
+    return json({
+      generatedAt: new Date().toISOString(),
+      source: 'error',
+      count: 0,
+      currentCount: 0,
+      previousCount: 0,
+      items: []
+    }, 200, { 'Cache-Control': 'no-store' });
+  }
 }
 
 
