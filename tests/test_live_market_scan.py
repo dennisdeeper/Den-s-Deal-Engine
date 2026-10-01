@@ -130,6 +130,37 @@ class LiveMarketScanTests(unittest.TestCase):
         }
         self.assertGreater(scan.score_item(a), scan.score_item(b))
 
+    def test_rank_movement_and_price_drop_history(self):
+        selected = [
+            {
+                "title":"Deal A","retailer":"Zavvi UK",
+                "publicUrl":"https://www.zavvi.com/p/4k/deal-a/11111111/",
+                "price":8.99,
+            },
+            {
+                "title":"Deal B","retailer":"Arrow Films UK",
+                "publicUrl":"https://www.arrowfilms.com/p/4k/deal-b/22222222/",
+                "price":20.00,
+            },
+        ]
+        previous = [
+            {
+                "title":"Deal B","publicUrl":"https://www.arrowfilms.com/p/4k/deal-b/22222222/",
+                "rank":1,"price":25.00,"firstSeenAt":"2026-09-30T10:00:00Z","verifiedAt":"2026-10-01T10:00:00Z",
+            },
+            {
+                "title":"Deal A","publicUrl":"https://www.zavvi.com/p/4k/deal-a/11111111/",
+                "rank":2,"price":8.99,"firstSeenAt":"2026-09-30T10:00:00Z","verifiedAt":"2026-10-01T10:00:00Z",
+            },
+        ]
+        out = scan.annotate_history(selected, previous)
+        self.assertEqual(out[0]["rank"], 1)
+        self.assertEqual(out[0]["rankChange"], 1)
+        self.assertFalse(out[0]["isNew"])
+        self.assertEqual(out[1]["rankChange"], -1)
+        self.assertEqual(out[1]["priceDrop"], 5.0)
+        self.assertEqual(out[1]["firstSeenAt"], "2026-09-30T10:00:00Z")
+
     def test_balancing_prevents_single_retailer_takeover(self):
         items = []
         for i in range(20):
