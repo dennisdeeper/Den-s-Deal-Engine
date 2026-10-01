@@ -597,6 +597,46 @@ def select_balanced(items: list[dict[str, Any]], max_items: int) -> list[dict[st
     return selected
 
 
+def annotate_history(
+    selected: list[dict[str, Any]],
+    existing_items: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    previous_rank: dict[str, int] = {}
+    previous_by_url: dict[str, dict[str, Any]] = {}
+    for idx, item in enumerate(existing_items, 1):
+        url = str(item.get("publicUrl") or item.get("url") or "").rstrip("/")
+        if not url:
+            continue
+        previous_by_url[url] = item
+        rank = item.get("rank")
+        try:
+            previous_rank[url] = int(rank) if rank is not None else idx
+        except Exception:
+            previous_rank[url] = idx
+
+    stamp = now_iso()
+    for idx, item in enumerate(selected, 1):
+        key = str(item.get("publicUrl") or "").rstrip("/")
+        prior = previous_by_url.get(key)
+        old_rank = previous_rank.get(key)
+
+        item["rank"] = idx
+        item["rankChange"] = (old_rank - idx) if old_rank is not None else None
+        item["isNew"] = old_rank is None
+        item["firstSeenAt"] = (
+            str((prior or {}).get("firstSeenAt") or (prior or {}).get("verifiedAt") or stamp)
+        )
+
+        old_price = money_from((prior or {}).get("price"))
+        new_price = money_from(item.get("price"))
+        if old_price is not None and new_price is not None and new_price < old_price - 0.005:
+            item["priceDrop"] = round(old_price - new_price, 2)
+        else:
+            item["priceDrop"] = 0
+
+    return selected
+
+
 def main() -> int:
     ap = argparse.ArgumentParser()
     ap.add_argument("--input", default="data/live-market.json")
@@ -668,6 +708,7 @@ def main() -> int:
             time.sleep(0.25)
 
     selected = select_balanced(verified, max(1, min(args.max_items, 40)))
+    selected = annotate_history(selected, existing_items)
     if len(selected) < MIN_SAFE_LIVE:
         print(json.dumps({"ok": False, "verified": len(selected), "errors": errors[-12:]}, indent=2))
         raise SystemExit(f"Fail-closed: only {len(selected)} verified live deals; refusing to replace feed")
