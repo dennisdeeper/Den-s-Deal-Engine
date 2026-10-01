@@ -19,6 +19,26 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
 
+      - name: Verify API token
+        shell: bash
+        run: |
+          curl -sS https://api.cloudflare.com/client/v4/user/tokens/verify \
+            -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
+            -H "Content-Type: application/json"
+          echo
+
+      - name: Verify account access
+        shell: bash
+        run: |
+          curl -sS "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID" \
+            -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
+            -H "Content-Type: application/json"
+          echo
+
       - name: List KV namespaces
-        working-directory: backend/cloudflare-worker
-        run: npx wrangler@latest kv namespace list
+        shell: bash
+        run: |
+          curl -sS "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/storage/kv/namespaces?per_page=100" \
+            -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
+            -H "Content-Type: application/json"
+          echo
