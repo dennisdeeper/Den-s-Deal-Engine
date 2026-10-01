@@ -54,25 +54,37 @@ jobs:
         shell: bash
         run: |
           python - <<'PY'
-          import json, time, urllib.request
+          import json, subprocess, time
 
           base = "https://deal-engine-api.dennis-deeper.workers.dev"
           expected_version = "8.2.1-live-market-kv"
 
+          def get_json(path):
+              out = subprocess.check_output([
+                  "curl", "-fsS",
+                  "-A", "Mozilla/5.0 MediaDealEngine-CI",
+                  base + path
+              ], text=True, timeout=20)
+              return json.loads(out)
+
           last = None
           for _ in range(12):
               try:
-                  with urllib.request.urlopen(base + "/health", timeout=15) as r:
-                      health = json.load(r)
-                  with urllib.request.urlopen(base + "/live-market/status", timeout=15) as r:
-                      status = json.load(r)
-                  last = {"health": health, "status": status}
+                  health = get_json("/health?ci=1")
+                  status = get_json("/live-market/status?ci=1")
+                  market = get_json("/live-market?ci=1")
+                  last = {"health": health, "status": status, "market": {
+                      "source": market.get("source"),
+                      "count": market.get("count")
+                  }}
                   if (
                       health.get("version") == expected_version
                       and health.get("marketStorage") == "kv"
                       and health.get("marketAdminConfigured") is True
                       and status.get("storage") == "kv"
                       and status.get("adminWriteReady") is True
+                      and market.get("source") == "kv"
+                      and int(market.get("count", 0)) > 0
                   ):
                       print(json.dumps(last, indent=2))
                       raise SystemExit(0)
