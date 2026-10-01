@@ -1,6 +1,6 @@
 let ebayTokenCache = { token: null, expiresAt: 0 };
 
-const VERSION = '8.2-retail-discovery';
+const VERSION = '8.2.1-live-market-kv';
 const DEFAULT_PUBLIC_FEED =
   'https://dennisdeeper.github.io/Den-s-Deal-Engine/data/live-market.json';
 
@@ -356,6 +356,7 @@ async function publicLiveMarket(request, env) {
       verifiedAt: latestVerification
         ? new Date(latestVerification).toISOString()
         : null,
+      source: feed.source,
       count: items.length,
       items
     }, 200, {
@@ -365,6 +366,7 @@ async function publicLiveMarket(request, env) {
     return json({
       generatedAt: new Date().toISOString(),
       verifiedAt: null,
+      source: 'error',
       count: 0,
       items: [],
       error: 'Live market feed temporarily unavailable'
