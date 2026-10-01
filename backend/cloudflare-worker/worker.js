@@ -1,6 +1,6 @@
 let ebayTokenCache = { token: null, expiresAt: 0 };
 
-const VERSION = '8.2.1-live-market-kv';
+const VERSION = '8.2.2-product-artwork';
 const DEFAULT_PUBLIC_FEED =
   'https://raw.githubusercontent.com/dennisdeeper/Den-s-Deal-Engine/main/data/live-market.json';
 
@@ -72,6 +72,10 @@ export default {
 
     if (url.pathname === '/image' && request.method === 'GET') {
       return proxyImage(url);
+    }
+
+    if (url.pathname === '/product-artwork' && request.method === 'GET') {
+      return productArtwork(url);
     }
 
     if (url.pathname === '/health' && request.method === 'GET') {
@@ -633,6 +637,87 @@ async function proxyImage(url) {
     return new Response(response.body, { status: 200, headers });
   } catch (e) {
     return new Response('Image proxy error: ' + safeError(e), {
+      status: 502,
+      headers: corsHeaders
+    });
+  }
+}
+
+
+async function productArtwork(url) {
+  const pageUrl = validHttps(url.searchParams.get('url') || '');
+  if (!pageUrl) {
+    return new Response('Bad product URL', { status: 400, headers: corsHeaders });
+  }
+
+  const target = new URL(pageUrl);
+  const host = target.hostname.toLowerCase();
+  const allowed =
+    host === 'www.zavvi.com' ||
+    host === 'zavvi.com' ||
+    host === 'www.arrowfilms.com' ||
+    host === 'arrowfilms.com';
+
+  if (!allowed) {
+    return new Response('Retailer not supported', { status: 403, headers: corsHeaders });
+  }
+
+  try {
+    const response = await fetch(target.toString(), {
+      headers: {
+        Accept: 'text/html,application/xhtml+xml',
+        'User-Agent': 'Mozilla/5.0 (compatible; MediaDealEngine/8.2)'
+      },
+      redirect: 'follow',
+      cf: { cacheEverything: true, cacheTtl: 3600 }
+    });
+
+    if (!response.ok) {
+      return new Response('Product page fetch failed', {
+        status: response.status,
+        headers: corsHeaders
+      });
+    }
+
+    const html = await response.text();
+    const decode = value => String(value || '')
+      .replace(/&amp;/g, '&')
+      .replace(/&quot;/g, '"')
+      .replace(/&#39;/g, "'")
+      .replace(/&lt;/g, '<')
+      .replace(/&gt;/g, '>');
+
+    const patterns = [
+      /<meta[^>]+property=["']og:image["'][^>]+content=["']([^"']+)["']/i,
+      /<meta[^>]+content=["']([^"']+)["'][^>]+property=["']og:image["']/i,
+      /<meta[^>]+name=["']twitter:image(?::src)?["'][^>]+content=["']([^"']+)["']/i,
+      /<meta[^>]+content=["']([^"']+)["'][^>]+name=["']twitter:image(?::src)?["']/i
+    ];
+
+    let imageUrl = '';
+    for (const pattern of patterns) {
+      const match = html.match(pattern);
+      if (match && match[1]) {
+        imageUrl = decode(match[1]);
+        break;
+      }
+    }
+
+    if (!imageUrl) {
+      const jsonLd = html.match(/"image"\s*:\s*(?:\[\s*)?["'](https:\/\/[^"']+)["']/i);
+      if (jsonLd && jsonLd[1]) imageUrl = decode(jsonLd[1]);
+    }
+
+    const cleanImage = normaliseExternalImageUrl(imageUrl);
+    if (!cleanImage) {
+      return new Response('Artwork not found', { status: 404, headers: corsHeaders });
+    }
+
+    const redirectUrl = new URL('/image', url.origin);
+    redirectUrl.searchParams.set('url', cleanImage);
+    return Response.redirect(redirectUrl.toString(), 302);
+  } catch (e) {
+    return new Response('Artwork resolver error: ' + safeError(e), {
       status: 502,
       headers: corsHeaders
     });
