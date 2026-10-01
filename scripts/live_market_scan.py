@@ -86,18 +86,29 @@ SOURCES = (
         max_links=16,
     ),
     Source(
-        "HMV UK",
-        "https://hmv.com/store/hmv-offers/4k-ultra-hd-blu-ray-offers",
+        "Rarewaves UK",
+        "https://www.rarewaves.com/collections/4k-ultra-hd-blu-ray-offers",
         region="UK",
-        tags=("hmv", "4k", "sale"),
+        tags=("rarewaves", "4k", "sale"),
         max_links=14,
     ),
     Source(
-        "HMV UK",
-        "https://hmv.com/store/promotions/limitededitionsteelbook",
+        "Rarewaves UK",
+        "https://www.rarewaves.com/collections/2-for-30-offer",
         region="UK",
-        tags=("hmv", "steelbook", "limited-edition"),
-        max_links=12,
+        offer_text="Selected 4K UHD titles are currently 2 for £30; offer applies to qualifying products while the retailer promotion remains live.",
+        offer_signal="2 FOR £30",
+        tags=("rarewaves", "4k", "multibuy"),
+        max_links=14,
+    ),
+    Source(
+        "Rarewaves UK",
+        "https://www.rarewaves.com/collections/2-for-26-4k-ultra-hd-blu-ray",
+        region="UK",
+        offer_text="Selected 4K UHD titles are currently 2 for £26; offer applies to qualifying products while the retailer promotion remains live.",
+        offer_signal="2 FOR £26",
+        tags=("rarewaves", "4k", "multibuy"),
+        max_links=14,
     ),
 )
 
@@ -108,6 +119,8 @@ ALLOWED_HOSTS = {
     "arrowfilms.com",
     "www.hmv.com",
     "hmv.com",
+    "www.rarewaves.com",
+    "rarewaves.com",
 }
 
 MEDIA_RE = re.compile(
@@ -231,7 +244,8 @@ def discover_links(page: str, collection_url: str, max_links: int) -> list[str]:
             p.path,
             re.I,
         ))
-        if not (is_thg_product or is_hmv_product):
+        is_rarewaves_product = bool(re.search(r"^/products/[^/]+/?$", p.path, re.I))
+        if not (is_thg_product or is_hmv_product or is_rarewaves_product):
             continue
 
         if full not in seen:
@@ -287,6 +301,7 @@ def parse_product(url: str, page: str, source: Source | None = None) -> dict[str
         for pat in (
             r"Current price:\s*£\s*([\d,.]+)",
             r"\bNow\s*£\s*([\d,.]+)",
+            r"Sale price\s*£\s*([\d,.]+)",
         ):
             m = re.search(pat, text, re.I)
             if m:
@@ -299,6 +314,7 @@ def parse_product(url: str, page: str, source: Source | None = None) -> dict[str
         r"Recommended Retail Price:\s*£\s*([\d,.]+)",
         r"\bRRP:\s*£\s*([\d,.]+)",
         r"\bWas\s*£\s*([\d,.]+)",
+        r"Regular price\s*£\s*([\d,.]+)",
     ):
         m = re.search(pat, text, re.I)
         if m:
@@ -350,6 +366,7 @@ def product_id(url: str, retailer: str) -> str:
         "zavvi" if "zavvi" in retailer.lower()
         else "arrow" if "arrow" in retailer.lower()
         else "hmv" if "hmv" in retailer.lower()
+        else "rarewaves" if "rarewaves" in retailer.lower()
         else "media"
     )
     slug = p.path.strip("/").split("/")[-2] if p.path.rstrip("/").split("/")[-1].isdigit() else p.path.strip("/").split("/")[-1]
@@ -391,6 +408,8 @@ def infer_tags(title: str, source: Source | None, retailer: str) -> list[str]:
         tags.update(("arrow", "boutique"))
     if "hmv" in retailer.lower():
         tags.add("hmv")
+    if "rarewaves" in retailer.lower():
+        tags.add("rarewaves")
     for needle, tag in (
         ("4k", "4k"),
         ("ultra hd", "4k"),
@@ -516,6 +535,8 @@ def source_for_existing(url: str) -> Source | None:
         return Source("Zavvi UK", "https://www.zavvi.com/", tags=("zavvi",))
     if "hmv.com" in host:
         return Source("HMV UK", "https://hmv.com/", region="UK", tags=("hmv",))
+    if "rarewaves.com" in host:
+        return Source("Rarewaves UK", "https://www.rarewaves.com/", region="UK", tags=("rarewaves",))
     return None
 
 
