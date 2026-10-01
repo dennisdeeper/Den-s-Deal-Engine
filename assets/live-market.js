@@ -2,7 +2,7 @@
   'use strict';
 
   const API = 'https://deal-engine-api.dennis-deeper.workers.dev';
-  const STATIC_FEED = 'data/live-market.json';
+  const STATIC_FEED = 'https://raw.githubusercontent.com/dennisdeeper/Den-s-Deal-Engine/main/data/live-market.json';
 
   const grid = document.getElementById('marketGrid');
   const empty = document.getElementById('emptyState');
