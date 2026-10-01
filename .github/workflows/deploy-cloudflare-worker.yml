@@ -42,11 +42,12 @@ jobs:
           if not aid:
               raise SystemExit("CLOUDFLARE_ACCOUNT_ID is empty after normalization")
 
-          with open(os.environ["GITHUB_ENV"], "a") as fh:
-              fh.write("CLOUDFLARE_API_TOKEN=" + s + "\n")
-              fh.write("CLOUDFLARE_ACCOUNT_ID=" + aid + "\n")
+          open("/tmp/cf_api_token", "w").write(s)
+          open("/tmp/cf_account_id", "w").write(aid)
           print("Cloudflare credentials normalized for Wrangler.")
           PY
+          export CLOUDFLARE_API_TOKEN="$(cat /tmp/cf_api_token)"
+          export CLOUDFLARE_ACCOUNT_ID="$(cat /tmp/cf_account_id)"
           npx wrangler@latest deploy --config backend/cloudflare-worker/wrangler.toml
 
       - name: Verify production health
