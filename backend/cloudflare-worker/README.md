@@ -1,29 +1,46 @@
 # Den's Deal Engine secure lookup backend
 
-This optional Cloudflare Worker keeps marketplace credentials off the public GitHub Pages site.
+This Cloudflare Worker keeps marketplace credentials off the public GitHub Pages site and serves the barcode lookup plus Live Market APIs.
 
-## What it does
+## Endpoints
 
-- `GET /health` confirms the service is running.
-- `GET /lookup?barcode=0711719720148` looks up a GTIN/EAN/UPC.
-- Uses UPCitemdb and, when eBay credentials are configured, the eBay Browse API.
-- Returns title, category, model/edition clues, product image(s), and an active eBay listing reference when available.
-- This endpoint does **not** claim active eBay listings are sold-price history.
+- `GET /health` — service/configuration health.
+- `GET /lookup?barcode=0711719720148` — GTIN/EAN/UPC lookup.
+- `GET /live-market` — public verified Live Market feed.
+- `GET /live-market/status` — Live Market storage/write readiness.
+- `POST /admin/live-market` — authenticated Live Market feed update.
 
-## Secrets to add in Cloudflare
+## Cloudflare bindings and secrets
+
+Required for Live Market managed storage:
+
+- KV binding: `MDE_MARKET_KV` → the dedicated Live Market KV namespace.
+- Admin secret: `MDE_ADMIN_TOKEN`.
+
+For backward compatibility the Worker also accepts the existing `ADMIN_TOKEN` secret, so an existing deployment can be upgraded without rotating the secret.
 
 Required for eBay enrichment:
 
 - `EBAY_CLIENT_ID`
 - `EBAY_CLIENT_SECRET`
 
-Optional for a paid UPCitemdb plan:
+Optional:
 
 - `UPCITEMDB_USER_KEY`
 - `UPCITEMDB_KEY_TYPE` (normally `3scale`)
+- `EBAY_MARKETPLACE_ID=EBAY_GB`
+- `MDE_MIN_IMMEDIATE_ROI=50`
+- `MDE_DEFAULT_FEE_RATE=0.13`
 
-Set `EBAY_MARKETPLACE_ID` to `EBAY_GB` for the UK market.
+## Live Market safety
 
-After deployment, copy the Worker URL (for example `https://dens-deal-engine-api.<account>.workers.dev`) into **Scanner → Identification Connection → Secure Backend URL** and press **SAVE CONNECTION**.
+Do not copy stale fallback items into KV or simply refresh their timestamps. Re-verify the exact edition, current price, current stock/availability and source URL before updating `verifiedAt`.
 
-V7.5 also queries the CeX UK product service by barcode and returns current sell/cash/voucher reference prices when available.
+After deployment, check:
+
+- `/health` → `marketStorage: "kv"` and `marketAdminConfigured: true`
+- `/live-market/status` → `storage: "kv"` and `adminWriteReady: true`
+
+The public endpoint deliberately filters stale, unavailable and expired items.
+
+V7.5+ also queries the CeX UK product service by barcode and returns current sell/cash/voucher reference prices when available.
