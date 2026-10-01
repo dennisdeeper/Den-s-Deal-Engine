@@ -1,6 +1,6 @@
 let ebayTokenCache = { token: null, expiresAt: 0 };
 
-const VERSION = '8.2.3-page-artwork';
+const VERSION = '8.2.4-live-rank';
 const DEFAULT_PUBLIC_FEED =
   'https://raw.githubusercontent.com/dennisdeeper/Den-s-Deal-Engine/main/data/live-market.json';
 
@@ -331,6 +331,14 @@ function publicMarketItem(item, requestUrl, env) {
       : [],
     signal: clean(item.signal, 80),
     reason: clean(item.reason, 320),
+    rank: num(item.rank),
+    rankChange:
+      item.rankChange === null || item.rankChange === undefined
+        ? null
+        : num(item.rankChange),
+    isNew: item.isNew === true,
+    firstSeenAt: clean(item.firstSeenAt, 80),
+    priceDrop: num(item.priceDrop),
     roi: economics.roi,
     netProfit: economics.netProfit,
     marginSafe: true,
