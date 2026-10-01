@@ -1,0 +1,41 @@
+name: Cloudflare KV Inventory
+
+on:
+  push:
+    branches:
+      - "inventory-cloudflare-kv-*"
+
+permissions:
+  contents: read
+
+jobs:
+  inventory:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: List KV namespaces
+        shell: bash
+        env:
+          RAW_CF_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          RAW_CF_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          python - <<'PY'
+          import os, re
+          raw = os.environ.get("RAW_CF_API_TOKEN", "")
+          s = raw.strip().strip('"').strip("'")
+          m = re.search(r'Authorization:\s*Bearer\s+([A-Za-z0-9._~-]+)', s, re.I)
+          if m:
+              s = m.group(1)
+          elif s.lower().startswith("bearer "):
+              s = s[7:].strip()
+          s = re.sub(r'[\r\n\t ]+', '', s)
+          aid = re.sub(r'\s+', '', os.environ.get("RAW_CF_ACCOUNT_ID", ""))
+          open("/tmp/cf_api_token", "w").write(s)
+          open("/tmp/cf_account_id", "w").write(aid)
+          PY
+          export CLOUDFLARE_API_TOKEN="$(cat /tmp/cf_api_token)"
+          export CLOUDFLARE_ACCOUNT_ID="$(cat /tmp/cf_account_id)"
+          npx wrangler@latest kv namespace list --config backend/cloudflare-worker/wrangler.toml
