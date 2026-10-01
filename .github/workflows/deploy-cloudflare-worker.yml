@@ -1,0 +1,60 @@
+name: Deploy Cloudflare Worker
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - "deploy-worker-*"
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Deploy deal-engine-api
+        uses: cloudflare/wrangler-action@v4
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: backend/cloudflare-worker
+          command: deploy
+
+      - name: Verify production health
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json, time, urllib.request
+
+          base = "https://deal-engine-api.dennis-deeper.workers.dev"
+          expected_version = "8.2.1-live-market-kv"
+
+          last = None
+          for _ in range(12):
+              try:
+                  with urllib.request.urlopen(base + "/health", timeout=15) as r:
+                      health = json.load(r)
+                  with urllib.request.urlopen(base + "/live-market/status", timeout=15) as r:
+                      status = json.load(r)
+                  last = {"health": health, "status": status}
+                  if (
+                      health.get("version") == expected_version
+                      and health.get("marketStorage") == "kv"
+                      and health.get("marketAdminConfigured") is True
+                      and status.get("storage") == "kv"
+                      and status.get("adminWriteReady") is True
+                  ):
+                      print(json.dumps(last, indent=2))
+                      raise SystemExit(0)
+              except Exception as exc:
+                  last = {"error": str(exc)}
+              time.sleep(5)
+
+          print(json.dumps(last, indent=2))
+          raise SystemExit("Production verification failed")
+          PY
