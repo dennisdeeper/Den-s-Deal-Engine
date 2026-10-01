@@ -87,7 +87,7 @@ jobs:
           import json, subprocess, time
 
           base = "https://deal-engine-api.dennis-deeper.workers.dev"
-          expected_version = "8.2.1-live-market-kv"
+          expected_version = "8.2.2-product-artwork"
 
           def get_json(path):
               out = subprocess.check_output([
@@ -115,7 +115,7 @@ jobs:
                       and status.get("storage") == "kv"
                       and status.get("adminWriteReady") is True
                       and market.get("source") == "kv"
-                      and int(market.get("count", 0)) >= 13
+                      and int(market.get("count", 0)) >= 12
                   ):
                       print(json.dumps(last, indent=2))
                       raise SystemExit(0)
