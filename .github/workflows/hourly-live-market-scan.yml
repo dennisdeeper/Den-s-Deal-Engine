@@ -1,0 +1,199 @@
+name: Hourly Live Market Scan
+
+on:
+  schedule:
+    - cron: "17 * * * *"
+  workflow_dispatch:
+  push:
+    branches:
+      - "scan-live-market-*"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: media-deal-engine-live-market-scan
+  cancel-in-progress: true
+
+jobs:
+  scan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      RAW_CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Test scanner
+        shell: bash
+        run: |
+          python -m unittest tests/test_live_market_scan.py
+
+      - name: Discover and verify live deals
+        shell: bash
+        run: |
+          python scripts/live_market_scan.py \
+            --input data/live-market.json \
+            --output data/live-market.json \
+            --max-items 20 \
+            --summary /tmp/live-market-summary.json
+
+      - name: Validate generated feed
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json
+          from datetime import datetime, timezone
+
+          with open("data/live-market.json", "r", encoding="utf-8") as fh:
+              data = json.load(fh)
+
+          items = data.get("items", [])
+          if len(items) < 6:
+              raise SystemExit("Refusing to publish fewer than 6 verified live deals")
+          if len(items) > 20:
+              raise SystemExit("Feed exceeded 20 items")
+
+          now = datetime.now(timezone.utc)
+          seen = set()
+          for item in items:
+              required = ["id","title","price","publicUrl","retailer","verifiedAt"]
+              missing = [k for k in required if not item.get(k)]
+              if missing:
+                  raise SystemExit(f"Missing fields {missing} in {item.get('id')}")
+              if item["status"] != "live" or item.get("sourceVerified") is not True:
+                  raise SystemExit(f"Unsafe public item {item.get('id')}")
+              if item["publicUrl"] in seen:
+                  raise SystemExit(f"Duplicate URL {item['publicUrl']}")
+              seen.add(item["publicUrl"])
+              stamp = datetime.fromisoformat(item["verifiedAt"].replace("Z","+00:00"))
+              age = (now - stamp.astimezone(timezone.utc)).total_seconds()/3600
+              if age < -0.2 or age > 3.1:
+                  raise SystemExit(f"Freshness failure {item.get('id')}: {age:.2f}h")
+          print(f"Validated {len(items)} fresh verified deals.")
+          PY
+
+      - name: Normalize Cloudflare token
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json, os, re, urllib.request
+
+          raw = os.environ.get("RAW_CLOUDFLARE_API_TOKEN", "")
+          candidates = []
+
+          def add(v):
+              v = (v or "").strip().strip("'\"")
+              if v and v not in candidates:
+                  candidates.append(v)
+
+          add(raw)
+          m = re.search(r"(?i)bearer\s+([A-Za-z0-9._~+/-]{20,})", raw)
+          if m:
+              add(m.group(1))
+          for token in re.findall(r"[A-Za-z0-9._~+/-]{20,}", raw):
+              add(token)
+
+          good = None
+          for token in candidates:
+              req = urllib.request.Request(
+                  "https://api.cloudflare.com/client/v4/user/tokens/verify",
+                  headers={"Authorization":"Bearer "+token,"Content-Type":"application/json"},
+              )
+              try:
+                  with urllib.request.urlopen(req, timeout=15) as r:
+                      body = json.load(r)
+                  if body.get("success"):
+                      good = token
+                      break
+              except Exception:
+                  pass
+
+          if not good:
+              raise SystemExit("Could not validate Cloudflare API token.")
+
+          print("::add-mask::" + good)
+          with open(os.environ["GITHUB_ENV"], "a") as fh:
+              fh.write("CLOUDFLARE_API_TOKEN=" + good + "\n")
+          PY
+
+      - name: Publish verified feed to Cloudflare KV
+        shell: bash
+        run: |
+          curl -fsS -X PUT \
+            "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/storage/kv/namespaces/763b501028384e6aa55aa33878ce9450/values/live-market-feed" \
+            -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
+            -H "Content-Type: application/json" \
+            --data-binary @data/live-market.json
+          echo
+
+      - name: Verify production feed
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json, subprocess, time
+
+          url = "https://deal-engine-api.dennis-deeper.workers.dev/live-market?scancheck=1"
+          last = None
+          for _ in range(8):
+              try:
+                  out = subprocess.check_output([
+                      "curl","-fsS",
+                      "-A","Mozilla/5.0 MediaDealEngine-Scanner",
+                      url
+                  ], text=True, timeout=20)
+                  data = json.loads(out)
+                  last = data
+                  if data.get("source") == "kv" and int(data.get("count", 0)) >= 6:
+                      print(json.dumps({
+                          "source":data.get("source"),
+                          "count":data.get("count"),
+                          "verifiedAt":data.get("verifiedAt")
+                      }, indent=2))
+                      raise SystemExit(0)
+              except Exception as exc:
+                  last = {"error":str(exc)}
+              time.sleep(5)
+          print(json.dumps(last, indent=2))
+          raise SystemExit("Production feed verification failed")
+          PY
+
+      - name: Refresh repository fallback twice daily
+        if: github.event_name == 'schedule'
+        shell: bash
+        run: |
+          HOUR="$(date -u +%H)"
+          if [ "$HOUR" != "00" ] && [ "$HOUR" != "12" ]; then
+            echo "KV refreshed; repository fallback commit not due this hour."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/live-market.json
+          if git diff --cached --quiet; then
+            echo "No fallback changes to commit."
+            exit 0
+          fi
+          git commit -m "Refresh verified Live Market feed"
+          git push
+
+      - name: Scan summary
+        if: always()
+        shell: bash
+        run: |
+          if [ -f /tmp/live-market-summary.json ]; then
+            echo "## Media Deal Engine Live Market" >> "$GITHUB_STEP_SUMMARY"
+            python - <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import json
+          d=json.load(open("/tmp/live-market-summary.json"))
+          print(f"- Verified live deals: **{d.get('verifiedCount',0)}**")
+          print(f"- Candidates checked: **{d.get('candidateCount',0)}**")
+          print(f"- Retailers: **{', '.join(d.get('retailers',[]))}**")
+          print("")
+          print("### Current leaders")
+          for x in d.get("topDeals",[])[:8]:
+              print(f"- {x['title']} — £{x['price']:.2f} — {x['signal']} — {x['retailer']}")
+          PY
+          fi
