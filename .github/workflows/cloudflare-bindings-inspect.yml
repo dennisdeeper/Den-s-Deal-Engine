@@ -19,26 +19,50 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v6
 
-      - name: Normalize token
+      - name: Authenticate Cloudflare safely
         shell: bash
         run: |
-          token="$RAW_CLOUDFLARE_API_TOKEN"
-          token="${token//$'\r'/}"
-          token="${token//$'\n'/}"
-          token="${token#Authorization: }"
-          token="${token#authorization: }"
-          token="${token#Bearer }"
-          token="${token#bearer }"
-          echo "::add-mask::$token"
-          echo "CLOUDFLARE_API_TOKEN=$token" >> "$GITHUB_ENV"
+          python - <<'PY'
+          import json, os, re, urllib.request, urllib.error
 
-      - name: Verify API token
-        shell: bash
-        run: |
-          curl -fsS https://api.cloudflare.com/client/v4/user/tokens/verify \
-            -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
-            -H "Content-Type: application/json"
-          echo
+          raw = os.environ.get("RAW_CLOUDFLARE_API_TOKEN", "")
+          candidates = []
+
+          def add(v):
+              v = (v or "").strip().strip("'\"")
+              if v and v not in candidates:
+                  candidates.append(v)
+
+          add(raw)
+          m = re.search(r"(?i)bearer\s+([A-Za-z0-9._~+/-]{20,})", raw)
+          if m:
+              add(m.group(1))
+          for token in re.findall(r"[A-Za-z0-9._~+/-]{20,}", raw):
+              add(token)
+
+          good = None
+          for token in candidates:
+              req = urllib.request.Request(
+                  "https://api.cloudflare.com/client/v4/user/tokens/verify",
+                  headers={"Authorization": "Bearer " + token, "Content-Type": "application/json"},
+              )
+              try:
+                  with urllib.request.urlopen(req, timeout=15) as r:
+                      body = json.load(r)
+                  if body.get("success"):
+                      good = token
+                      break
+              except Exception:
+                  pass
+
+          if not good:
+              raise SystemExit("Could not validate the stored Cloudflare API token.")
+
+          print("Cloudflare API token validated.")
+          with open(os.environ["GITHUB_ENV"], "a") as fh:
+              fh.write("CLOUDFLARE_API_TOKEN=" + good + "\n")
+          print("::add-mask::" + good)
+          PY
 
       - name: Verify account access
         shell: bash
