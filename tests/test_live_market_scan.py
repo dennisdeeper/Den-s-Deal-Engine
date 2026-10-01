@@ -32,6 +32,32 @@ class LiveMarketScanTests(unittest.TestCase):
         self.assertTrue(links[0].startswith("https://hmv.com/store/film-tv/4k-ultra-hd-blu-ray/"))
         self.assertTrue(links[1].startswith("https://hmv.com/store/film-tv/steelbooks/"))
 
+    def test_discovers_rarewaves_product_links(self):
+        page = """
+        <a href="/products/example-limited-edition-4k">One</a>
+        <a href="https://www.rarewaves.com/products/another-4k-steelbook">Two</a>
+        <a href="/collections/4k-ultra-hd-blu-ray">Collection</a>
+        """
+        links = scan.discover_links(page, "https://www.rarewaves.com/collections/4k-ultra-hd-blu-ray-offers", 10)
+        self.assertEqual(len(links), 2)
+        self.assertTrue(links[0].startswith("https://www.rarewaves.com/products/"))
+        self.assertTrue(links[1].startswith("https://www.rarewaves.com/products/"))
+
+    def test_parses_shopify_sale_price_fallback(self):
+        page = """
+        <html><head><meta property="og:title" content="Example Limited Edition 4K Ultra HD"></head>
+        <body>Regular price £29.99 Sale price £17.99 In stock</body></html>
+        """
+        source = [x for x in scan.SOURCES if x.retailer == "Rarewaves UK"][0]
+        parsed = scan.parse_product(
+            "https://www.rarewaves.com/products/example-limited-edition-4k-ultra-hd",
+            page,
+            source,
+        )
+        self.assertEqual(parsed["price"], 17.99)
+        self.assertEqual(parsed["referencePrice"], 29.99)
+        self.assertEqual(parsed["availability"], "In stock")
+
     def test_parses_hmv_was_now_fallback(self):
         page = """
         <html><head><meta property="og:title" content="Example Limited Edition 4K Ultra HD Steelbook"></head>
