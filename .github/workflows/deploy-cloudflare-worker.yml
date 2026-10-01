@@ -18,12 +18,15 @@ jobs:
         uses: actions/checkout@v6
 
       - name: Deploy deal-engine-api
-        uses: cloudflare/wrangler-action@v4
-        with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
-          workingDirectory: backend/cloudflare-worker
-          command: deploy
+        shell: bash
+        env:
+          RAW_CF_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          RAW_CF_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          CLOUDFLARE_API_TOKEN="$(printf '%s' "$RAW_CF_API_TOKEN" | tr -d '\r\n')"
+          CLOUDFLARE_ACCOUNT_ID="$(printf '%s' "$RAW_CF_ACCOUNT_ID" | tr -d '\r\n')"
+          export CLOUDFLARE_API_TOKEN CLOUDFLARE_ACCOUNT_ID
+          npx wrangler@latest deploy --config backend/cloudflare-worker/wrangler.toml
 
       - name: Verify production health
         shell: bash
