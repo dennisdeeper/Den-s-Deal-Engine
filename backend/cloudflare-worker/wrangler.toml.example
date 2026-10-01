@@ -13,10 +13,16 @@ compatibility_date = "2026-09-01"
 # MDE_MIN_IMMEDIATE_ROI = "50"
 # MDE_DEFAULT_FEE_RATE = "0.13"
 #
-# Later, for private admin-managed Live Market storage:
+# Production Live Market storage:
 #
 # [[kv_namespaces]]
 # binding = "MDE_MARKET_KV"
 # id = "YOUR_KV_NAMESPACE_ID"
 #
-# Then add MDE_ADMIN_TOKEN as a Cloudflare secret.
+# Admin write authentication:
+# Preferred secret: MDE_ADMIN_TOKEN
+# Backward-compatible existing secret: ADMIN_TOKEN
+#
+# Verify after deployment:
+# /health -> marketStorage="kv", marketAdminConfigured=true
+# /live-market/status -> storage="kv", adminWriteReady=true
