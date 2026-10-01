@@ -21,6 +21,32 @@ class LiveMarketScanTests(unittest.TestCase):
         self.assertTrue(links[0].endswith("/12345678/"))
         self.assertTrue(links[1].endswith("/98765432/"))
 
+    def test_discovers_hmv_product_links(self):
+        page = """
+        <a href="/store/film-tv/4k-ultra-hd-blu-ray/signs-(hmv-exclusive)-limited-edition-4k-ultra-hd">One</a>
+        <a href="/store/film-tv/steelbooks/example-limited-edition-steelbook">Two</a>
+        <a href="/store/film-tv/4k-ultra-hd-blu-ray">Category</a>
+        """
+        links = scan.discover_links(page, "https://hmv.com/store/hmv-offers/4k-ultra-hd-blu-ray-offers", 10)
+        self.assertEqual(len(links), 2)
+        self.assertTrue(links[0].startswith("https://hmv.com/store/film-tv/4k-ultra-hd-blu-ray/"))
+        self.assertTrue(links[1].startswith("https://hmv.com/store/film-tv/steelbooks/"))
+
+    def test_parses_hmv_was_now_fallback(self):
+        page = """
+        <html><head><meta property="og:title" content="Example Limited Edition 4K Ultra HD Steelbook"></head>
+        <body>Was £24.99 Now £15.99 Add to basket</body></html>
+        """
+        source = [x for x in scan.SOURCES if x.retailer == "HMV UK"][0]
+        parsed = scan.parse_product(
+            "https://hmv.com/store/film-tv/4k-ultra-hd-blu-ray/example-limited-edition-4k-ultra-hd",
+            page,
+            source,
+        )
+        self.assertEqual(parsed["price"], 15.99)
+        self.assertEqual(parsed["referencePrice"], 24.99)
+        self.assertEqual(parsed["availability"], "In stock")
+
     def test_parses_jsonld_product(self):
         product = {
             "@context":"https://schema.org",
