@@ -1,0 +1,186 @@
+name: Daily Household Recommendations
+
+on:
+  schedule:
+    - cron: "35 6 * * *"
+  workflow_dispatch:
+  push:
+    branches:
+      - "scan-household-recommendations-*"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: gap-solver-household-recommendations
+  cancel-in-progress: true
+
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      RAW_CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Test recommendation scanner
+        run: python -m unittest tests/test_household_recommendations_scan.py
+
+      - name: Normalize Cloudflare token
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json, os, re, urllib.request
+
+          raw=os.environ.get("RAW_CLOUDFLARE_API_TOKEN","")
+          candidates=[]
+          def add(v):
+              v=(v or "").strip().strip("'\"")
+              if v and v not in candidates:
+                  candidates.append(v)
+          add(raw)
+          m=re.search(r"(?i)bearer\s+([A-Za-z0-9._~+/-]{20,})",raw)
+          if m: add(m.group(1))
+          for token in re.findall(r"[A-Za-z0-9._~+/-]{20,}",raw):
+              add(token)
+
+          good=None
+          for token in candidates:
+              req=urllib.request.Request(
+                  "https://api.cloudflare.com/client/v4/user/tokens/verify",
+                  headers={"Authorization":"Bearer "+token,"Content-Type":"application/json"},
+              )
+              try:
+                  with urllib.request.urlopen(req,timeout=15) as r:
+                      body=json.load(r)
+                  if body.get("success"):
+                      good=token
+                      break
+              except Exception:
+                  pass
+
+          if not good:
+              raise SystemExit("Could not validate Cloudflare API token.")
+          print("::add-mask::"+good)
+          with open(os.environ["GITHUB_ENV"],"a") as fh:
+              fh.write("CLOUDFLARE_API_TOKEN="+good+"\n")
+          PY
+
+      - name: Load previous persistent feed
+        shell: bash
+        run: |
+          if ! curl -fsS \
+            "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/storage/kv/namespaces/763b501028384e6aa55aa33878ce9450/values/household-recommendations-feed" \
+            -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
+            -o /tmp/household-previous.json; then
+            cp data/household-recommendations.json /tmp/household-previous.json
+          fi
+          python - <<'PY'
+          import json, shutil
+          p="/tmp/household-previous.json"
+          try:
+              d=json.load(open(p,encoding="utf-8"))
+              if not isinstance(d,dict) or not isinstance(d.get("items"),list):
+                  raise ValueError("bad feed")
+          except Exception:
+              shutil.copyfile("data/household-recommendations.json",p)
+          PY
+
+      - name: Recheck products and discover periodically
+        shell: bash
+        run: |
+          DISCOVER=""
+          if [ "${{ github.event_name }}" != "schedule" ]; then
+            DISCOVER="--discover"
+          elif [ "$(date -u +%u)" = "7" ]; then
+            DISCOVER="--discover"
+          fi
+          python scripts/household_recommendations_scan.py \
+            --input /tmp/household-previous.json \
+            --output data/household-recommendations.json \
+            $DISCOVER \
+            --summary /tmp/household-summary.json
+
+      - name: Validate persistent history
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json
+          old=json.load(open("/tmp/household-previous.json",encoding="utf-8"))
+          new=json.load(open("data/household-recommendations.json",encoding="utf-8"))
+
+          before={x.get("id") for x in old.get("items",[]) if x.get("id")}
+          items=new.get("items",[])
+          after={x.get("id") for x in items if x.get("id")}
+          missing=before-after
+          if missing:
+              raise SystemExit(f"Persistent history violation; products disappeared: {sorted(missing)}")
+          if len(items)<4:
+              raise SystemExit("Too few household recommendations")
+          for item in items:
+              if item.get("state") not in ("current","previous"):
+                  raise SystemExit(f"Bad state on {item.get('id')}")
+              if not item.get("problem") or not item.get("url") or not item.get("title"):
+                  raise SystemExit(f"Incomplete item {item.get('id')}")
+          print(f"Validated {len(items)} persistent recommendation records; none removed.")
+          PY
+
+      - name: Publish persistent feed to Cloudflare KV
+        shell: bash
+        run: |
+          curl -fsS -X PUT \
+            "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/storage/kv/namespaces/763b501028384e6aa55aa33878ce9450/values/household-recommendations-feed" \
+            -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
+            -H "Content-Type: application/json" \
+            --data-binary @data/household-recommendations.json
+          echo
+
+      - name: Verify stored feed
+        shell: bash
+        run: |
+          curl -fsS \
+            "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/storage/kv/namespaces/763b501028384e6aa55aa33878ce9450/values/household-recommendations-feed" \
+            -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
+            -o /tmp/household-stored.json
+          python - <<'PY'
+          import json
+          d=json.load(open("/tmp/household-stored.json",encoding="utf-8"))
+          items=d.get("items",[])
+          print(f"Stored {len(items)} records: {sum(x.get('state')=='current' for x in items)} current, {sum(x.get('state')=='previous' for x in items)} previous.")
+          if len(items)<4:
+              raise SystemExit("Stored feed verification failed")
+          PY
+
+      - name: Persist fallback history on scheduled runs
+        if: github.event_name == 'schedule'
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/household-recommendations.json
+          if git diff --cached --quiet; then
+            echo "No recommendation changes to commit."
+            exit 0
+          fi
+          git commit -m "Refresh household recommendation history"
+          git push
+
+      - name: Summary
+        if: always()
+        shell: bash
+        run: |
+          if [ -f /tmp/household-summary.json ]; then
+            echo "## Household recommendation refresh" >> "$GITHUB_STEP_SUMMARY"
+            python - <<'PY' >> "$GITHUB_STEP_SUMMARY"
+          import json
+          d=json.load(open("/tmp/household-summary.json"))
+          print(f"- Current: **{d.get('current',0)}**")
+          print(f"- Previous/history: **{d.get('previous',0)}**")
+          print(f"- Newly discovered this run: **{d.get('discovered',0)}**")
+          for s in d.get("sourceHealth",[]):
+              print(f"- {'✅' if s.get('ok') else '⚠️'} {s.get('url')} — {s.get('links',0)} links")
+          PY
+          fi
