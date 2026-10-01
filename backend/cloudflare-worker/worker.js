@@ -1,6 +1,6 @@
 let ebayTokenCache = { token: null, expiresAt: 0 };
 
-const VERSION = '8.2.2-product-artwork';
+const VERSION = '8.2.3-page-artwork';
 const DEFAULT_PUBLIC_FEED =
   'https://raw.githubusercontent.com/dennisdeeper/Den-s-Deal-Engine/main/data/live-market.json';
 
@@ -661,11 +661,23 @@ async function productArtwork(url) {
 
   const target = new URL(pageUrl);
   const host = target.hostname.toLowerCase();
-  const allowed =
-    host === 'www.zavvi.com' ||
-    host === 'zavvi.com' ||
-    host === 'www.arrowfilms.com' ||
-    host === 'arrowfilms.com';
+  const allowedHosts = new Set([
+    'www.zavvi.com',
+    'zavvi.com',
+    'www.arrowfilms.com',
+    'arrowfilms.com',
+    'www.meaco.com',
+    'meaco.com',
+    'www.lakeland.co.uk',
+    'lakeland.co.uk',
+    'www.zooplus.co.uk',
+    'zooplus.co.uk',
+    'www.litter-robot.com',
+    'litter-robot.com',
+    'www.mykitsch.co.uk',
+    'mykitsch.co.uk'
+  ]);
+  const allowed = allowedHosts.has(host);
 
   if (!allowed) {
     return new Response('Retailer not supported', { status: 403, headers: corsHeaders });
