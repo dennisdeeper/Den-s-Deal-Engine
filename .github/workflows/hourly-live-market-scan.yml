@@ -28,52 +28,7 @@ jobs:
 
       - name: Test scanner
         shell: bash
-        run: |
-          python -m unittest tests/test_live_market_scan.py
-
-      - name: Discover and verify live deals
-        shell: bash
-        run: |
-          python scripts/live_market_scan.py \
-            --input data/live-market.json \
-            --output data/live-market.json \
-            --max-items 20 \
-            --summary /tmp/live-market-summary.json
-
-      - name: Validate generated feed
-        shell: bash
-        run: |
-          python - <<'PY'
-          import json
-          from datetime import datetime, timezone
-
-          with open("data/live-market.json", "r", encoding="utf-8") as fh:
-              data = json.load(fh)
-
-          items = data.get("items", [])
-          if len(items) < 6:
-              raise SystemExit("Refusing to publish fewer than 6 verified live deals")
-          if len(items) > 20:
-              raise SystemExit("Feed exceeded 20 items")
-
-          now = datetime.now(timezone.utc)
-          seen = set()
-          for item in items:
-              required = ["id","title","price","publicUrl","retailer","verifiedAt"]
-              missing = [k for k in required if not item.get(k)]
-              if missing:
-                  raise SystemExit(f"Missing fields {missing} in {item.get('id')}")
-              if item["status"] != "live" or item.get("sourceVerified") is not True:
-                  raise SystemExit(f"Unsafe public item {item.get('id')}")
-              if item["publicUrl"] in seen:
-                  raise SystemExit(f"Duplicate URL {item['publicUrl']}")
-              seen.add(item["publicUrl"])
-              stamp = datetime.fromisoformat(item["verifiedAt"].replace("Z","+00:00"))
-              age = (now - stamp.astimezone(timezone.utc)).total_seconds()/3600
-              if age < -0.2 or age > 3.1:
-                  raise SystemExit(f"Freshness failure {item.get('id')}: {age:.2f}h")
-          print(f"Validated {len(items)} fresh verified deals.")
-          PY
+        run: python -m unittest tests/test_live_market_scan.py
 
       - name: Normalize Cloudflare token
         shell: bash
@@ -117,6 +72,79 @@ jobs:
           print("::add-mask::" + good)
           with open(os.environ["GITHUB_ENV"], "a") as fh:
               fh.write("CLOUDFLARE_API_TOKEN=" + good + "\n")
+          PY
+
+      - name: Load previous production ranking
+        shell: bash
+        run: |
+          if ! curl -fsS \
+            "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/storage/kv/namespaces/763b501028384e6aa55aa33878ce9450/values/live-market-feed" \
+            -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
+            -o /tmp/live-market-previous.json; then
+            cp data/live-market.json /tmp/live-market-previous.json
+          fi
+          python - <<'PY'
+          import json
+          p="/tmp/live-market-previous.json"
+          try:
+              d=json.load(open(p,encoding="utf-8"))
+              if not isinstance(d,dict) or not isinstance(d.get("items"),list):
+                  raise ValueError("bad feed shape")
+              print(f"Loaded {len(d['items'])} previous items for movement history.")
+          except Exception:
+              import shutil
+              shutil.copyfile("data/live-market.json",p)
+              d=json.load(open(p,encoding="utf-8"))
+              print(f"Fell back to repository feed with {len(d.get('items',[]))} items.")
+          PY
+
+      - name: Discover and verify live deals
+        shell: bash
+        run: |
+          python scripts/live_market_scan.py \
+            --input /tmp/live-market-previous.json \
+            --output data/live-market.json \
+            --max-items 20 \
+            --summary /tmp/live-market-summary.json
+
+      - name: Validate generated feed
+        shell: bash
+        run: |
+          python - <<'PY'
+          import json
+          from datetime import datetime, timezone
+
+          with open("data/live-market.json", "r", encoding="utf-8") as fh:
+              data = json.load(fh)
+
+          items = data.get("items", [])
+          if len(items) < 6:
+              raise SystemExit("Refusing to publish fewer than 6 verified live deals")
+          if len(items) > 20:
+              raise SystemExit("Feed exceeded 20 items")
+
+          now = datetime.now(timezone.utc)
+          seen = set()
+          ranks = []
+          for item in items:
+              required = ["id","title","price","publicUrl","retailer","verifiedAt","rank"]
+              missing = [k for k in required if item.get(k) in (None, "")]
+              if missing:
+                  raise SystemExit(f"Missing fields {missing} in {item.get('id')}")
+              if item["status"] != "live" or item.get("sourceVerified") is not True:
+                  raise SystemExit(f"Unsafe public item {item.get('id')}")
+              if item["publicUrl"] in seen:
+                  raise SystemExit(f"Duplicate URL {item['publicUrl']}")
+              seen.add(item["publicUrl"])
+              ranks.append(int(item["rank"]))
+              stamp = datetime.fromisoformat(item["verifiedAt"].replace("Z","+00:00"))
+              age = (now - stamp.astimezone(timezone.utc)).total_seconds()/3600
+              if age < -0.2 or age > 3.1:
+                  raise SystemExit(f"Freshness failure {item.get('id')}: {age:.2f}h")
+
+          if ranks != list(range(1, len(items)+1)):
+              raise SystemExit(f"Rank sequence invalid: {ranks}")
+          print(f"Validated {len(items)} fresh ranked deals.")
           PY
 
       - name: Publish verified feed to Cloudflare KV
@@ -191,6 +219,11 @@ jobs:
           print(f"- Verified live deals: **{d.get('verifiedCount',0)}**")
           print(f"- Candidates checked: **{d.get('candidateCount',0)}**")
           print(f"- Retailers: **{', '.join(d.get('retailers',[]))}**")
+          print("")
+          print("### Source health")
+          for s in d.get("sourceHealth",[]):
+              mark="✅" if s.get("ok") else "⚠️"
+              print(f"- {mark} {s.get('source')} — {s.get('links',0)} product links")
           print("")
           print("### Current leaders")
           for x in d.get("topDeals",[])[:8]:
