@@ -70,16 +70,6 @@ jobs:
         shell: bash
         run: npx wrangler@latest deploy
 
-      - name: Seed verified Live Market KV
-        shell: bash
-        run: |
-          curl -fsS -X PUT \
-            "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/storage/kv/namespaces/763b501028384e6aa55aa33878ce9450/values/live-market-feed" \
-            -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
-            -H "Content-Type: application/json" \
-            --data-binary @data/live-market.json
-          echo
-
       - name: Verify production health
         shell: bash
         run: |
