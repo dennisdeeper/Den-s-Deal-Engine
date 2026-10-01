@@ -23,9 +23,30 @@ jobs:
           RAW_CF_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           RAW_CF_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
         run: |
-          CLOUDFLARE_API_TOKEN="$(printf '%s' "$RAW_CF_API_TOKEN" | tr -d '\r\n')"
-          CLOUDFLARE_ACCOUNT_ID="$(printf '%s' "$RAW_CF_ACCOUNT_ID" | tr -d '\r\n')"
-          export CLOUDFLARE_API_TOKEN CLOUDFLARE_ACCOUNT_ID
+          python - <<'PY'
+          import os, re
+          raw = os.environ.get("RAW_CF_API_TOKEN", "")
+          s = raw.strip().strip('"').strip("'")
+          m = re.search(r'Authorization:\s*Bearer\s+([A-Za-z0-9._~-]+)', s, re.I)
+          if m:
+              s = m.group(1)
+          elif s.lower().startswith("bearer "):
+              s = s[7:].strip()
+          s = re.sub(r'[\r\n\t ]+', '', s)
+
+          aid = os.environ.get("RAW_CF_ACCOUNT_ID", "")
+          aid = re.sub(r'\s+', '', aid)
+
+          if not s:
+              raise SystemExit("CLOUDFLARE_API_TOKEN is empty after normalization")
+          if not aid:
+              raise SystemExit("CLOUDFLARE_ACCOUNT_ID is empty after normalization")
+
+          with open(os.environ["GITHUB_ENV"], "a") as fh:
+              fh.write("CLOUDFLARE_API_TOKEN=" + s + "\n")
+              fh.write("CLOUDFLARE_ACCOUNT_ID=" + aid + "\n")
+          print("Cloudflare credentials normalized for Wrangler.")
+          PY
           npx wrangler@latest deploy --config backend/cloudflare-worker/wrangler.toml
 
       - name: Verify production health
