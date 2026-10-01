@@ -101,15 +101,6 @@ SOURCES = (
         tags=("rarewaves", "4k", "multibuy"),
         max_links=14,
     ),
-    Source(
-        "Rarewaves UK",
-        "https://www.rarewaves.com/collections/2-for-26-4k-ultra-hd-blu-ray",
-        region="UK",
-        offer_text="Selected 4K UHD titles are currently 2 for £26; offer applies to qualifying products while the retailer promotion remains live.",
-        offer_signal="2 FOR £26",
-        tags=("rarewaves", "4k", "multibuy"),
-        max_links=14,
-    ),
 )
 
 ALLOWED_HOSTS = {
