@@ -1,6 +1,7 @@
 name = "deal-engine-api"
 main = "worker.js"
 compatibility_date = "2026-09-01"
+keep_vars = true
 
 [[kv_namespaces]]
 binding = "MDE_MARKET_KV"
@@ -10,13 +11,16 @@ id = "763b501028384e6aa55aa33878ce9450"
 binding = "PRODUCT_CACHE"
 id = "aa93a1cfc354489c8b80e9cba5803050"
 
+[secrets]
+required = ["ADMIN_TOKEN", "EBAY_CLIENT_ID", "EBAY_CLIENT_SECRET"]
+
 # Secrets are configured in Cloudflare, not committed here:
 # ADMIN_TOKEN (supported for backward compatibility)
-# MDE_ADMIN_TOKEN (preferred)
+# MDE_ADMIN_TOKEN (preferred alternative)
 # EBAY_CLIENT_ID
 # EBAY_CLIENT_SECRET
 #
-# Optional runtime variables:
+# Optional runtime variables are preserved from the dashboard by keep_vars=true:
 # EBAY_MARKETPLACE_ID = "EBAY_GB"
 # MDE_MIN_IMMEDIATE_ROI = "50"
 # MDE_DEFAULT_FEE_RATE = "0.13"
