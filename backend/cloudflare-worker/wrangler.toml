@@ -6,6 +6,10 @@ compatibility_date = "2026-09-01"
 binding = "MDE_MARKET_KV"
 id = "763b501028384e6aa55aa33878ce9450"
 
+[[kv_namespaces]]
+binding = "PRODUCT_CACHE"
+id = "aa93a1cfc354489c8b80e9cba5803050"
+
 # Secrets are configured in Cloudflare, not committed here:
 # ADMIN_TOKEN (supported for backward compatibility)
 # MDE_ADMIN_TOKEN (preferred)
