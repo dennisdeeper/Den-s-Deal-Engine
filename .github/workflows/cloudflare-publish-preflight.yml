@@ -1,0 +1,36 @@
+name: Cloudflare Publish Preflight
+
+on:
+  push:
+    branches:
+      - "preflight-worker-*"
+
+permissions:
+  contents: read
+
+jobs:
+  preflight:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+
+      - name: Validate Worker build
+        working-directory: backend/cloudflare-worker
+        run: npx wrangler@latest deploy --dry-run --outdir=dist
+
+      - name: Check deployment credentials are connected
+        env:
+          CF_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CF_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          if [ -z "$CF_API_TOKEN" ]; then
+            echo "CLOUDFLARE_API_TOKEN is not configured."
+            exit 2
+          fi
+          if [ -z "$CF_ACCOUNT_ID" ]; then
+            echo "CLOUDFLARE_ACCOUNT_ID is not configured."
+            exit 3
+          fi
+          echo "Cloudflare deployment credentials are configured."
