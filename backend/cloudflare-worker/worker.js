@@ -1,6 +1,6 @@
 let ebayTokenCache = { token: null, expiresAt: 0 };
 
-const VERSION = '8.2.4-live-rank';
+const VERSION = '8.2.5-hourly-market';
 const DEFAULT_PUBLIC_FEED =
   'https://raw.githubusercontent.com/dennisdeeper/Den-s-Deal-Engine/main/data/live-market.json';
 
@@ -365,6 +365,21 @@ async function publicLiveMarket(request, env) {
       .filter(Boolean)
       .sort((a, b) => b - a)[0];
 
+    const automation = data && typeof data.automation === 'object'
+      ? {
+          mode: clean(data.automation.mode, 80),
+          verifiedCount: num(data.automation.verifiedCount),
+          candidateCount: num(data.automation.candidateCount),
+          sources: Array.isArray(data.automation.sources)
+            ? data.automation.sources.slice(0, 16).map(source => ({
+                source: clean(source?.source, 300),
+                links: num(source?.links),
+                ok: source?.ok === true
+              }))
+            : []
+        }
+      : null;
+
     return json({
       generatedAt: new Date().toISOString(),
       verifiedAt: latestVerification
@@ -372,6 +387,7 @@ async function publicLiveMarket(request, env) {
         : null,
       source: feed.source,
       count: items.length,
+      automation,
       items
     }, 200, {
       'Cache-Control': 'public, max-age=30, s-maxage=60'
@@ -683,7 +699,9 @@ async function productArtwork(url) {
     'www.litter-robot.com',
     'litter-robot.com',
     'www.mykitsch.co.uk',
-    'mykitsch.co.uk'
+    'mykitsch.co.uk',
+    'www.rarewaves.com',
+    'rarewaves.com'
   ]);
   const allowed = allowedHosts.has(host);
 
