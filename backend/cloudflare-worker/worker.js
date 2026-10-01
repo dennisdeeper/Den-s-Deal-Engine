@@ -1,6 +1,6 @@
 let ebayTokenCache = { token: null, expiresAt: 0 };
 
-const VERSION = '8.2.5-hourly-market';
+const VERSION = '8.2.6-feed-guard';
 const DEFAULT_PUBLIC_FEED =
   'https://raw.githubusercontent.com/dennisdeeper/Den-s-Deal-Engine/main/data/live-market.json';
 
@@ -100,16 +100,50 @@ export default {
     }
 
     if (url.pathname === '/live-market/status' && request.method === 'GET') {
+      const feed = await readMarketFeed(env);
+      const data = feed.data || {};
+      const rawItems = Array.isArray(data) ? data : (Array.isArray(data.items) ? data.items : []);
+      const eligibleItems = rawItems.filter(item => eligibleMarketItem(item, env));
+      const generatedMs = dateMs(data.generatedAt);
+      const latestVerification = eligibleItems
+        .map(item => dateMs(item.verifiedAt))
+        .filter(Boolean)
+        .sort((a, b) => b - a)[0] || null;
+      const ageMinutes = latestVerification
+        ? Math.max(0, Math.round((Date.now() - latestVerification) / 60000))
+        : null;
+      const automation = data && typeof data.automation === 'object'
+        ? {
+            mode: clean(data.automation.mode, 80),
+            verifiedCount: num(data.automation.verifiedCount),
+            candidateCount: num(data.automation.candidateCount),
+            sources: Array.isArray(data.automation.sources)
+              ? data.automation.sources.slice(0, 16).map(source => ({
+                  source: clean(source?.source, 300),
+                  links: num(source?.links),
+                  ok: source?.ok === true
+                }))
+              : []
+          }
+        : null;
+
       return json({
-        ok: true,
+        ok: feed.source !== 'error' && eligibleItems.length > 0,
         version: VERSION,
         storage: marketStorage(env),
+        source: feed.source,
         publicFeedFallback: DEFAULT_PUBLIC_FEED,
         adminWriteReady: !!(
           (env.MDE_ADMIN_TOKEN || env.ADMIN_TOKEN) &&
           env.MDE_MARKET_KV &&
           typeof env.MDE_MARKET_KV.put === 'function'
-        )
+        ),
+        feedGeneratedAt: generatedMs ? new Date(generatedMs).toISOString() : null,
+        latestVerificationAt: latestVerification ? new Date(latestVerification).toISOString() : null,
+        ageMinutes,
+        rawCount: rawItems.length,
+        eligibleCount: eligibleItems.length,
+        automation
       }, 200, { 'Cache-Control': 'no-store' });
     }
 
@@ -437,15 +471,50 @@ async function updateLiveMarket(request, env) {
     return json({ error: 'Maximum 250 market items per update' }, 400);
   }
 
+  const nowIso = new Date().toISOString();
+  const requestedGeneratedAt = Array.isArray(body)
+    ? nowIso
+    : clean(body.generatedAt, 80) || nowIso;
+  const requestedGeneratedMs = dateMs(requestedGeneratedAt);
+  if (!requestedGeneratedMs) {
+    return json({ error: 'generatedAt must be a valid date when supplied' }, 400);
+  }
+
+  let existingGeneratedMs = null;
+  try {
+    const existingRaw = await env.MDE_MARKET_KV.get('live-market-feed');
+    if (existingRaw) {
+      const existing = JSON.parse(existingRaw);
+      existingGeneratedMs = dateMs(existing?.generatedAt);
+    }
+  } catch (_) {}
+
+  if (
+    existingGeneratedMs &&
+    requestedGeneratedMs + 5000 < existingGeneratedMs
+  ) {
+    return json({
+      error: 'Refusing to replace a newer Live Market feed with older data',
+      existingGeneratedAt: new Date(existingGeneratedMs).toISOString(),
+      requestedGeneratedAt: new Date(requestedGeneratedMs).toISOString()
+    }, 409, { 'Cache-Control': 'no-store' });
+  }
+
   const cleaned = items.map((item, index) => ({
     ...item,
     id: clean(item.id || `item-${index + 1}`, 120),
     title: clean(item.title, 240),
-    updatedAt: new Date().toISOString()
+    updatedAt: nowIso
   }));
 
+  const automation =
+    !Array.isArray(body) && body && typeof body.automation === 'object'
+      ? body.automation
+      : undefined;
+
   const payload = {
-    generatedAt: new Date().toISOString(),
+    generatedAt: new Date(requestedGeneratedMs).toISOString(),
+    ...(automation ? { automation } : {}),
     items: cleaned
   };
 
@@ -457,7 +526,8 @@ async function updateLiveMarket(request, env) {
   return json({
     ok: true,
     stored: cleaned.length,
-    generatedAt: payload.generatedAt
+    generatedAt: payload.generatedAt,
+    protectedAgainstStaleOverwrite: true
   }, 200, { 'Cache-Control': 'no-store' });
 }
 
