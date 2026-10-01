@@ -77,7 +77,7 @@ jobs:
           import json, subprocess, time
 
           base = "https://deal-engine-api.dennis-deeper.workers.dev"
-          expected_version = "8.2.6-feed-guard"
+          expected_version = "8.2.7-household-recommendations"
 
           def get_json(path):
               out = subprocess.check_output([
