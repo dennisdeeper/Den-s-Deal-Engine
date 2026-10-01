@@ -1,0 +1,1 @@
+Deploy production Worker with Live Market KV and preserved product cache binding.
