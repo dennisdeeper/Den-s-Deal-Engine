@@ -1,0 +1,76 @@
+{
+  "generatedAt": "2026-10-01T13:20:00Z",
+  "mode": "persistent-recommendations",
+  "items": [
+    {
+      "id": "meaco-12l-low-energy",
+      "problem": "condensation-damp",
+      "problemTitle": "Condensation & damp",
+      "title": "Meaco 12L Low Energy Dehumidifier and Air Purifier",
+      "retailer": "Meaco",
+      "url": "https://www.meaco.com/products/meaco-12l-low-energy-dehumidifier-and-air-purifier",
+      "state": "current",
+      "tier": "primary",
+      "sourceType": "curated",
+      "firstSeenAt": "2026-10-01T13:20:00Z",
+      "lastCheckedAt": "2026-10-01T13:20:00Z",
+      "summary": "Primary checked option for recurring indoor humidity in smaller homes and flats. A dehumidifier is not a fix for leaks or structural damp."
+    },
+    {
+      "id": "lakeland-drysoon-3-tier",
+      "problem": "indoor-laundry",
+      "problemTitle": "Indoor laundry drying",
+      "title": "Dry:Soon 3-Tier Heated Clothes Airer",
+      "retailer": "Lakeland",
+      "url": "https://www.lakeland.co.uk/products/dry-soon-3-tier-heated-clothes-airer",
+      "state": "current",
+      "tier": "primary",
+      "sourceType": "curated",
+      "firstSeenAt": "2026-10-01T13:20:00Z",
+      "lastCheckedAt": "2026-10-01T13:20:00Z",
+      "summary": "Primary checked heated-airer option where the main problem is getting laundry dry indoors. Ventilation still matters because the moisture stays in the room."
+    },
+    {
+      "id": "kitsch-hair-catcher",
+      "problem": "shower-drain-hair",
+      "problemTitle": "Shower drain hair",
+      "title": "Kitsch Hair Catcher",
+      "retailer": "Kitsch",
+      "url": "https://www.mykitsch.co.uk/products/hair-catcher",
+      "state": "current",
+      "tier": "primary",
+      "sourceType": "curated",
+      "firstSeenAt": "2026-10-01T13:20:00Z",
+      "lastCheckedAt": "2026-10-01T13:20:00Z",
+      "summary": "Checked for many flat and pop-up drains. Drain shape and surface still need to be checked before purchase."
+    },
+    {
+      "id": "zooplus-soft-touch-track-mat",
+      "problem": "cat-litter-tracking",
+      "problemTitle": "Cat litter tracking",
+      "title": "Zooplus Soft Touch Track Mat",
+      "retailer": "Zooplus",
+      "url": "https://www.zooplus.co.uk/shop/cats/cat_litter_litter_boxes/deo_accessoires/litter_box_mats/101940",
+      "state": "current",
+      "tier": "primary",
+      "sourceType": "curated",
+      "firstSeenAt": "2026-10-01T13:20:00Z",
+      "lastCheckedAt": "2026-10-01T13:20:00Z",
+      "summary": "Checked tray-style option for cats that actually walk across the mat when leaving the litter box."
+    },
+    {
+      "id": "litter-robot-4-ramp",
+      "problem": "cat-litter-tracking",
+      "problemTitle": "Cat litter tracking",
+      "title": "Litter-Robot 4 Ramp",
+      "retailer": "Litter-Robot",
+      "url": "https://www.litter-robot.com/uk/litter-robot-4-ramp.html",
+      "state": "current",
+      "tier": "alternative",
+      "sourceType": "curated",
+      "firstSeenAt": "2026-10-01T13:20:00Z",
+      "lastCheckedAt": "2026-10-01T13:20:00Z",
+      "summary": "Compatibility-specific alternative for Litter-Robot 4 owners, combining easier access with a textured exit route."
+    }
+  ]
+}
