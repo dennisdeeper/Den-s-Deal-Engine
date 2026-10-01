@@ -63,7 +63,7 @@ class LiveMarketScanTests(unittest.TestCase):
         <html><head><meta property="og:title" content="Example Limited Edition 4K Ultra HD Steelbook"></head>
         <body>Was £24.99 Now £15.99 Add to basket</body></html>
         """
-        source = [x for x in scan.SOURCES if x.retailer == "HMV UK"][0]
+        source = scan.Source("HMV UK", "https://hmv.com/", region="UK", tags=("hmv",))
         parsed = scan.parse_product(
             "https://hmv.com/store/film-tv/4k-ultra-hd-blu-ray/example-limited-edition-4k-ultra-hd",
             page,
