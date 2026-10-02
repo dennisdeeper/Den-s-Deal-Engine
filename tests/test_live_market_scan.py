@@ -43,6 +43,33 @@ class LiveMarketScanTests(unittest.TestCase):
         self.assertTrue(links[0].startswith("https://www.rarewaves.com/products/"))
         self.assertTrue(links[1].startswith("https://www.rarewaves.com/products/"))
 
+    def test_discovers_shopify_boutique_product_links(self):
+        page = """
+        <a href="/products/dog-soldiers-standard-edition-4k-uhd">Dog Soldiers</a>
+        <a href="/collections/4k-uhd">Collection</a>
+        """
+        links = scan.discover_links(page, "https://secondsightfilms.co.uk/collections/sale", 10)
+        self.assertEqual(links, ["https://secondsightfilms.co.uk/products/dog-soldiers-standard-edition-4k-uhd"])
+
+    def test_discovers_bfi_root_product_links_by_media_text(self):
+        page = """
+        <a href="/about-bfi-shop/">About BFI Shop</a>
+        <a href="/watership-down-limited-edition-4k-uhd/">Watership Down (Limited Edition 4K UHD)</a>
+        <a href="/salo-4k-uhd/">Salò (4K UHD)</a>
+        """
+        links = scan.discover_links(
+            page,
+            "https://shop.bfi.org.uk/blu-ray-and-home-entertainment/by-format/4k-uhd/",
+            10,
+        )
+        self.assertEqual(len(links), 2)
+        self.assertTrue(all("4k" in x.lower() for x in links))
+
+    def test_new_boutique_sources_are_configured(self):
+        retailers = {x.retailer for x in scan.SOURCES}
+        for name in ("Second Sight Films", "Powerhouse / Indicator", "88 Films UK", "BFI Shop"):
+            self.assertIn(name, retailers)
+
     def test_parses_shopify_sale_price_fallback(self):
         page = """
         <html><head><meta property="og:title" content="Example Limited Edition 4K Ultra HD"></head>
@@ -163,28 +190,28 @@ class LiveMarketScanTests(unittest.TestCase):
 
     def test_balancing_prevents_single_retailer_takeover(self):
         items = []
-        for i in range(20):
-            items.append({
-                "title":f"Z {i}",
-                "retailer":"Zavvi UK",
-                "publicUrl":f"https://www.zavvi.com/p/x/z-{i}/{100000+i}/",
-                "price":10+i/100,
-                "_score":100-i,
-            })
-        for i in range(8):
-            items.append({
-                "title":f"A {i}",
-                "retailer":"Arrow Films UK",
-                "publicUrl":f"https://www.arrowfilms.com/p/x/a-{i}/{200000+i}/",
-                "price":20+i/100,
-                "_score":80-i,
-            })
+        retailers = [
+            ("Zavvi UK", "https://www.zavvi.com/p/x/z-", 100000, 100),
+            ("Arrow Films UK", "https://www.arrowfilms.com/p/x/a-", 200000, 90),
+            ("Second Sight Films", "https://secondsightfilms.co.uk/products/s-", 300000, 80),
+            ("Powerhouse / Indicator", "https://www.powerhousefilms.co.uk/products/p-", 400000, 70),
+        ]
+        for retailer, base, seed, score in retailers:
+            for i in range(10):
+                items.append({
+                    "title":f"{retailer} {i}",
+                    "retailer":retailer,
+                    "publicUrl":f"{base}{i}-{seed+i}/",
+                    "price":10+i/100,
+                    "_score":score-i,
+                })
         selected = scan.select_balanced(items, 20)
         counts = {}
         for x in selected:
             counts[x["retailer"]] = counts.get(x["retailer"],0)+1
-        self.assertLessEqual(counts["Zavvi UK"], 13)
-        self.assertGreaterEqual(counts["Arrow Films UK"], 7)
+        self.assertEqual(len(selected), 20)
+        self.assertLessEqual(max(counts.values()), 6)
+        self.assertGreaterEqual(len(counts), 4)
 
 
 if __name__ == "__main__":
