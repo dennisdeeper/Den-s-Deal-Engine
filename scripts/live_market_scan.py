@@ -101,6 +101,64 @@ SOURCES = (
         tags=("rarewaves", "4k", "multibuy"),
         max_links=14,
     ),
+    Source(
+        "Second Sight Films",
+        "https://secondsightfilms.co.uk/collections/sale",
+        region="UK",
+        label="Second Sight",
+        tags=("second-sight", "boutique", "sale"),
+        max_links=16,
+    ),
+    Source(
+        "Second Sight Films",
+        "https://secondsightfilms.co.uk/collections/4k-uhd",
+        region="UK",
+        label="Second Sight",
+        tags=("second-sight", "boutique", "4k"),
+        max_links=16,
+    ),
+    Source(
+        "Powerhouse / Indicator",
+        "https://www.powerhousefilms.co.uk/collections/2-for-40-uhd",
+        region="Region Free",
+        label="Indicator",
+        offer_text="Selected Powerhouse / Indicator 4K UHD titles are currently 2 for £40; offer applies at checkout while the promotion remains live.",
+        offer_signal="2 FOR £40",
+        tags=("indicator", "powerhouse", "boutique", "4k", "multibuy"),
+        max_links=18,
+    ),
+    Source(
+        "Powerhouse / Indicator",
+        "https://www.powerhousefilms.co.uk/collections/4k-uhd",
+        region="Region Free",
+        label="Indicator",
+        tags=("indicator", "powerhouse", "boutique", "4k"),
+        max_links=16,
+    ),
+    Source(
+        "88 Films UK",
+        "https://88-films.myshopify.com/collections/special-offers",
+        region="UK",
+        label="88 Films",
+        tags=("88-films", "boutique", "sale"),
+        max_links=16,
+    ),
+    Source(
+        "88 Films UK",
+        "https://88-films.myshopify.com/collections/uhd",
+        region="UK",
+        label="88 Films",
+        tags=("88-films", "boutique", "4k"),
+        max_links=16,
+    ),
+    Source(
+        "BFI Shop",
+        "https://shop.bfi.org.uk/blu-ray-and-home-entertainment/by-format/4k-uhd/",
+        region="UK",
+        label="BFI",
+        tags=("bfi", "boutique", "4k"),
+        max_links=16,
+    ),
 )
 
 ALLOWED_HOSTS = {
@@ -112,6 +170,22 @@ ALLOWED_HOSTS = {
     "hmv.com",
     "www.rarewaves.com",
     "rarewaves.com",
+    "secondsightfilms.co.uk",
+    "www.secondsightfilms.co.uk",
+    "www.powerhousefilms.co.uk",
+    "powerhousefilms.co.uk",
+    "88-films.myshopify.com",
+    "shop.bfi.org.uk",
+}
+
+SHOPIFY_COLLECTION_HOSTS = {
+    "www.rarewaves.com",
+    "rarewaves.com",
+    "secondsightfilms.co.uk",
+    "www.secondsightfilms.co.uk",
+    "www.powerhousefilms.co.uk",
+    "powerhousefilms.co.uk",
+    "88-films.myshopify.com",
 }
 
 MEDIA_RE = re.compile(
@@ -255,8 +329,8 @@ def discover_links(page: str, collection_url: str, max_links: int) -> list[str]:
             p.path,
             re.I,
         ))
-        is_rarewaves_product = bool(re.search(r"^/products/[^/]+/?$", p.path, re.I))
-        if not (is_thg_product or is_hmv_product or is_rarewaves_product):
+        is_shopify_product = bool(re.search(r"^/products/[^/]+/?$", p.path, re.I))
+        if not (is_thg_product or is_hmv_product or is_shopify_product):
             continue
 
         if full not in seen:
@@ -264,6 +338,30 @@ def discover_links(page: str, collection_url: str, max_links: int) -> list[str]:
             links.append(full)
             if len(links) >= max_links:
                 break
+    # BFI product URLs live at the domain root rather than under /products/.
+    # Only accept root-level anchors whose visible text looks like physical media,
+    # so navigation pages do not consume the candidate limit.
+    if (urlparse(collection_url).hostname or "").lower() == "shop.bfi.org.uk" and len(links) < max_links:
+        for raw, inner in re.findall(
+            r'<a\b[^>]*href\s*=\s*["\']([^"\']+)["\'][^>]*>(.*?)</a>',
+            page,
+            flags=re.I | re.S,
+        ):
+            href = html.unescape(raw)
+            full = urljoin(collection_url, href).split("#", 1)[0].split("?", 1)[0]
+            p = urlparse(full)
+            if p.hostname != "shop.bfi.org.uk":
+                continue
+            if not re.search(r"^/[^/]+/?$", p.path, re.I):
+                continue
+            if not MEDIA_RE.search(strip_text(inner)):
+                continue
+            if full not in seen:
+                seen.add(full)
+                links.append(full)
+                if len(links) >= max_links:
+                    break
+
     return links
 
 
@@ -378,6 +476,10 @@ def product_id(url: str, retailer: str) -> str:
         else "arrow" if "arrow" in retailer.lower()
         else "hmv" if "hmv" in retailer.lower()
         else "rarewaves" if "rarewaves" in retailer.lower()
+        else "secondsight" if "second sight" in retailer.lower()
+        else "indicator" if ("powerhouse" in retailer.lower() or "indicator" in retailer.lower())
+        else "88films" if "88 films" in retailer.lower()
+        else "bfi" if "bfi" in retailer.lower()
         else "media"
     )
     slug = p.path.strip("/").split("/")[-2] if p.path.rstrip("/").split("/")[-1].isdigit() else p.path.strip("/").split("/")[-1]
@@ -421,6 +523,14 @@ def infer_tags(title: str, source: Source | None, retailer: str) -> list[str]:
         tags.add("hmv")
     if "rarewaves" in retailer.lower():
         tags.add("rarewaves")
+    if "second sight" in retailer.lower():
+        tags.update(("second-sight", "boutique"))
+    if "powerhouse" in retailer.lower() or "indicator" in retailer.lower():
+        tags.update(("powerhouse", "indicator", "boutique"))
+    if "88 films" in retailer.lower():
+        tags.update(("88-films", "boutique"))
+    if "bfi" in retailer.lower():
+        tags.update(("bfi", "boutique"))
     for needle, tag in (
         ("4k", "4k"),
         ("ultra hd", "4k"),
@@ -479,7 +589,16 @@ def public_item(parsed: dict[str, Any], source: Source | None, existing: dict[st
     retailer = (source.retailer if source else str((existing or {}).get("retailer") or "")).strip()
     if not retailer:
         host = urlparse(parsed["url"]).hostname or ""
-        retailer = "Zavvi UK" if "zavvi" in host else "Arrow Films UK" if "arrowfilms" in host else host
+        retailer = (
+            "Zavvi UK" if "zavvi" in host
+            else "Arrow Films UK" if "arrowfilms" in host
+            else "Rarewaves UK" if "rarewaves" in host
+            else "Second Sight Films" if "secondsightfilms" in host
+            else "Powerhouse / Indicator" if "powerhousefilms" in host
+            else "88 Films UK" if "88-films" in host
+            else "BFI Shop" if "bfi.org.uk" in host
+            else host
+        )
 
     rrp = money_from(parsed.get("referencePrice"))
     tags = infer_tags(title, source, retailer)
@@ -548,6 +667,14 @@ def source_for_existing(url: str) -> Source | None:
         return Source("HMV UK", "https://hmv.com/", region="UK", tags=("hmv",))
     if "rarewaves.com" in host:
         return Source("Rarewaves UK", "https://www.rarewaves.com/", region="UK", tags=("rarewaves",))
+    if "secondsightfilms.co.uk" in host:
+        return Source("Second Sight Films", "https://secondsightfilms.co.uk/", region="UK", label="Second Sight", tags=("second-sight", "boutique"))
+    if "powerhousefilms.co.uk" in host:
+        return Source("Powerhouse / Indicator", "https://www.powerhousefilms.co.uk/", region="Region Free", label="Indicator", tags=("powerhouse", "indicator", "boutique"))
+    if "88-films.myshopify.com" in host:
+        return Source("88 Films UK", "https://88-films.myshopify.com/", region="UK", label="88 Films", tags=("88-films", "boutique"))
+    if "shop.bfi.org.uk" in host:
+        return Source("BFI Shop", "https://shop.bfi.org.uk/", region="UK", label="BFI", tags=("bfi", "boutique"))
     return None
 
 
@@ -562,8 +689,17 @@ def select_balanced(items: list[dict[str, Any]], max_items: int) -> list[dict[st
 
     ranked = sorted(by_url.values(), key=lambda x: (-float(x.get("_score", 0)), x.get("price") or 999999, x["title"]))
 
-    # Avoid one retailer overwhelming the storefront if multiple sources are healthy.
-    per_retailer_cap = max(8, int(max_items * 0.65))
+    # Avoid one retailer overwhelming the storefront when the verified pool
+    # genuinely contains several retailers. With 3+ healthy retailers, the first
+    # pass caps each one around 30% of the league (6 of a Top 20). Overflow is
+    # still allowed afterwards so we never pad the page with weak/unverified deals.
+    retailer_count = len({str(x.get("retailer") or "") for x in ranked if x.get("retailer")})
+    if retailer_count >= 3:
+        per_retailer_cap = max(5, int(max_items * 0.30 + 0.999))
+    elif retailer_count == 2:
+        per_retailer_cap = max(8, int(max_items * 0.55 + 0.999))
+    else:
+        per_retailer_cap = max_items
     counts: dict[str, int] = {}
     selected: list[dict[str, Any]] = []
     overflow: list[dict[str, Any]] = []
@@ -648,20 +784,28 @@ def main() -> int:
 
     for source in SOURCES:
         try:
-            host = urlparse(source.url).hostname or ""
-            if "rarewaves.com" in host:
-                endpoint = source.url.rstrip("/") + "/products.json?limit=50"
-                data = fetch_json_url(endpoint)
-                products = data.get("products", []) if isinstance(data, dict) else []
-                links = []
-                for product in products:
-                    handle = str(product.get("handle") or "").strip()
-                    if not handle:
-                        continue
-                    links.append("https://www.rarewaves.com/products/" + handle)
-                    if len(links) >= source.max_links:
-                        break
-            else:
+            host = (urlparse(source.url).hostname or "").lower()
+            links = []
+
+            # Shopify collection JSON is substantially more reliable than scraping
+            # collection markup. If a store blocks/changes that endpoint we fall
+            # back to normal HTML discovery instead of losing the retailer.
+            if host in SHOPIFY_COLLECTION_HOSTS:
+                try:
+                    endpoint = source.url.rstrip("/") + "/products.json?limit=50"
+                    data = fetch_json_url(endpoint)
+                    products = data.get("products", []) if isinstance(data, dict) else []
+                    for product in products:
+                        handle = str(product.get("handle") or "").strip()
+                        if not handle:
+                            continue
+                        links.append(urljoin(source.url, "/products/" + handle))
+                        if len(links) >= source.max_links:
+                            break
+                except Exception as exc:
+                    errors.append(f"collection json {source.url}: {exc}")
+
+            if not links:
                 page = fetch_text(source.url)
                 links = discover_links(page, source.url, source.max_links)
 

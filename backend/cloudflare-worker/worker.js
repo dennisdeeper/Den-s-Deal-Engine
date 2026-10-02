@@ -898,7 +898,13 @@ async function productArtwork(url) {
     'www.mykitsch.co.uk',
     'mykitsch.co.uk',
     'www.rarewaves.com',
-    'rarewaves.com'
+    'rarewaves.com',
+    'secondsightfilms.co.uk',
+    'www.secondsightfilms.co.uk',
+    'www.powerhousefilms.co.uk',
+    'powerhousefilms.co.uk',
+    '88-films.myshopify.com',
+    'shop.bfi.org.uk'
   ]);
   const allowed = allowedHosts.has(host);
 
