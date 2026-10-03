@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-10-02T06:51:18.488829Z",
+  "generatedAt": "2026-10-03T06:59:19.118834Z",
   "mode": "persistent-recommendations",
   "automation": {
     "dailyRecheck": true,
@@ -19,10 +19,10 @@
       "tier": "primary",
       "sourceType": "curated",
       "firstSeenAt": "2026-10-01T13:20:00Z",
-      "lastCheckedAt": "2026-10-02T06:51:12.394529Z",
+      "lastCheckedAt": "2026-10-03T06:59:13.379205Z",
       "summary": "Checked tray-style option for cats that actually walk across the mat when leaving the litter box.",
       "image": "https://media.zooplus.com/bilder/9/400/203606_pla_schulze_katzentoilettenvorleger_soft_touch_track_matt_hs1_9.jpg",
-      "price": 25.79,
+      "price": 25.89,
       "availability": "In stock",
       "lastCheckOk": true,
       "previousPrice": 25.79
@@ -38,7 +38,7 @@
       "tier": "alternative",
       "sourceType": "curated",
       "firstSeenAt": "2026-10-01T13:20:00Z",
-      "lastCheckedAt": "2026-10-02T06:51:13.626767Z",
+      "lastCheckedAt": "2026-10-03T06:59:15.339462Z",
       "summary": "Compatibility-specific alternative for Litter-Robot 4 owners, combining easier access with a textured exit route.",
       "image": "https://images.litter-robot.com/media/catalog/product/cache/74c1057f7991b4edb2bc7bdaa94de933/l/r/lr4_ramp_black_1.png",
       "price": 65.0,
@@ -60,7 +60,7 @@
       "tier": "alternative",
       "sourceType": "discovered",
       "firstSeenAt": "2026-10-01T13:27:48.562639Z",
-      "lastCheckedAt": "2026-10-02T06:51:14.769069Z",
+      "lastCheckedAt": "2026-10-03T06:59:15.553366Z",
       "lastCheckOk": true,
       "summary": "Newly checked litter-tracking alternative. Effectiveness depends on whether the cat actually walks across the mat and on litter type.",
       "previousPrice": 2.89
@@ -79,7 +79,7 @@
       "tier": "alternative",
       "sourceType": "discovered",
       "firstSeenAt": "2026-10-01T13:27:51.172563Z",
-      "lastCheckedAt": "2026-10-02T06:51:15.829869Z",
+      "lastCheckedAt": "2026-10-03T06:59:17.176411Z",
       "lastCheckOk": true,
       "summary": "Newly checked litter-tracking alternative. Effectiveness depends on whether the cat actually walks across the mat and on litter type.",
       "previousPrice": 3.69
@@ -95,14 +95,15 @@
       "tier": "primary",
       "sourceType": "curated",
       "firstSeenAt": "2026-10-01T13:20:00Z",
-      "lastCheckedAt": "2026-10-02T06:51:16.753341Z",
+      "lastCheckedAt": "2026-10-03T06:59:18.577207Z",
       "summary": "Primary checked option for recurring indoor humidity in smaller homes and flats. A dehumidifier is not a fix for leaks or structural damp.",
       "image": "https://www.meaco.com/cdn/shop/files/UK_Low_Energy_12L_OFFER_700x700_957db54c-2641-4dbc-aeca-fbd6fe6b4097_1024x.jpg?v=1772023100",
       "price": 189.99,
       "availability": "Out of stock",
-      "lastCheckOk": true,
+      "lastCheckOk": false,
       "previousReason": "Currently unavailable",
-      "previousPrice": 189.99
+      "previousPrice": 189.99,
+      "checkError": "HTTP Error 429: Too Many Requests"
     },
     {
       "id": "lakeland-drysoon-3-tier",
@@ -115,13 +116,14 @@
       "tier": "primary",
       "sourceType": "curated",
       "firstSeenAt": "2026-10-01T13:20:00Z",
-      "lastCheckedAt": "2026-10-02T06:51:17.193203Z",
+      "lastCheckedAt": "2026-10-03T06:59:18.815374Z",
       "summary": "Primary checked heated-airer option where the main problem is getting laundry dry indoors. Ventilation still matters because the moisture stays in the room.",
       "image": "https://www.lakeland.co.uk/cdn/shop/files/21736_1.jpg?v=1774890501&width=1500",
       "price": 133.33,
       "availability": "In stock",
-      "lastCheckOk": true,
-      "previousPrice": 133.33
+      "lastCheckOk": false,
+      "previousPrice": 133.33,
+      "checkError": "HTTP Error 429: Too Many Requests"
     },
     {
       "id": "kitsch-hair-catcher",
@@ -134,13 +136,14 @@
       "tier": "primary",
       "sourceType": "curated",
       "firstSeenAt": "2026-10-01T13:20:00Z",
-      "lastCheckedAt": "2026-10-02T06:51:17.710526Z",
+      "lastCheckedAt": "2026-10-03T06:59:18.946270Z",
       "summary": "Checked for many flat and pop-up drains. Drain shape and surface still need to be checked before purchase.",
       "image": "https://www.mykitsch.com/cdn/shop/files/65805-HairCatcher-Consumables-Gray-hero-1280x1280px_450x450.jpg?v=1774277077",
       "price": 14.0,
       "availability": "In stock",
-      "lastCheckOk": true,
-      "previousPrice": 14.0
+      "lastCheckOk": false,
+      "previousPrice": 14.0,
+      "checkError": "HTTP Error 429: Too Many Requests"
     }
   ]
 }
