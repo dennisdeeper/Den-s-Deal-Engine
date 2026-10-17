@@ -14,7 +14,7 @@ jobs:
     timeout-minutes: 10
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
 
       - name: List KV namespaces
         shell: bash
@@ -38,4 +38,4 @@ jobs:
           PY
           export CLOUDFLARE_API_TOKEN="$(cat /tmp/cf_api_token)"
           export CLOUDFLARE_ACCOUNT_ID="$(cat /tmp/cf_account_id)"
-          npx wrangler@latest kv namespace list --config backend/cloudflare-worker/wrangler.toml
+          npx wrangler@4.148.0 kv namespace list --config backend/cloudflare-worker/wrangler.toml
