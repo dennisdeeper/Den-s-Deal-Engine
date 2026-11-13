@@ -14,11 +14,11 @@ jobs:
     timeout-minutes: 10
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@d23441a48e516b6c34aea4fa41551a30e30af803 # v6.1.0
 
       - name: Validate Worker build
         working-directory: backend/cloudflare-worker
-        run: npx wrangler@latest deploy --dry-run --outdir=dist
+        run: npx wrangler@4.148.0 deploy --dry-run --outdir=dist
 
       - name: Check deployment credentials are connected
         env:
