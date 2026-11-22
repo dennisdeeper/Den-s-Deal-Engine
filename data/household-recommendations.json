@@ -1,11 +1,27 @@
 {
-  "generatedAt": "2026-11-21T14:53:22.830827Z",
+  "generatedAt": "2026-11-22T14:49:03.101794Z",
   "mode": "persistent-recommendations",
   "automation": {
     "dailyRecheck": true,
-    "discoveryRun": false,
+    "discoveryRun": true,
     "discoveredCount": 0,
-    "sources": []
+    "sources": [
+      {
+        "url": "https://www.meaco.com/collections/compressor-dehumidifiers",
+        "ok": true,
+        "links": 3
+      },
+      {
+        "url": "https://www.lakeland.co.uk/collections/drysoon",
+        "ok": true,
+        "links": 0
+      },
+      {
+        "url": "https://www.zooplus.co.uk/shop/cats/cat_litter_litter_boxes/deo_accessoires",
+        "ok": true,
+        "links": 8
+      }
+    ]
   },
   "items": [
     {
@@ -19,7 +35,7 @@
       "tier": "primary",
       "sourceType": "curated",
       "firstSeenAt": "2026-10-01T13:20:00Z",
-      "lastCheckedAt": "2026-11-21T14:53:12.029406Z",
+      "lastCheckedAt": "2026-11-22T14:48:49.880209Z",
       "summary": "Checked tray-style option for cats that actually walk across the mat when leaving the litter box.",
       "image": "https://media.zooplus.com/bilder/9/400/203606_pla_schulze_katzentoilettenvorleger_soft_touch_track_matt_hs1_9.jpg",
       "price": 25.69,
@@ -41,7 +57,7 @@
       "tier": "alternative",
       "sourceType": "discovered",
       "firstSeenAt": "2026-10-04T14:28:00.011675Z",
-      "lastCheckedAt": "2026-11-21T14:53:13.780834Z",
+      "lastCheckedAt": "2026-11-22T14:48:51.077339Z",
       "lastCheckOk": true,
       "summary": "Newly checked litter-tracking alternative. Effectiveness depends on whether the cat actually walks across the mat and on litter type.",
       "previousPrice": 1.69,
@@ -61,7 +77,7 @@
       "tier": "alternative",
       "sourceType": "discovered",
       "firstSeenAt": "2026-10-04T14:28:01.668659Z",
-      "lastCheckedAt": "2026-11-21T14:53:14.466651Z",
+      "lastCheckedAt": "2026-11-22T14:48:51.698386Z",
       "lastCheckOk": true,
       "summary": "Newly checked litter-tracking alternative. Effectiveness depends on whether the cat actually walks across the mat and on litter type.",
       "previousPrice": 18.79
@@ -80,7 +96,7 @@
       "tier": "alternative",
       "sourceType": "discovered",
       "firstSeenAt": "2026-10-11T13:21:25.261956Z",
-      "lastCheckedAt": "2026-11-21T14:53:15.632494Z",
+      "lastCheckedAt": "2026-11-22T14:48:52.638073Z",
       "lastCheckOk": true,
       "summary": "Newly checked litter-tracking alternative. Effectiveness depends on whether the cat actually walks across the mat and on litter type.",
       "previousPrice": 13.85
@@ -99,7 +115,7 @@
       "tier": "alternative",
       "sourceType": "discovered",
       "firstSeenAt": "2026-10-11T13:21:26.860996Z",
-      "lastCheckedAt": "2026-11-21T14:53:17.175311Z",
+      "lastCheckedAt": "2026-11-22T14:48:53.472671Z",
       "lastCheckOk": true,
       "summary": "Newly checked litter-tracking alternative. Effectiveness depends on whether the cat actually walks across the mat and on litter type.",
       "previousPrice": 17.0
@@ -115,7 +131,7 @@
       "tier": "alternative",
       "sourceType": "curated",
       "firstSeenAt": "2026-10-01T13:20:00Z",
-      "lastCheckedAt": "2026-11-21T14:53:18.872740Z",
+      "lastCheckedAt": "2026-11-22T14:48:54.308688Z",
       "summary": "Compatibility-specific alternative for Litter-Robot 4 owners, combining easier access with a textured exit route.",
       "image": "https://images.litter-robot.com/media/catalog/product/cache/74c1057f7991b4edb2bc7bdaa94de933/l/r/lr4_ramp_black_1.png",
       "price": 65.0,
@@ -139,7 +155,7 @@
       "tier": "alternative",
       "sourceType": "discovered",
       "firstSeenAt": "2026-10-01T13:27:48.562639Z",
-      "lastCheckedAt": "2026-11-21T14:53:18.980619Z",
+      "lastCheckedAt": "2026-11-22T14:48:55.435804Z",
       "lastCheckOk": true,
       "summary": "Newly checked litter-tracking alternative. Effectiveness depends on whether the cat actually walks across the mat and on litter type.",
       "previousPrice": 2.6,
@@ -160,7 +176,7 @@
       "tier": "alternative",
       "sourceType": "discovered",
       "firstSeenAt": "2026-10-01T13:27:51.172563Z",
-      "lastCheckedAt": "2026-11-21T14:53:19.971494Z",
+      "lastCheckedAt": "2026-11-22T14:48:55.964579Z",
       "lastCheckOk": true,
       "summary": "Newly checked litter-tracking alternative. Effectiveness depends on whether the cat actually walks across the mat and on litter type.",
       "previousPrice": 3.41,
@@ -177,7 +193,7 @@
       "tier": "primary",
       "sourceType": "curated",
       "firstSeenAt": "2026-10-01T13:20:00Z",
-      "lastCheckedAt": "2026-11-21T14:53:20.981589Z",
+      "lastCheckedAt": "2026-11-22T14:48:56.848359Z",
       "summary": "Primary checked option for recurring indoor humidity in smaller homes and flats. A dehumidifier is not a fix for leaks or structural damp.",
       "image": "https://www.meaco.com/cdn/shop/files/1_LowEnergy12L_2034x2034_5040b9d6-e2e1-46c3-91a9-7b0ca0a1662e.png?v=1791995873&width=1920",
       "price": 189.99,
@@ -198,7 +214,7 @@
       "tier": "primary",
       "sourceType": "curated",
       "firstSeenAt": "2026-10-01T13:20:00Z",
-      "lastCheckedAt": "2026-11-21T14:53:21.719577Z",
+      "lastCheckedAt": "2026-11-22T14:48:57.651975Z",
       "summary": "Primary checked heated-airer option where the main problem is getting laundry dry indoors. Ventilation still matters because the moisture stays in the room.",
       "image": "https://www.lakeland.co.uk/cdn/shop/files/21736_1.jpg?v=1793810103&width=1920",
       "price": 99.99,
@@ -218,7 +234,7 @@
       "tier": "primary",
       "sourceType": "curated",
       "firstSeenAt": "2026-10-01T13:20:00Z",
-      "lastCheckedAt": "2026-11-21T14:53:22.183923Z",
+      "lastCheckedAt": "2026-11-22T14:48:58.098020Z",
       "summary": "Checked for many flat and pop-up drains. Drain shape and surface still need to be checked before purchase.",
       "image": "https://www.mykitsch.com/cdn/shop/files/65805-HairCatcher-Consumables-Gray-hero-1280x1280px_450x450.jpg?v=1774277077",
       "price": 10.0,
